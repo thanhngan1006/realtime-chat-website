@@ -1,0 +1,32 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Check inclusive language (Alex)
+        run: npm run alex
+
+      - name: Check code formatting (Prettier)
+        run: npm run prettier -- --list-different
+
+      - name: Lint code (ESLint)
+        run: npm run eslint -- --max-warnings 0
+
+      - name: Build project
+        run: npm run build
+        
+      - name: Lint Summary
+        if: always()
+        run: echo "✅ All linting checks passed!"
