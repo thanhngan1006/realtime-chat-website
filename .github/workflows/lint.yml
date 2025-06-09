@@ -1,6 +1,6 @@
 name: Lint
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   lint:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Build project
         run: npm run build
-        
+
       - name: Lint Summary
         if: always()
         run: echo "✅ All linting checks passed!"
