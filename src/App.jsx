@@ -6,6 +6,7 @@ function App() {
       </header>
       <main className="p-4">
         {/* Chat components will go here */}
+        {/* jjjjj */}
       </main>
     </div>
   )
