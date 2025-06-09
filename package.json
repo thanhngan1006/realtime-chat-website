@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "alex": "alex .",
+    "eslint": "eslint .",
+    "prettier": "prettier .",
+    "format": "npm run prettier -- --write"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
@@ -32,6 +36,7 @@
     "globals": "^16.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "alex": "^8.2.0"
   }
 }
