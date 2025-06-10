@@ -1,0 +1,22 @@
+name: Presubmit.ai
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: presubmit/ai-reviewer@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_API_KEY: "AIzaSyB7cMSDCNJl8sim8cshGXSH6NjfX84HWD8"
+          LLM_MODEL: "gemini-2.0-flash-lite"
