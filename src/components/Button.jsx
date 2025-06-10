@@ -1,15 +1,15 @@
-import React from 'react';
+import React from "react";
 
 const Button = ({
   children,
-  size = "base",        
-  bgColor = "blue-500", 
+  size = "base",
+  bgColor = "blue-500",
   isDisabled = false,
   className = "",
-  ...rest           
+  ...rest
 }) => {
   const baseStyles = `text-${size} bg-${bgColor} px-4 py-2 rounded`;
-  const disabledStyles = isDisabled ? 'opacity-50 cursor-not-allowed' : '';
+  const disabledStyles = isDisabled ? "opacity-50 cursor-not-allowed" : "";
 
   return (
     <button
@@ -23,6 +23,3 @@ const Button = ({
 };
 
 export default Button;
-
-
-
