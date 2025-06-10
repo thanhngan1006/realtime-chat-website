@@ -29,6 +29,10 @@ function App() {
       <div className="min-h-screen bg-gray-100 text-gray-900">
         <header className="bg-white p-4 shadow">
           <h1 className="text-2xl font-bold">Web Chat</h1>
+          <h1 className="text-2xl font-bold">Web Chat</h1>
+          <h1 className="text-2xl font-bold">Web Chat</h1>
+          <h1 className="text-2xl font-bold">Web Chat</h1>
+          <h1 className="text-2xl font-bold">Web Chat hehe</h1><h1 className="text-2xl font-bold">Web Chat</h1><h1 className="text-2xl font-bold">Web Chat</h1><h1 className="text-2xl font-bold">Web Chat</h1>
         </header>
         <Sidebar />
       </div>
