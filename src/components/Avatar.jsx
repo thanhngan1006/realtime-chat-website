@@ -1,9 +1,13 @@
 import React from "react";
 
-const Avatar = ({ size = 8, src }) => {
-  const baseStyles = `text-${size} rounded-full`;
+const Avatar = ({ src, className = " " }) => {
+  const baseStyles = `rounded-full`;
 
-  return <img className={`${baseStyles}`} src={`${src}`} />;
+  return (
+    <div className={`${className}`}>
+      <img className={`${baseStyles}`} src={`${src}`} />
+    </div>
+  );
 };
 
 export default Avatar;

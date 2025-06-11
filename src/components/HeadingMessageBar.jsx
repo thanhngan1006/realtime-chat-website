@@ -1,10 +1,40 @@
 import React from "react";
+import {
+  IoIosInformationCircle,
+  IoIosNotificationsOutline,
+} from "react-icons/io";
+import { SlOptionsVertical } from "react-icons/sl";
+import Button from "./Button";
+import { FaPhoneAlt } from "react-icons/fa";
+import { MdVideoCall } from "react-icons/md";
+import Avatar from "./Avatar";
 
-const HeadingMessageBar = ({ name }) => {
+const HeadingMessageBar = ({ name, activeTime }) => {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-black">{name}</span>
-      <div className="flex items-center gap-2"></div>
+    <div className="flex items-center justify-between border-1 border-gray-200 bg-white px-6 py-2">
+      <div className="flex items-center gap-2">
+        <Avatar
+          className="h-10 w-10"
+          src="https://ui-avatars.com/api/?name=Linda&background=random"
+        />
+
+        <div className="flex flex-col">
+          <span className="font-bold text-black">{name}</span>
+          <span className="text-sm">{activeTime}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button className="px-0 py-0" onClick={() => {}}>
+          <FaPhoneAlt className="h-6 w-6 text-blue-500" />
+        </Button>
+        <Button className="px-0 py-0" onClick={() => {}}>
+          <MdVideoCall className="h-6 w-6 text-blue-500" />
+        </Button>
+
+        <Button onClick={() => {}}>
+          <IoIosInformationCircle className="h-6 w-6 text-blue-500" />
+        </Button>
+      </div>
     </div>
   );
 };
