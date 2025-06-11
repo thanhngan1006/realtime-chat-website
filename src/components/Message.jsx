@@ -46,7 +46,7 @@ const Message = ({
         <div
           className={`max-w-[75%] rounded-2xl px-4 py-2 text-${textColor} ${
             isYourMessage
-              ? `bg-${bgColor} rounded-br-none`
+              ? `bg-${bgColor} rounded-br-none bg-blue-500`
               : "rounded-bl-none bg-gray-500"
           } ${className}`}
         >

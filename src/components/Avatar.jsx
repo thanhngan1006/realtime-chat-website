@@ -1,6 +1,6 @@
 import React from "react";
 
-const Avatar = ({ src, className = " " }) => {
+const Avatar = ({ src, className = "" }) => {
   const baseStyles = `rounded-full`;
 
   return (
