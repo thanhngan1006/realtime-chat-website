@@ -14,7 +14,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NoPage />} />
-          {/* aaaaa */}
+          {/* bbbbb */}
         </Route>
       </Routes>
     </BrowserRouter>
