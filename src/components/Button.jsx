@@ -4,7 +4,7 @@ const Button = ({
   children,
   size = "base",
   isDisabled = false,
-  className = "px-4 py-2 ",
+  className = "",
   ...rest
 }) => {
   const baseStyles = `text-${size} rounded`;

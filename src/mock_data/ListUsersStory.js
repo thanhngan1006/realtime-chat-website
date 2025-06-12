@@ -23,4 +23,20 @@ export const ListUsersStory = [
     name: "Minh",
     src: "https://ui-avatars.com/api/?name=Minh&background=random",
   },
+  {
+    name: "Minh",
+    src: "https://ui-avatars.com/api/?name=Minh&background=random",
+  },
+  {
+    name: "Minh",
+    src: "https://ui-avatars.com/api/?name=Minh&background=random",
+  },
+  {
+    name: "Minh",
+    src: "https://ui-avatars.com/api/?name=Minh&background=random",
+  },
+  {
+    name: "Minh",
+    src: "https://ui-avatars.com/api/?name=Minh&background=random",
+  },
 ];

@@ -10,6 +10,7 @@ import Sidebar from "../components/Sidebar";
 import HeadingMessageBar from "../components/HeadingMessageBar";
 import MessageBox from "../components/MessageBox";
 import Input from "../components/Input";
+import { IoSearch } from "react-icons/io5";
 
 const Home = () => {
   return (
@@ -18,7 +19,10 @@ const Home = () => {
         <header className="flex items-center justify-between bg-white p-4 text-center shadow">
           <LiaUserSecretSolid className="h-8 w-8" onClick={() => {}} />
           <h3 className="text-2xl font-bold">Chat</h3>
-          <HiOutlinePencilAlt className="h-8 w-8" onClick={() => {}} />
+          <div className="flex gap-2">
+            <IoSearch className="h-8 w-8" onClick={() => {}} />
+            <HiOutlinePencilAlt className="h-8 w-8" onClick={() => {}} />
+          </div>
         </header>
 
         <Sidebar />
