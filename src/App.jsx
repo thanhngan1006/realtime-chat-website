@@ -9,7 +9,6 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
 import AuthProvider from './context/UseAuth';
-import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
