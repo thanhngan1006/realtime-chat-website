@@ -1,8 +1,8 @@
-import React from "react";
-import { CiSearch } from "react-icons/ci";
-import Input from "./Input";
-import Button from "./Button";
-import { IoMdMail } from "react-icons/io";
+import React from 'react';
+import { CiSearch } from 'react-icons/ci';
+import Input from './Input';
+import Button from './Button';
+import { IoMdMail } from 'react-icons/io';
 
 const SearchPeople = () => {
   return (

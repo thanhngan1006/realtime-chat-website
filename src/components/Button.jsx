@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 
 const Button = ({
   children,
-  size = "base",
+  size = 'base',
   isDisabled = false,
-  className = "",
+  className = '',
   ...rest
 }) => {
   const baseStyles = `text-${size} rounded`;
-  const disabledStyles = isDisabled ? "opacity-50 cursor-not-allowed" : "";
+  const disabledStyles = isDisabled ? 'opacity-50 cursor-not-allowed' : '';
 
   return (
     <button

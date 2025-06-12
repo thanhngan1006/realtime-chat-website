@@ -1,5 +1,5 @@
-import React from "react";
-import Avatar from "./Avatar";
+import React from 'react';
+import Avatar from './Avatar';
 
 const UserItem = ({ name, imgUrl, timeSendMessage, messageContent }) => {
   return (
