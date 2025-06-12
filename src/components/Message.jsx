@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import Button from "./Button";
-import { SlOptionsVertical } from "react-icons/sl";
-import { FaShare } from "react-icons/fa";
-import { MdEmojiEmotions } from "react-icons/md";
-import Avatar from "./Avatar";
-import OptionsForMessage from "./OptionsForMessage";
+import React, { useState } from 'react';
+import Button from './Button';
+import { SlOptionsVertical } from 'react-icons/sl';
+import { FaShare } from 'react-icons/fa';
+import { MdEmojiEmotions } from 'react-icons/md';
+import Avatar from './Avatar';
+import OptionsForMessage from './OptionsForMessage';
 
 const Message = ({
   children,
-  bgColor = "blue-500",
-  textColor = "white",
-  className = "",
-  src = "",
+  bgColor = 'blue-500',
+  textColor = 'white',
+  className = '',
+  src = '',
   isYourMessage,
   isShowAvatar,
 }) => {
@@ -29,8 +29,8 @@ const Message = ({
 
       <div
         className={`flex w-full items-center gap-2 ${
-          isYourMessage ? "justify-end" : "justify-start"
-        } ${!isYourMessage && !isShowAvatar ? "ml-10" : ""}`}
+          isYourMessage ? 'justify-end' : 'justify-start'
+        } ${!isYourMessage && !isShowAvatar ? 'ml-10' : ''}`}
       >
         {isHover &&
           (isYourMessage ? (
@@ -47,7 +47,7 @@ const Message = ({
           className={`max-w-[75%] rounded-2xl px-4 py-2 text-${textColor} ${
             isYourMessage
               ? `bg-${bgColor} rounded-br-none bg-blue-500`
-              : "rounded-bl-none bg-gray-500"
+              : 'rounded-bl-none bg-gray-500'
           } ${className}`}
         >
           {children}

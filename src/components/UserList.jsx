@@ -1,5 +1,5 @@
-import React from "react";
-import UserItem from "./UserItem";
+import React from 'react';
+import UserItem from './UserItem';
 
 const UserList = ({ users }) => {
   return (

@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 const Input = ({
-  type = "text",
-  label = "",
-  placeholder = "",
-  error = "",
-  className = "",
+  type = 'text',
+  label = '',
+  placeholder = '',
+  error = '',
+  className = '',
   ...otherProps
 }) => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
   const handleChange = (event) => {
     setValue(event.target.value);

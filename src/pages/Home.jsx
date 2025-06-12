@@ -1,15 +1,16 @@
-import React from "react";
-import { LiaUserSecretSolid } from "react-icons/lia";
-import { BiHome } from "react-icons/bi";
-import { HiOutlinePencilAlt } from "react-icons/hi";
-import { AiFillLike } from "react-icons/ai";
-import { IoIosCamera, IoMdAddCircle } from "react-icons/io";
-import { FaMicrophone, FaRegImage, FaSmile } from "react-icons/fa";
-import { MdEmojiEmotions } from "react-icons/md";
-import Sidebar from "../components/Sidebar";
-import HeadingMessageBar from "../components/HeadingMessageBar";
-import MessageBox from "../components/MessageBox";
-import Input from "../components/Input";
+import React from 'react';
+import { LiaUserSecretSolid } from 'react-icons/lia';
+import { BiHome } from 'react-icons/bi';
+import { HiOutlinePencilAlt } from 'react-icons/hi';
+import { AiFillLike } from 'react-icons/ai';
+import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
+import { FaMicrophone, FaRegImage, FaSmile } from 'react-icons/fa';
+import { MdEmojiEmotions } from 'react-icons/md';
+import Sidebar from '../components/Sidebar';
+import HeadingMessageBar from '../components/HeadingMessageBar';
+import MessageBox from '../components/MessageBox';
+import Input from '../components/Input';
+import { IoSearch } from 'react-icons/io5';
 
 const Home = () => {
   return (
@@ -18,7 +19,10 @@ const Home = () => {
         <header className="flex items-center justify-between bg-white p-4 text-center shadow">
           <LiaUserSecretSolid className="h-8 w-8" onClick={() => {}} />
           <h3 className="text-2xl font-bold">Chat</h3>
-          <HiOutlinePencilAlt className="h-8 w-8" onClick={() => {}} />
+          <div className="flex gap-2">
+            <IoSearch className="h-8 w-8" onClick={() => {}} />
+            <HiOutlinePencilAlt className="h-8 w-8" onClick={() => {}} />
+          </div>
         </header>
 
         <Sidebar />
@@ -30,9 +34,9 @@ const Home = () => {
         <div className="flex-1 overflow-y-auto bg-gray-200 p-4">
           <MessageBox
             messages={[
-              "Hey! How are you?",
-              "Shall we go for Hiking this weekend?",
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Volutpat lacus laoreet non curabitur gravida.",
+              'Hey! How are you?',
+              'Shall we go for Hiking this weekend?',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Volutpat lacus laoreet non curabitur gravida.',
             ]}
             isYourMessage={false}
             src="https://randomuser.me/api/portraits/women/44.jpg"
@@ -46,16 +50,16 @@ const Home = () => {
             messages={[
               "Hey! I'm good, thanks!",
               "Hiking sounds great! Let's do it.",
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
             ]}
             isYourMessage={true}
           />
 
           <MessageBox
             messages={[
-              "Hey! How are you?",
-              "Shall we go for Hiking this weekend?",
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Volutpat lacus laoreet non curabitur gravida.",
+              'Hey! How are you?',
+              'Shall we go for Hiking this weekend?',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Volutpat lacus laoreet non curabitur gravida.',
             ]}
             isYourMessage={false}
             src="https://randomuser.me/api/portraits/women/44.jpg"
@@ -77,7 +81,7 @@ const Home = () => {
               className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <MdEmojiEmotions
-              onClick={() => console.log("ok")}
+              onClick={() => console.log('ok')}
               className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
             />
           </div>

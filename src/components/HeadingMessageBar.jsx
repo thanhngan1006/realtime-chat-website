@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 import {
   IoIosInformationCircle,
   IoIosNotificationsOutline,
-} from "react-icons/io";
-import { SlOptionsVertical } from "react-icons/sl";
-import Button from "./Button";
-import { FaPhoneAlt } from "react-icons/fa";
-import { MdVideoCall } from "react-icons/md";
-import Avatar from "./Avatar";
+} from 'react-icons/io';
+import { SlOptionsVertical } from 'react-icons/sl';
+import Button from './Button';
+import { FaPhoneAlt } from 'react-icons/fa';
+import { MdVideoCall } from 'react-icons/md';
+import Avatar from './Avatar';
 
 const HeadingMessageBar = ({ name, activeTime }) => {
   return (
@@ -24,14 +24,14 @@ const HeadingMessageBar = ({ name, activeTime }) => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button className="px-0 py-0" onClick={() => {}}>
+        <Button className="px-2 py-2" onClick={() => {}}>
           <FaPhoneAlt className="h-6 w-6 text-blue-500" />
         </Button>
-        <Button className="px-0 py-0" onClick={() => {}}>
+        <Button className="px-2 py-2" onClick={() => {}}>
           <MdVideoCall className="h-6 w-6 text-blue-500" />
         </Button>
 
-        <Button onClick={() => {}}>
+        <Button className="px-2 py-2" onClick={() => {}}>
           <IoIosInformationCircle className="h-6 w-6 text-blue-500" />
         </Button>
       </div>

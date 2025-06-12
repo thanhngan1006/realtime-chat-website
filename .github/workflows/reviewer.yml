@@ -18,5 +18,5 @@ jobs:
       - uses: presubmit/ai-reviewer@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LLM_API_KEY: "AIzaSyB7cMSDCNJl8sim8cshGXSH6NjfX84HWD8"
-          LLM_MODEL: "gemini-2.0-flash-lite-preview-02-05"
+          LLM_API_KEY: 'AIzaSyB7cMSDCNJl8sim8cshGXSH6NjfX84HWD8'
+          LLM_MODEL: 'gemini-2.0-flash-lite-preview-02-05'

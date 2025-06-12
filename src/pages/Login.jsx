@@ -1,39 +1,88 @@
-import React from "react";
-import { useState } from "react";
-import login from "../assets/login.jpeg";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import Button from "../components/Button";
-import Input from "../components/Input";
+import React from 'react';
+import { useState } from 'react';
+import login from '../assets/login.jpeg';
+import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import useNotifier from '../hooks/useNotifier';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const notify = useNotifier();
+
   const [formData, setFormData] = useState({
-    username: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const validateEmail = (email) => {
+    var re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.password) {
-      setError("Vui lòng nhập đầy đủ thông tin!");
+    if (!formData.email || !formData.password) {
+      setError('Vui lòng nhập đầy đủ thông tin!');
       return;
     }
-    setError("");
+
+    if (!validateEmail(formData.email)) {
+      setError('Vui lòng nhập đúng dạng email');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Vui lòng nhập mật khẩu trên 6 kí tự');
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password,
+      );
+      const user = userCredential.user;
+      notify('Đăng nhập thành công!', 'success');
+
+      navigate('/');
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setError(errorCode);
+      setError(errorMessage);
+
+      notify('Đăng nhập thất bại!', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgorPassord = () => {
+    navigate('/forgot-password');
   };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-blue-950">
       <div className="shadow-blue flex h-4/5 w-4/5 rounded-md bg-white shadow-2xl">
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-5xl font-bold text-blue-950">Đăng nhập</h1>
+          <h1 className="text-5xl font-bold text-blue-950">Login</h1>
           <h2 className="text-center text-blue-950">
-            Đảm bảo tài khoản của bạn được an toàn
+            Make your account more secure
           </h2>
           <img className="w-4/5 object-contain" src={login} alt="ảnh login" />
         </div>
@@ -47,23 +96,23 @@ const Login = () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <Input
-                  label="Tên đăng nhập"
+                  label="Email"
                   type="text"
-                  name="username"
-                  value={formData.username}
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="Nhập tên đăng nhập"
+                  placeholder="Enter your email"
                   className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
               <div className="relative flex flex-col items-center gap-1">
                 <Input
-                  label="Mật khẩu"
-                  type={isShowPassword ? "text" : "password"}
+                  label="Password"
+                  type={isShowPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Nhập mật khẩu"
+                  placeholder="Enter your password"
                   className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
                 <div
@@ -78,11 +127,12 @@ const Login = () => {
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <Button
+              onClick={handleForgorPassord}
               type="button"
               className="mb-4 flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
             >
               <span className="cursor-pointer text-blue-800 hover:text-blue-950">
-                Quên mật khẩu?
+                Forgot password?
               </span>
             </Button>
 
@@ -90,8 +140,30 @@ const Login = () => {
               type="submit"
               className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
             >
-              ĐĂNG NHẬP
+              {loading ? (
+                <div className="items-center justify-center">
+                  <FaSpinner className="animate-spin" />
+                  <span>Login...</span>
+                </div>
+              ) : (
+                'Login'
+              )}
             </Button>
+
+            <div className="flex items-center justify-center gap-0.5">
+              <span className="text-black">Don't have an account? </span>
+              <Button
+                type="button"
+                onClick={() => {
+                  navigate('/signup');
+                }}
+                className="flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
+              >
+                <span className="cursor-pointer text-blue-800 hover:text-blue-950">
+                  Sign up
+                </span>
+              </Button>
+            </div>
           </form>
         </div>
       </div>

@@ -1,7 +1,7 @@
-import React from "react";
-import Message from "./Message";
+import React from 'react';
+import Message from './Message';
 
-const MessageBox = ({ messages, isYourMessage, src = "" }) => {
+const MessageBox = ({ messages, isYourMessage, src = '' }) => {
   return (
     <div className="relative flex flex-col">
       <div className="mb-4">
@@ -11,7 +11,7 @@ const MessageBox = ({ messages, isYourMessage, src = "" }) => {
             isYourMessage={isYourMessage}
             src={src}
             isShowAvatar={!isYourMessage && index === 0}
-            bgColor={isYourMessage ? "blue-500" : "gray-600"}
+            bgColor={isYourMessage ? 'blue-500' : 'gray-600'}
             textColor="white"
           >
             {msg}
