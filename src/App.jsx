@@ -1,14 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 
-import Layout from './pages/Layout';
-import Home from './pages/Home';
-import NoPage from './pages/NoPage';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ResetPassword from './pages/ResetPassword';
 import AuthProvider from './context/UseAuth';
+import AppRoutes from './routes';
 
 function App() {
   return (
@@ -18,15 +13,7 @@ function App() {
     >
       <AuthProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="*" element={<NoPage />} />
-            </Route>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ResetPassword />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
     </SnackbarProvider>

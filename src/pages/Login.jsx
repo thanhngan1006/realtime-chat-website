@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 import login from '../assets/login.jpeg';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
-import { sendPasswordResetEmail } from 'firebase/auth';
 import useNotifier from '../hooks/useNotifier';
+import { AuthContext } from '../context/UseAuth';
 
 const Login = () => {
+  const { loading, setLoading, loginUser, validateEmail } =
+    useContext(AuthContext);
+
   const navigate = useNavigate();
   const notify = useNotifier();
 
@@ -18,18 +19,12 @@ const Login = () => {
     email: '',
     password: '',
   });
-  const [isShowPassword, setIsShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isShowPassword, setIsShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const validateEmail = (email) => {
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
   };
 
   const handleSubmit = async (e) => {
@@ -48,17 +43,13 @@ const Login = () => {
       setError('Vui lòng nhập mật khẩu trên 6 kí tự');
       return;
     }
-    setLoading(true);
+    // setLoading(false);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password,
-      );
+      const userCredential = await loginUser(formData.email, formData.password);
       const user = userCredential.user;
       notify('Đăng nhập thành công!', 'success');
-
+      setError('');
       navigate('/');
     } catch (error) {
       const errorCode = error.code;

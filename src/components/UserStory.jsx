@@ -10,9 +10,9 @@ const UserStory = ({ userStorys }) => {
         <div className="flex flex-col items-center text-white">
           <div className="rounded-full bg-blue-600 p-0.5">
             <div className="rounded-full bg-gray-500">
-              <div className="flex h-10 w-10 items-center justify-center">
+              <button className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full hover:bg-gray-600">
                 <IoMdAdd className="font-extrabold text-white" />
-              </div>
+              </button>
             </div>
           </div>
           <p className="mt-2 text-sm text-black">Add</p>

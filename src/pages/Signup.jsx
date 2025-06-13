@@ -1,14 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import signup from '../assets/signup.png';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import Snackbar from '@mui/material/Snackbar';
 
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { sendEmailVerification } from 'firebase/auth';
-import { auth } from '../firebase';
 import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
 
@@ -16,23 +13,18 @@ const Signup = () => {
   const navigate = useNavigate();
   const notify = useNotifier();
 
-  const { createUser } = useContext(AuthContext);
+  const { createUser, loading, setLoading, validateEmail } =
+    useContext(AuthContext);
 
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmedPassword, setIsShowConfirmedPassword] = useState(false);
-  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmedPassword: '',
   });
-  const [loading, setLoading] = useState(false);
-
-  const validateEmail = (email) => {
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-  };
+  const [error, setError] = useState('');
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -71,8 +63,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      const userCredential = await createUser(
         formData.email,
         formData.password,
       );
