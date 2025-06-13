@@ -5,7 +5,7 @@ const Avatar = ({ src, className = '' }) => {
 
   return (
     <div className={`${className}`}>
-      <img className={`${baseStyles}`} src={`${src}`} />
+      <img className={`${baseStyles}`} src={`${src}`} alt="" />
     </div>
   );
 };

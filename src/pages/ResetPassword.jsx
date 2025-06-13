@@ -1,23 +1,21 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import reset from '../assets/reset.png';
 import { FaSpinner } from 'react-icons/fa';
 import Input from '../components/Input';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../firebase';
 import useNotifier from '../hooks/useNotifier';
 import Button from '../components/Button';
-import { fetchSignInMethodsForEmail } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/UseAuth';
 
 const ResetPassword = () => {
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
   const notify = useNotifier();
+  const navigate = useNavigate();
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const validateEmail = (email) => {
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-  };
+  const { resetPasswordForUser, validateEmail, loading, setLoading } =
+    useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,21 +28,32 @@ const ResetPassword = () => {
       setError('Vui lòng nhập đúng dạng email');
       return;
     }
-
     setLoading(true);
 
     // con check mail da dang ky hay chua
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      await resetPasswordForUser(email);
+      notify('Reset password thành công, vui lòng check mail', 'success');
+      setSuccess(true);
       setError('');
-      notify('Reset password thành công', 'success');
     } catch (error) {
       notify('Reset password thất bại', 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setError('');
+    if (success) {
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-blue-950">

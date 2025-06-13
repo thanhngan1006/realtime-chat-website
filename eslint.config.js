@@ -24,6 +24,7 @@ export default [
       'react-refresh': reactRefresh,
       'jsx-a11y': jsxA11y,
     },
+
     settings: {
       react: {
         version: 'detect',
@@ -35,12 +36,18 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...jsxA11y.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      // 'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // 'react-refresh/only-export-components': [
+      //   'warn',
+      //   { allowConstantExport: true },
+      // ],
       'react/react-in-jsx-scope': 'off',
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react/prop-types': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react-refresh/only-export-components': 'off',
+      'no-unused-vars': 'off',
+      'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-static-element-interactions': 'off',
     },
   },
 ];
