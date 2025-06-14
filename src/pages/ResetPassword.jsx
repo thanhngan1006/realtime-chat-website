@@ -23,7 +23,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
-      setError(t(ERROR_KEYS.NOTENTEREMTAIL));
+      setError(t(ERROR_KEYS.NOT_ENTER_EMAIL));
       return;
     }
 

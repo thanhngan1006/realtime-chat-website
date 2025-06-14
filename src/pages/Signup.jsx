@@ -42,7 +42,7 @@ const Signup = () => {
       !formData.password ||
       !formData.confirmedPassword
     ) {
-      setError(t(ERROR_KEYS.NOTFULLFIELD));
+      setError(t(ERROR_KEYS.NOT_FULL_FIELD));
       return;
     }
 
@@ -58,7 +58,7 @@ const Signup = () => {
 
     if (formData.password !== formData.confirmedPassword) {
       {
-        setError(t(ERROR_KEYS.PASSWORDNOTMATCHCONFIRMEDPASSWORD));
+        setError(t(ERROR_KEYS.PASSWORD_NOT_MATCH_CONFIRMED_PASSWORD));
         return;
       }
     }

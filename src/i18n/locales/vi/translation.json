@@ -4,14 +4,14 @@
     "success": "Đăng nhập thành công",
     "failure": "Đăng nhập thất bại"
   },
-  "validateField": {
+  "validate_field": {
     "not_fullfield": "Vui lòng nhập đầy đủ thông tin!",
     "invalid_email": "Vui lòng nhập đúng dạng email",
     "not_email": "Vui lòng nhập email",
     "invalid_password_format": "Vui lòng nhập mật khẩu trên 6 kí tự",
     "password_not_match_confirmedpassword": "Mật khẩu nhập lại cần giống với mật khẩu đã nhập"
   },
-  "resetPassword": {
+  "reset_password": {
     "success": "Khôi phục mật khẩu thành công, vui lòng check mail",
     "failure": "Khôi phục mật khẩu thất bại"
   },

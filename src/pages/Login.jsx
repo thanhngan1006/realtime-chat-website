@@ -34,7 +34,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      setError(t(ERROR_KEYS.NOTFULLFIELD));
+      setError(t(ERROR_KEYS.NOT_FULL_FIELD));
       return;
     }
 
