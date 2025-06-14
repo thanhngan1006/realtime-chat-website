@@ -1,23 +1,22 @@
 {
-    "login": {
-      "wrong_account": "Wrong password or email",
-      "success": "Login successfully",
-      "failure" : "Login unsuccessfully"
-    },
-    "validateField" : {
-      "not_fullfield": "Please enter full field",
-      "not_email": "Please enter email",
-      "invalid_email": "Please enter valid email",
-      "invalid_password_format": "Please enter password which has more than 6 characters",
-      "password_not_match_confirmedpassword": "Please enter password match with confirmed password"
-    },
-    "resetPassword":{
-      "success": "Reset password successfully, please check email",
-      "failure": "Reset password unsuccessfully"
-    },
-    "common": {
-      "submit": "Sent",
-      "cancel": "Cancel"
-    }
+  "login": {
+    "wrong_account": "Wrong password or email",
+    "success": "Login successfully",
+    "failure": "Login unsuccessfully"
+  },
+  "validateField": {
+    "not_fullfield": "Please enter full field",
+    "not_email": "Please enter email",
+    "invalid_email": "Please enter valid email",
+    "invalid_password_format": "Please enter password which has more than 6 characters",
+    "password_not_match_confirmedpassword": "Please enter password match with confirmed password"
+  },
+  "resetPassword": {
+    "success": "Reset password successfully, please check email",
+    "failure": "Reset password unsuccessfully"
+  },
+  "common": {
+    "submit": "Sent",
+    "cancel": "Cancel"
   }
-  
+}
