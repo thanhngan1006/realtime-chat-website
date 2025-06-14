@@ -9,7 +9,7 @@
     "not_email": "Please enter email",
     "invalid_email": "Please enter valid email",
     "invalid_password_format": "Please enter password which has more than 6 characters",
-    "password_not_match_confirmedpassword": "Please enter password match with confirmed password"
+    "password_not_match_confirmed_password": "Please enter password match with confirmed password"
   },
   "reset_password": {
     "success": "Reset password successfully, please check email",
