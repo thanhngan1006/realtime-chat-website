@@ -7,8 +7,12 @@ import Input from '../components/Input';
 import { useNavigate } from 'react-router-dom';
 import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
+import { useTranslation } from 'react-i18next';
+import { ERROR_KEYS } from '../constants/Message';
 
 const Login = () => {
+  const { t } = useTranslation();
+
   const { loading, setLoading, loginUser, validateEmail } =
     useContext(AuthContext);
 
@@ -30,17 +34,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      setError('Vui lòng nhập đầy đủ thông tin!');
+      setError(t(ERROR_KEYS.NOTFULLFIELD));
       return;
     }
 
     if (!validateEmail(formData.email)) {
-      setError('Vui lòng nhập đúng dạng email');
+      setError(t(ERROR_KEYS.INVALID_EMAIL));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Vui lòng nhập mật khẩu trên 6 kí tự');
+      setError(t(ERROR_KEYS.INVALID_PASSWORD));
       return;
     }
     // setLoading(false);
@@ -48,16 +52,18 @@ const Login = () => {
     try {
       const userCredential = await loginUser(formData.email, formData.password);
       const user = userCredential.user;
-      notify('Đăng nhập thành công!', 'success');
+      notify(t(ERROR_KEYS.LOGIN_SUCCESS), 'success');
       setError('');
       navigate('/');
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
-      setError(errorCode);
-      setError(errorMessage);
+      // setError(errorCode);
+      // setError(errorMessage);
 
-      notify('Đăng nhập thất bại!', 'error');
+      setError(t(ERROR_KEYS.LOGIN_WRONG_ACCOUNT));
+
+      notify(t(ERROR_KEYS.LOGIN_FAILURE), 'error');
     } finally {
       setLoading(false);
     }
@@ -66,6 +72,9 @@ const Login = () => {
   const handleForgorPassord = () => {
     navigate('/forgot-password');
   };
+
+  // const { i18n } = useTranslation();
+  // console.log('Current language:', i18n.language);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-blue-950">

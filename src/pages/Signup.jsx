@@ -8,8 +8,11 @@ import { useNavigate } from 'react-router-dom';
 import { sendEmailVerification } from 'firebase/auth';
 import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
+import { ERROR_KEYS } from '../constants/Message';
+import { useTranslation } from 'react-i18next';
 
 const Signup = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const notify = useNotifier();
 
@@ -39,23 +42,23 @@ const Signup = () => {
       !formData.password ||
       !formData.confirmedPassword
     ) {
-      setError('Please enter full field in the form');
+      setError(t(ERROR_KEYS.NOTFULLFIELD));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Vui lòng nhập mật khẩu trên 6 kí tự');
+      setError(t(ERROR_KEYS.INVALID_PASSWORD));
       return;
     }
 
     if (!validateEmail(formData.email)) {
-      setError('Vui lòng nhập đúng dạng email');
+      setError(t(ERROR_KEYS.INVALID_EMAIL));
       return;
     }
 
     if (formData.password !== formData.confirmedPassword) {
       {
-        setError('Please enter password match with confirmed password');
+        setError(t(ERROR_KEYS.PASSWORDNOTMATCHCONFIRMEDPASSWORD));
         return;
       }
     }
@@ -71,14 +74,14 @@ const Signup = () => {
 
       await sendEmailVerification(user);
 
-      notify('Đăng ký thành công', 'success');
+      notify(t(ERROR_KEYS.LOGIN_SUCCESS), 'success');
 
       navigate('/login');
     } catch (error) {
       const errorCode = error.code;
       setError(errorCode);
 
-      notify('Đăng ký thành công', 'error');
+      notify(t(ERROR_KEYS.LOGIN_FAILURE), 'error');
     } finally {
       setLoading(false);
     }
