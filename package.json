@@ -11,7 +11,9 @@
     "alex": "alex .",
     "eslint": "eslint .",
     "prettier": "prettier .",
-    "format": "npm run prettier -- --write"
+    "format": "npm run prettier -- --write",
+    "prepare": "husky",
+    "lint:fix": "eslint . --ext .js,.jsx --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -21,11 +23,13 @@
     "@tailwindcss/vite": "^4.1.10",
     "firebase": "^11.9.1",
     "husky": "^9.1.7",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.2.0",
     "lightningcss": "^1.30.1",
-    "lint-staged": "^16.1.0",
     "notistack": "^3.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-i18next": "^15.5.3",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.2",
     "tailwindcss": "^4.1.8"
@@ -42,8 +46,16 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "lint-staged": "^16.1.1",
     "prettier": "3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
     "vite": "^6.3.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "npm run lint:fix",
+      "npm run format",
+      "git add ."
+    ]
   }
 }

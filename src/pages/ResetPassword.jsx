@@ -6,8 +6,11 @@ import useNotifier from '../hooks/useNotifier';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/UseAuth';
+import { ERROR_KEYS } from '../constants/Message';
+import { useTranslation } from 'react-i18next';
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const notify = useNotifier();
   const navigate = useNavigate();
@@ -20,12 +23,12 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
-      setError('Vui lòng nhập email!');
+      setError(t(ERROR_KEYS.NOT_ENTER_EMAIL));
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Vui lòng nhập đúng dạng email');
+      setError(t(ERROR_KEYS.INVALID_EMAIL));
       return;
     }
     setLoading(true);
@@ -34,11 +37,11 @@ const ResetPassword = () => {
 
     try {
       await resetPasswordForUser(email);
-      notify('Reset password thành công, vui lòng check mail', 'success');
+      notify(t(ERROR_KEYS.RESET_SUCCESS), 'success');
       setSuccess(true);
       setError('');
     } catch (error) {
-      notify('Reset password thất bại', 'error');
+      notify(t(ERROR_KEYS.RESET_FAILURE), 'error');
     } finally {
       setLoading(false);
     }

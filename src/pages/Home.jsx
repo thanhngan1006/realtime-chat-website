@@ -1,6 +1,5 @@
 import React from 'react';
 import { LiaUserSecretSolid } from 'react-icons/lia';
-import { BiHome } from 'react-icons/bi';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
