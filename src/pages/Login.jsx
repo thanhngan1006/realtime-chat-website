@@ -140,14 +140,7 @@ const Login = () => {
               type="submit"
               className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
             >
-              {loading ? (
-                <div className="items-center justify-center">
-                  <FaSpinner className="animate-spin" />
-                  <span>Login...</span>
-                </div>
-              ) : (
-                'Login'
-              )}
+              Login
             </Button>
 
             <div className="flex items-center justify-center gap-0.5">
@@ -167,6 +160,12 @@ const Login = () => {
           </form>
         </div>
       </div>
+
+      {loading && (
+        <div className="fixed flex items-center justify-center">
+          <FaSpinner className="animate-spin text-4xl text-blue-700" />
+        </div>
+      )}
     </div>
   );
 };

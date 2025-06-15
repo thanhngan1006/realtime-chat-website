@@ -93,18 +93,17 @@ const ResetPassword = () => {
               type="submit"
               className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
             >
-              {loading ? (
-                <div className="items-center justify-center">
-                  <FaSpinner className="animate-spin" />
-                  <span>Reset...</span>
-                </div>
-              ) : (
-                'Reset'
-              )}
+              Reset
             </Button>
           </form>
         </div>
       </div>
+
+      {loading && (
+        <div className="fixed flex items-center justify-center">
+          <FaSpinner className="animate-spin text-4xl text-blue-700" />
+        </div>
+      )}
     </div>
   );
 };
