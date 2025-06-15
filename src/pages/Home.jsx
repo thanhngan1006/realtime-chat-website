@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { LiaUserSecretSolid } from 'react-icons/lia';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { AiFillLike } from 'react-icons/ai';
@@ -10,13 +10,32 @@ import HeadingMessageBar from '../components/HeadingMessageBar';
 import MessageBox from '../components/MessageBox';
 import Input from '../components/Input';
 import { IoSearch } from 'react-icons/io5';
+import Avatar from '../components/Avatar';
+import SubMenu from '../components/SubMenu';
+import { AuthContext } from '../context/UseAuth';
 
 const Home = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { user } = useContext(AuthContext);
+
+  const handleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="grid min-h-screen w-full grid-cols-12">
       <div className="col-span-3 bg-gray-100 text-gray-900">
-        <header className="flex items-center justify-between bg-white p-4 text-center shadow">
-          <LiaUserSecretSolid className="h-8 w-8" onClick={() => {}} />
+        <header className="flex items-center justify-between bg-white p-2.5 text-center shadow">
+          <button onClick={handleOpen} className="relative cursor-pointer">
+            <Avatar
+              className="h-10 w-10"
+              isOnline={!!user}
+              src="https://ui-avatars.com/api/?name=Linda&background=random"
+            />
+          </button>
+
+          {isOpen ? <SubMenu className="top-14 left-0" /> : null}
+
           <h3 className="text-2xl font-bold">Chat</h3>
           <div className="flex gap-2">
             <IoSearch className="h-8 w-8" onClick={() => {}} />
