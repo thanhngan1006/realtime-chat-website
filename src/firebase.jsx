@@ -1,7 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import {
+  initializeAuth,
+  browserPopupRedirectResolver,
+  browserLocalPersistence,
+} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,8 +16,18 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
-
 const app = initializeApp(firebaseConfig);
+// const auth = getAuth(app);
+
+const auth = initializeAuth(app, {
+  persistence: [browserLocalPersistence],
+  popupRedirectResolver: browserPopupRedirectResolver,
+});
+
+// @ts-ignore
+await auth._initializationPromise;
+
 const analytics = getAnalytics(app);
 export const db = getFirestore(app);
-export const auth = getAuth(app);
+
+export { auth };

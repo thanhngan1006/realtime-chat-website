@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { sendEmailVerification } from 'firebase/auth';
 import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
-import { ERROR_KEYS } from '../constants/Message';
+import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
 import { useTranslation } from 'react-i18next';
 
 const Signup = () => {
@@ -74,7 +74,7 @@ const Signup = () => {
 
       await sendEmailVerification(user);
 
-      notify(t(ERROR_KEYS.LOGIN_SUCCESS), 'success');
+      notify(t(SUCCESS_KEYS.LOGIN_SUCCESS), 'success');
 
       navigate('/login');
     } catch (error) {
