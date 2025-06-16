@@ -6,7 +6,7 @@ import useNotifier from '../hooks/useNotifier';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/UseAuth';
-import { ERROR_KEYS } from '../constants/Message';
+import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
 import { useTranslation } from 'react-i18next';
 
 const ResetPassword = () => {
@@ -37,7 +37,7 @@ const ResetPassword = () => {
 
     try {
       await resetPasswordForUser(email);
-      notify(t(ERROR_KEYS.RESET_SUCCESS), 'success');
+      notify(t(SUCCESS_KEYS.RESET_SUCCESS), 'success');
       setSuccess(true);
       setError('');
     } catch (error) {

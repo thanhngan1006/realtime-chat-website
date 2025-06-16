@@ -4,14 +4,17 @@ import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/UseAuth';
 
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+
 const PrivateRoute = ({ children }) => {
-  const { loading, user } = useContext(AuthContext);
+  const { loading, user, setUser, setLoading } = useContext(AuthContext);
 
   if (loading) {
     return <span className="loading loading-dots loading-lg"></span>;
   }
 
-  if (user) {
+  if (auth.currentUser) {
     return children;
   }
 

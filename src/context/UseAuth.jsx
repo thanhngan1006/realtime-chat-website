@@ -61,6 +61,7 @@ const AuthProvider = ({ children }) => {
     setLoading,
     validateEmail,
     resetPasswordForUser,
+    setUser,
   };
 
   return (

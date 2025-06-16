@@ -13,6 +13,7 @@ import { IoSearch } from 'react-icons/io5';
 import Avatar from '../components/Avatar';
 import SubMenu from '../components/SubMenu';
 import { AuthContext } from '../context/UseAuth';
+import { auth } from '../firebase';
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,10 @@ const Home = () => {
   const handleOpen = () => {
     setIsOpen(!isOpen);
   };
+
+  const { setUser } = useContext(AuthContext);
+
+  setUser(auth.currentUser);
 
   return (
     <div className="grid min-h-screen w-full grid-cols-12">

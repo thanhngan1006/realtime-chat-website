@@ -8,7 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
 import { useTranslation } from 'react-i18next';
-import { ERROR_KEYS } from '../constants/Message';
+import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
+import { setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -50,9 +52,11 @@ const Login = () => {
     // setLoading(false);
 
     try {
+      await setPersistence(auth, browserLocalPersistence);
       const userCredential = await loginUser(formData.email, formData.password);
       const user = userCredential.user;
-      notify(t(ERROR_KEYS.LOGIN_SUCCESS), 'success');
+      notify(t(SUCCESS_KEYS.LOGIN_SUCCESS), 'success');
+      console.log('cccc');
       setError('');
       navigate('/');
     } catch (error) {
