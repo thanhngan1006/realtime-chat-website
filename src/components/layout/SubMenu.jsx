@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
-import SubMenuItem from './SubMenuItem';
+import SubMenuItem from '../common/SubMenuItem';
 
 import { AiOutlineSetting } from 'react-icons/ai';
 import { BiLogOutCircle } from 'react-icons/bi';
 import { MdHelpOutline } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
-import { AuthContext } from '../context/UseAuth';
+import { AuthContext } from '../../context/UseAuth';
 
 const SubMenu = ({ className = '' }) => {
   const { logOut } = useContext(AuthContext);

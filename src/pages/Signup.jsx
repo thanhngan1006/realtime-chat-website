@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import signup from '../assets/signup.png';
-import Input from '../components/Input';
-import Button from '../components/Button';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 

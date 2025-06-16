@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import Button from './Button';
+import Button from '../common/Button';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { FaShare } from 'react-icons/fa';
 import { MdEmojiEmotions } from 'react-icons/md';
-import Avatar from './Avatar';
+import Avatar from '../common/Avatar';
 import OptionsForMessage from './OptionsForMessage';
 
 const Message = ({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { IoMdAdd } from 'react-icons/io';
-import Button from './Button';
+import Button from '../common/Button';
 import UserStoryItem from './UserStoryItem';
 
 const UserStory = ({ userStorys }) => {
