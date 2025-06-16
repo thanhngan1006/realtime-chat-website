@@ -7,4 +7,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['fsevents', 'lightningcss'],
   },
+  build: {
+    target: 'esnext',
+  },
 });
