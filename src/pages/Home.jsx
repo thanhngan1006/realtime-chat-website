@@ -5,15 +5,12 @@ import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
 import { FaMicrophone, FaRegImage, FaSmile } from 'react-icons/fa';
 import { MdEmojiEmotions } from 'react-icons/md';
-import Sidebar from '../components/Sidebar';
-import HeadingMessageBar from '../components/HeadingMessageBar';
-import MessageBox from '../components/MessageBox';
-import Input from '../components/Input';
 import { IoSearch } from 'react-icons/io5';
-import Avatar from '../components/Avatar';
-import SubMenu from '../components/SubMenu';
 import { AuthContext } from '../context/UseAuth';
 import { auth } from '../firebase';
+import { Avatar, Input } from '../components/common';
+import { HeadingMessageBar, Sidebar, SubMenu } from '../components/layout';
+import { MessageBox } from '../components/chat';
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);

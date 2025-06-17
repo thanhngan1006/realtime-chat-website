@@ -4,10 +4,9 @@ import {
   IoIosNotificationsOutline,
 } from 'react-icons/io';
 import { SlOptionsVertical } from 'react-icons/sl';
-import Button from './Button';
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdVideoCall } from 'react-icons/md';
-import Avatar from './Avatar';
+import { Avatar, Button } from '../common';
 
 const HeadingMessageBar = ({ name, activeTime }) => {
   return (

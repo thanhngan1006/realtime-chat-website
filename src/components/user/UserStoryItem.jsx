@@ -1,5 +1,5 @@
 import React from 'react';
-import Avatar from './Avatar';
+import { Avatar } from '../common';
 
 const UserStoryItem = ({ src, name }) => {
   return (

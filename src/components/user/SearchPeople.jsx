@@ -1,8 +1,7 @@
 import React from 'react';
 import { CiSearch } from 'react-icons/ci';
-import Input from './Input';
-import Button from './Button';
 import { IoMdMail } from 'react-icons/io';
+import { Button, Input } from '../common';
 
 const SearchPeople = () => {
   return (

@@ -1,8 +1,8 @@
 import React from 'react';
-import Button from './Button';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { FaShare } from 'react-icons/fa';
 import { MdEmojiEmotions } from 'react-icons/md';
+import { Button } from '../common';
 
 const OptionsForMessage = () => {
   return (

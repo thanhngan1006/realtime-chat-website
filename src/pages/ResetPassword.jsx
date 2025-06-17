@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import reset from '../assets/reset.png';
 import { FaSpinner } from 'react-icons/fa';
-import Input from '../components/Input';
+import Input from '../components/common/Input';
 import useNotifier from '../hooks/useNotifier';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/UseAuth';
 import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';

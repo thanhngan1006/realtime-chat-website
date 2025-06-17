@@ -2,10 +2,10 @@ import React from 'react';
 import { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../context/UseAuth';
 
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase';
+import { AuthContext } from '../../context/UseAuth';
+import { auth } from '../../firebase';
 
 const PrivateRoute = ({ children }) => {
   const { loading, user, setUser, setLoading } = useContext(AuthContext);

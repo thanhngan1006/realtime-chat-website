@@ -7,7 +7,7 @@ import NoPage from './pages/NoPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
-import PrivateRoute from './components/PrivateRoute';
+import { PrivateRoute } from './components/common';
 
 const AppRoutes = () => {
   return (

@@ -1,10 +1,9 @@
 import React from 'react';
-import UserList from './UserList';
-import { ListUser } from '../mock_data/ListUser';
-import Input from './Input';
 import { MdSearch } from 'react-icons/md';
-import UserStory from './UserStory';
-import { ListUsersStory } from '../mock_data/ListUsersStory';
+import { Input } from '../common';
+import { UserList, UserStory } from '../user';
+import { ListUsersStory } from '../../mock_data/ListUsersStory';
+import { ListUser } from '../../mock_data/ListUser';
 
 const Sidebar = () => {
   return (
