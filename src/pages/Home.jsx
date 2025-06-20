@@ -1,28 +1,22 @@
-import React, { useContext, useState } from 'react';
-import { LiaUserSecretSolid } from 'react-icons/lia';
+import React, { useContext, useEffect, useState } from 'react';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
 import { FaMicrophone, FaRegImage, FaSmile } from 'react-icons/fa';
 import { MdEmojiEmotions } from 'react-icons/md';
 import { IoSearch } from 'react-icons/io5';
-import { AuthContext } from '../context/UseAuth';
-import { auth } from '../firebase';
 import { Avatar, Input } from '../components/common';
 import { HeadingMessageBar, Sidebar, SubMenu } from '../components/layout';
 import { MessageBox } from '../components/chat';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useContext(AuthContext);
+  const { user } = useSelector((state) => state.auth);
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
   };
-
-  const { setUser } = useContext(AuthContext);
-
-  setUser(auth.currentUser);
 
   return (
     <div className="grid min-h-screen w-full grid-cols-12">
@@ -49,7 +43,7 @@ const Home = () => {
       </div>
 
       <div className="col-span-9 flex flex-col">
-        <HeadingMessageBar name="Mon" activeTime="1h ago" />
+        <HeadingMessageBar name="mon" activeTime="1h ago" />
 
         <div className="flex-1 overflow-y-auto bg-gray-200 p-4">
           <MessageBox

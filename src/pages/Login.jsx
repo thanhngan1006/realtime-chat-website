@@ -1,25 +1,31 @@
-import React, { useContext, useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import login from '../assets/login.jpeg';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { useNavigate } from 'react-router-dom';
 import useNotifier from '../hooks/useNotifier';
-import { AuthContext } from '../context/UseAuth';
 import { useTranslation } from 'react-i18next';
 import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
 import { setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { loginUser, validateEmail } from '../../features/user/authActions';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { setUser } from '../../features/user/authReducer';
 
 const Login = () => {
   const { t } = useTranslation();
-
-  const { loading, setLoading, loginUser, validateEmail } =
-    useContext(AuthContext);
-
   const navigate = useNavigate();
   const notify = useNotifier();
+  const dispatch = useDispatch();
+
+  const {
+    loading,
+    error: reduxError,
+    isEmailValid,
+    user,
+  } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -28,6 +34,18 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isShowPassword, setIsShowPassword] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      console.log('user', user);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (formData.email) {
+      dispatch(validateEmail(formData.email));
+    }
+  }, [formData.email, dispatch]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -35,12 +53,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!formData.email || !formData.password) {
       setError(t(ERROR_KEYS.NOT_FULL_FIELD));
       return;
     }
 
-    if (!validateEmail(formData.email)) {
+    if (!isEmailValid) {
       setError(t(ERROR_KEYS.INVALID_EMAIL));
       return;
     }
@@ -49,36 +69,33 @@ const Login = () => {
       setError(t(ERROR_KEYS.INVALID_PASSWORD));
       return;
     }
-    // setLoading(false);
 
     try {
       await setPersistence(auth, browserLocalPersistence);
-      const userCredential = await loginUser(formData.email, formData.password);
-      const user = userCredential.user;
+
+      await dispatch(
+        loginUser({ email: formData.email, password: formData.password }),
+      ).unwrap();
+
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        dispatch(setUser(userData));
+        console.log('User data:', userData);
+      }
+
       notify(t(SUCCESS_KEYS.LOGIN_SUCCESS), 'success');
-      console.log('cccc');
       setError('');
       navigate('/');
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      // setError(errorCode);
-      // setError(errorMessage);
-
       setError(t(ERROR_KEYS.LOGIN_WRONG_ACCOUNT));
-
       notify(t(ERROR_KEYS.LOGIN_FAILURE), 'error');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleForgorPassord = () => {
+  const handleForgotPassword = () => {
     navigate('/forgot-password');
   };
-
-  // const { i18n } = useTranslation();
-  // console.log('Current language:', i18n.language);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-blue-950">
@@ -127,11 +144,11 @@ const Login = () => {
                 </div>
               </div>
             </div>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
+            {(error || reduxError) && (
+              <p className="text-sm text-red-500">{error || reduxError}</p>
+            )}
             <Button
-              onClick={handleForgorPassord}
+              onClick={handleForgotPassword}
               type="button"
               className="mb-4 flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
             >
@@ -139,21 +156,18 @@ const Login = () => {
                 Forgot password?
               </span>
             </Button>
-
             <Button
               type="submit"
               className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
+              disabled={loading}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
-
             <div className="flex items-center justify-center gap-0.5">
               <span className="text-black">Don't have an account? </span>
               <Button
                 type="button"
-                onClick={() => {
-                  navigate('/signup');
-                }}
+                onClick={() => navigate('/signup')}
                 className="flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
               >
                 <span className="cursor-pointer text-blue-800 hover:text-blue-950">

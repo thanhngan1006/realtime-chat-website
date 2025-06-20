@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
 import { PrivateRoute } from './components/common';
+import Profile from './pages/Profile';
 
 const AppRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<Home />} />
+        <Route path="profile/:uid" element={<Profile />} />
         <Route path="*" element={<NoPage />} />
       </Route>
 

@@ -36,6 +36,8 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...jsxA11y.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      'no-undef': 'error',
+      'no-unused-vars': 'warn',
       // 'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       // 'react-refresh/only-export-components': [
       //   'warn',
@@ -45,7 +47,6 @@ export default [
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'off',
       'react-refresh/only-export-components': 'off',
-      'no-unused-vars': 'off',
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
     },

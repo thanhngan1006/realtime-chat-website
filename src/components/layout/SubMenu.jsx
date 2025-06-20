@@ -6,9 +6,13 @@ import { BiLogOutCircle } from 'react-icons/bi';
 import { MdHelpOutline } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
 import { AuthContext } from '../../context/UseAuth';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { auth } from '../../firebase';
 
 const SubMenu = ({ className = '' }) => {
   const { logOut } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div
@@ -16,9 +20,12 @@ const SubMenu = ({ className = '' }) => {
     >
       <SubMenuItem leftIcon={<AiOutlineSetting />}>Setting</SubMenuItem>
 
-      {/* <hr className="my-1" /> */}
-
-      <SubMenuItem leftIcon={<CgProfile />}>Profile</SubMenuItem>
+      <SubMenuItem
+        leftIcon={<CgProfile />}
+        onClick={() => navigate(`/profile/${auth.currentUser.uid}`)}
+      >
+        Profile
+      </SubMenuItem>
 
       <hr className="my-1" />
 

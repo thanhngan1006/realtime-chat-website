@@ -8,6 +8,11 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/UseAuth';
 import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  resetPasswordForUser,
+  validateEmail,
+} from '../../features/user/authActions';
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -17,8 +22,19 @@ const ResetPassword = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const { resetPasswordForUser, validateEmail, loading, setLoading } =
-    useContext(AuthContext);
+  // const { resetPasswordForUser, validateEmail, loading, setLoading } =
+  //   useContext(AuthContext);
+
+  const { loading, isEmailValid } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  console.log('valid', isEmailValid);
+
+  useEffect(() => {
+    if (email) {
+      dispatch(validateEmail(email));
+    }
+  }, [email, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,23 +43,21 @@ const ResetPassword = () => {
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!isEmailValid) {
       setError(t(ERROR_KEYS.INVALID_EMAIL));
       return;
     }
-    setLoading(true);
+    // setLoading(true);
 
     // con check mail da dang ky hay chua
 
     try {
-      await resetPasswordForUser(email);
+      await dispatch(resetPasswordForUser(email)).unwrap();
       notify(t(SUCCESS_KEYS.RESET_SUCCESS), 'success');
       setSuccess(true);
       setError('');
     } catch (error) {
       notify(t(ERROR_KEYS.RESET_FAILURE), 'error');
-    } finally {
-      setLoading(false);
     }
   };
 

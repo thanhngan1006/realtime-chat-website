@@ -4,7 +4,6 @@ import { SnackbarProvider } from 'notistack';
 
 import AuthProvider from './context/UseAuth';
 import AppRoutes from './routes';
-
 function App() {
   return (
     <SnackbarProvider

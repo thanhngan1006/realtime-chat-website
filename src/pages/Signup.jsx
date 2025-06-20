@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import signup from '../assets/signup.png';
-import Input from '../components/common/Input';
-import Button from '../components/common/Button';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,14 +8,22 @@ import useNotifier from '../hooks/useNotifier';
 import { AuthContext } from '../context/UseAuth';
 import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
 import { useTranslation } from 'react-i18next';
+import { Button, Input } from '../components/common';
+import { useDispatch, useSelector } from 'react-redux';
+import { createUser, validateEmail } from '../../features/user/authActions';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 const Signup = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const notify = useNotifier();
+  const dispatch = useDispatch();
 
-  const { createUser, loading, setLoading, validateEmail } =
-    useContext(AuthContext);
+  // const { createUser, loading, setLoading, validateEmail } =
+  //   useContext(AuthContext);
+
+  const { loading, isEmailValid } = useSelector((state) => state.auth);
 
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmedPassword, setIsShowConfirmedPassword] = useState(false);
@@ -28,6 +34,12 @@ const Signup = () => {
     confirmedPassword: '',
   });
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (formData.email) {
+      dispatch(validateEmail(formData.email));
+    }
+  }, [formData.email, dispatch]);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -51,11 +63,6 @@ const Signup = () => {
       return;
     }
 
-    if (!validateEmail(formData.email)) {
-      setError(t(ERROR_KEYS.INVALID_EMAIL));
-      return;
-    }
-
     if (formData.password !== formData.confirmedPassword) {
       {
         setError(t(ERROR_KEYS.PASSWORD_NOT_MATCH_CONFIRMED_PASSWORD));
@@ -63,27 +70,33 @@ const Signup = () => {
       }
     }
 
-    setLoading(true);
+    if (!isEmailValid) {
+      setError(t(ERROR_KEYS.INVALID_EMAIL));
+      return;
+    }
 
     try {
-      const userCredential = await createUser(
-        formData.email,
-        formData.password,
-      );
-      const user = userCredential.user;
+      const result = await dispatch(
+        createUser({ email: formData.email, password: formData.password }),
+      ).unwrap();
 
-      await sendEmailVerification(user);
+      await sendEmailVerification(result);
 
-      notify(t(SUCCESS_KEYS.LOGIN_SUCCESS), 'success');
+      const user = auth.currentUser;
+      if (user) {
+        await setDoc(doc(db, 'users', user.uid), {
+          name: formData.fullName,
+          email: formData.email,
+          avatarUrl: '',
+        });
+      }
 
+      notify(t(SUCCESS_KEYS.SIGNUP_SUCCESS), 'success');
+      setError('');
       navigate('/login');
     } catch (error) {
-      const errorCode = error.code;
-      setError(errorCode);
-
-      notify(t(ERROR_KEYS.LOGIN_FAILURE), 'error');
-    } finally {
-      setLoading(false);
+      setError(t(ERROR_KEYS.ERROR_DEFAULT));
+      notify(t(ERROR_KEYS.SIGNUP_FAILURE), 'error');
     }
   };
 
