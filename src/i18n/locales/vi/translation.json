@@ -17,8 +17,35 @@
     "failure": "Khôi phục mật khẩu thất bại"
   },
   "signup": {
-    "success": "Đăng ký không thành công",
+    "success": "Đăng ký thành công",
     "failure": "Đăng ký thất bại"
+  },
+  "auth": {
+    "email_password_required": "Email và mật khẩu là bắt buộc",
+    "no_authenticated_user": "Không tìm thấy người dùng đã xác thực",
+    "current_new_password_required": "Mật khẩu hiện tại và mật khẩu mới là bắt buộc",
+    "email_already_verified": "Email đã được xác minh",
+    "email_required": "Email là bắt buộc",
+    "registration_success": "Đăng ký thành công. Vui lòng kiểm tra email để xác minh.",
+    "logout_success": "Đăng xuất thành công",
+    "password_reset_sent": "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.",
+    "password_updated": "Cập nhật mật khẩu thành công",
+    "verification_email_sent": "Email xác minh đã được gửi. Vui lòng kiểm tra hộp thư của bạn.",
+    "check_email_verification": "Vui lòng kiểm tra email để xác minh",
+    "check_email_reset": "Vui lòng kiểm tra email để hướng dẫn đặt lại mật khẩu"
+  },
+  "user": {
+    "profile_created_success": "Tạo hồ sơ người dùng thành công",
+    "profile_updated_success": "Cập nhật hồ sơ thành công",
+    "status_updated_success": "Cập nhật trạng thái thành công",
+    "contact_added_success": "Thêm liên hệ thành công",
+    "users_found": "Tìm thấy người dùng",
+    "user_id_data_required": "ID người dùng và dữ liệu là bắt buộc",
+    "user_id_updates_required": "ID người dùng và cập nhật là bắt buộc",
+    "search_term_required": "Từ khóa tìm kiếm là bắt buộc",
+    "cannot_add_yourself_contact": "Không thể thêm chính mình làm liên hệ",
+    "contact_user_not_found": "Không tìm thấy người dùng liên hệ",
+    "invalid_status": "Trạng thái không hợp lệ. Phải là một trong"
   },
   "common": {
     "submit": "Gửi",

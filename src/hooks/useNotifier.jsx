@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSnackbar } from 'notistack';
 import { IoCloseOutline } from 'react-icons/io5';
+import { t } from 'i18next';
 
 const useNotifier = () => {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -10,7 +11,7 @@ const useNotifier = () => {
   const notify = (message, variant = 'default') => {
     const safeVariant = allowedVariants.includes(variant) ? variant : 'default';
 
-    enqueueSnackbar(message, {
+    enqueueSnackbar(t(message), {
       variant:
         /** @type {'default' | 'error' | 'warning' | 'info' | 'success'} */ (
           safeVariant

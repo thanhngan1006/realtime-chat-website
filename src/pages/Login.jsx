@@ -6,45 +6,54 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { useNavigate } from 'react-router-dom';
 import useNotifier from '../hooks/useNotifier';
-import { useTranslation } from 'react-i18next';
-import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
+import { ERROR } from '../constants/Message';
 import { setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 import { loginUser, validateEmail } from '../../features/user/authActions';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
-import { setUser } from '../../features/user/authReducer';
+import { clearMessages } from '../../features/user/authReducer';
+import { t } from 'i18next';
 
 const Login = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const notify = useNotifier();
   const dispatch = useDispatch();
 
-  const {
-    loading,
-    error: reduxError,
-    isEmailValid,
-    user,
-  } = useSelector((state) => state.auth);
+  const { loading, isEmailValid, user, lastSuccessMessage, lastErrorMessage } =
+    useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
   const [isShowPassword, setIsShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       console.log('user', user);
+      navigate('/');
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (formData.email) {
       dispatch(validateEmail(formData.email));
     }
   }, [formData.email, dispatch]);
+
+  // Handle success/error messages
+  useEffect(() => {
+    if (lastSuccessMessage) {
+      notify(lastSuccessMessage, 'success');
+      dispatch(clearMessages());
+    }
+  }, [lastSuccessMessage, notify, dispatch]);
+
+  useEffect(() => {
+    if (lastErrorMessage) {
+      notify(lastErrorMessage, 'error');
+      dispatch(clearMessages());
+    }
+  }, [lastErrorMessage, notify, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,43 +62,35 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!formData.email || !formData.password) {
-      setError(t(ERROR_KEYS.NOT_FULL_FIELD));
+      notify(ERROR.NOT_FULL_FIELD, 'error');
       return;
     }
 
     if (!isEmailValid) {
-      setError(t(ERROR_KEYS.INVALID_EMAIL));
+      notify(ERROR.INVALID_EMAIL, 'error');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError(t(ERROR_KEYS.INVALID_PASSWORD));
+      notify(ERROR.INVALID_PASSWORD, 'error');
       return;
     }
 
     try {
       await setPersistence(auth, browserLocalPersistence);
-
       await dispatch(
-        loginUser({ email: formData.email, password: formData.password }),
+        loginUser({
+          email: formData.email,
+          password: formData.password,
+        }),
       ).unwrap();
 
-      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        dispatch(setUser(userData));
-        console.log('User data:', userData);
-      }
-
-      notify(t(SUCCESS_KEYS.LOGIN_SUCCESS), 'success');
-      setError('');
-      navigate('/');
+      // Success handling is done via useEffect watching lastSuccessMessage
     } catch (error) {
-      setError(t(ERROR_KEYS.LOGIN_WRONG_ACCOUNT));
-      notify(t(ERROR_KEYS.LOGIN_FAILURE), 'error');
+      // Error handling is done via useEffect watching lastErrorMessage
+      console.error('Login error:', error);
     }
   };
 
@@ -144,9 +145,7 @@ const Login = () => {
                 </div>
               </div>
             </div>
-            {(error || reduxError) && (
-              <p className="text-sm text-red-500">{error || reduxError}</p>
-            )}
+
             <Button
               onClick={handleForgotPassword}
               type="button"
@@ -156,6 +155,7 @@ const Login = () => {
                 Forgot password?
               </span>
             </Button>
+
             <Button
               type="submit"
               className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
@@ -163,6 +163,7 @@ const Login = () => {
             >
               {loading ? 'Logging in...' : 'Login'}
             </Button>
+
             <div className="flex items-center justify-center gap-0.5">
               <span className="text-black">Don't have an account? </span>
               <Button

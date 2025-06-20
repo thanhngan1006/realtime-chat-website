@@ -1,24 +1,25 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut,
-} from 'firebase/auth';
-import { auth } from '../../src/firebase';
+import { authService, userService } from '../../src/service';
+import { ERROR } from '../../src/constants/Message';
 
 export const createUser = createAsyncThunk(
   'auth/createUser',
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ email, password, displayName }, { rejectWithValue }) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      return userCredential.user;
+      const response = await authService.register(email, password, {
+        displayName: displayName || '',
+      });
+
+      return {
+        user: response.data,
+        messageKey: response.message,
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({
+        messageKey: error.message,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
     }
   },
 );
@@ -27,14 +28,18 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      return userCredential.user;
+      const response = await authService.login(email, password);
+
+      return {
+        user: response.data,
+        messageKey: response.message,
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({
+        messageKey: ERROR.LOGIN_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
     }
   },
 );
@@ -43,10 +48,18 @@ export const resetPasswordForUser = createAsyncThunk(
   'auth/resetPasswordForUser',
   async (email, { rejectWithValue }) => {
     try {
-      await sendPasswordResetEmail(auth, email);
-      return email;
+      const response = await authService.resetPassword(email);
+
+      return {
+        email,
+        messageKey: response.message,
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({
+        messageKey: ERROR.RESET_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
     }
   },
 );
@@ -55,10 +68,78 @@ export const logOut = createAsyncThunk(
   'auth/logOut',
   async (_, { rejectWithValue }) => {
     try {
-      await signOut(auth);
-      return null;
+      const response = await authService.logout();
+
+      return {
+        messageKey: response.message,
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({
+        messageKey: ERROR.LOGOUT_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
+    }
+  },
+);
+
+export const updateUserPassword = createAsyncThunk(
+  'auth/updateUserPassword',
+  async ({ currentPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const response = await authService.updatePassword(
+        currentPassword,
+        newPassword,
+      );
+
+      return {
+        messageKey: response.message,
+      };
+    } catch (error) {
+      return rejectWithValue({
+        messageKey: ERROR.UPDATE_PASSWORD_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
+    }
+  },
+);
+
+export const resendVerificationEmail = createAsyncThunk(
+  'auth/resendVerificationEmail',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authService.resendVerificationEmail();
+
+      return {
+        messageKey: response.message,
+      };
+    } catch (error) {
+      return rejectWithValue({
+        messageKey: ERROR.RESEND_VERIFICATION_EMAIL_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
+    }
+  },
+);
+
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async ({ userId, updates }, { rejectWithValue }) => {
+    try {
+      const response = await userService.updateUserProfile(userId, updates);
+
+      return {
+        user: response.data,
+        messageKey: response.message,
+      };
+    } catch (error) {
+      return rejectWithValue({
+        messageKey: ERROR.UPDATE_USER_PROFILE_FAILURE,
+        code: error.code,
+        statusCode: error.statusCode,
+      });
     }
   },
 );

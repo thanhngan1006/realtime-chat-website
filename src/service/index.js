@@ -1,0 +1,25 @@
+/**
+ * Central export for all services
+ */
+
+// Firebase services
+export { authService } from './firebase/auth.service';
+export { userService } from './firebase/user.service';
+
+// Repository pattern
+export { BaseRepository } from './repository/base.repository';
+
+// Utilities
+export {
+  ServiceError,
+  ErrorCodes,
+  withErrorHandler,
+  logError,
+} from './utils/error-handler';
+
+export {
+  ServiceResponse,
+  formatTimestamp,
+  formatDocument,
+  formatDocuments,
+} from './utils/response-formatter';

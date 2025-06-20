@@ -1,18 +1,25 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import SubMenuItem from '../common/SubMenuItem';
-
 import { AiOutlineSetting } from 'react-icons/ai';
 import { BiLogOutCircle } from 'react-icons/bi';
-import { MdHelpOutline } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
-import { AuthContext } from '../../context/UseAuth';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { logOut } from '../../../features/user/authActions';
 import { auth } from '../../firebase';
 
 const SubMenu = ({ className = '' }) => {
-  const { logOut } = useContext(AuthContext);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logOut()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <div
@@ -22,7 +29,7 @@ const SubMenu = ({ className = '' }) => {
 
       <SubMenuItem
         leftIcon={<CgProfile />}
-        onClick={() => navigate(`/profile/${auth.currentUser.uid}`)}
+        onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)}
       >
         Profile
       </SubMenuItem>
@@ -32,7 +39,7 @@ const SubMenu = ({ className = '' }) => {
       <SubMenuItem
         leftIcon={<BiLogOutCircle />}
         className="font-semibold"
-        onClick={logOut}
+        onClick={handleLogout}
       >
         Sign out
       </SubMenuItem>

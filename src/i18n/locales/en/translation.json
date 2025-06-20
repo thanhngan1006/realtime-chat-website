@@ -20,6 +20,33 @@
     "success": "Signup successfully",
     "failure": "Signup unsuccessfully"
   },
+  "auth": {
+    "email_password_required": "Email and password are required",
+    "no_authenticated_user": "No authenticated user found",
+    "current_new_password_required": "Current and new passwords are required",
+    "email_already_verified": "Email is already verified",
+    "email_required": "Email is required",
+    "registration_success": "Registration successful. Please check your email for verification.",
+    "logout_success": "Logout successful",
+    "password_reset_sent": "Password reset email sent. Please check your inbox.",
+    "password_updated": "Password updated successfully",
+    "verification_email_sent": "Verification email sent. Please check your inbox.",
+    "check_email_verification": "Please check your email for verification",
+    "check_email_reset": "Please check your email for password reset instructions"
+  },
+  "user": {
+    "profile_created_success": "User profile created successfully",
+    "profile_updated_success": "Profile updated successfully",
+    "status_updated_success": "Status updated successfully",
+    "contact_added_success": "Contact added successfully",
+    "users_found": "Found users",
+    "user_id_data_required": "User ID and data are required",
+    "user_id_updates_required": "User ID and updates are required",
+    "search_term_required": "Search term is required",
+    "cannot_add_yourself_contact": "Cannot add yourself as a contact",
+    "contact_user_not_found": "Contact user not found",
+    "invalid_status": "Invalid status. Must be one of"
+  },
   "common": {
     "submit": "Sent",
     "cancel": "Cancel"

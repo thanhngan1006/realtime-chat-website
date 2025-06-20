@@ -1,39 +1,36 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import signup from '../assets/signup.png';
 import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
-import { sendEmailVerification } from 'firebase/auth';
-import useNotifier from '../hooks/useNotifier';
-import { AuthContext } from '../context/UseAuth';
-import { ERROR_KEYS, SUCCESS_KEYS } from '../constants/Message';
-import { useTranslation } from 'react-i18next';
-import { Button, Input } from '../components/common';
 import { useDispatch, useSelector } from 'react-redux';
-import { createUser, validateEmail } from '../../features/user/authActions';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { createUser } from '../../features/user/authActions';
+import { validateEmail, clearMessages } from '../../features/user/authReducer';
+import useNotifier from '../hooks/useNotifier';
+import { ERROR } from '../constants/Message';
+import { Button, Input } from '../components/common';
 
 const Signup = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const notify = useNotifier();
   const dispatch = useDispatch();
 
-  // const { createUser, loading, setLoading, validateEmail } =
-  //   useContext(AuthContext);
+  const { loading, isEmailValid, user, lastSuccessMessage, lastErrorMessage } =
+    useSelector((state) => state.auth);
 
-  const { loading, isEmailValid } = useSelector((state) => state.auth);
-
-  const [isShowPassword, setIsShowPassword] = useState(false);
-  const [isShowConfirmedPassword, setIsShowConfirmedPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    confirmedPassword: '',
+    confirmPassword: '',
   });
-  const [error, setError] = useState('');
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (formData.email) {
@@ -41,62 +38,67 @@ const Signup = () => {
     }
   }, [formData.email, dispatch]);
 
-  const handleOnChange = (e) => {
+  // Handle success/error messages
+  useEffect(() => {
+    if (lastSuccessMessage) {
+      notify(lastSuccessMessage, 'success');
+      dispatch(clearMessages());
+    }
+  }, [lastSuccessMessage, notify, dispatch]);
+
+  useEffect(() => {
+    if (lastErrorMessage) {
+      notify(lastErrorMessage, 'error');
+      dispatch(clearMessages());
+    }
+  }, [lastErrorMessage, notify, dispatch]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (
       !formData.fullName ||
       !formData.email ||
       !formData.password ||
-      !formData.confirmedPassword
+      !formData.confirmPassword
     ) {
-      setError(t(ERROR_KEYS.NOT_FULL_FIELD));
+      notify(ERROR.NOT_FULL_FIELD, 'error');
+      return;
+    }
+
+    if (!isEmailValid) {
+      notify(ERROR.INVALID_EMAIL, 'error');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError(t(ERROR_KEYS.INVALID_PASSWORD));
+      notify(ERROR.INVALID_PASSWORD, 'error');
       return;
     }
 
-    if (formData.password !== formData.confirmedPassword) {
-      {
-        setError(t(ERROR_KEYS.PASSWORD_NOT_MATCH_CONFIRMED_PASSWORD));
-        return;
-      }
-    }
-
-    if (!isEmailValid) {
-      setError(t(ERROR_KEYS.INVALID_EMAIL));
+    if (formData.password !== formData.confirmPassword) {
+      notify(ERROR.PASSWORD_NOT_MATCH_CONFIRMED_PASSWORD, 'error');
       return;
     }
 
     try {
-      const result = await dispatch(
-        createUser({ email: formData.email, password: formData.password }),
+      await dispatch(
+        createUser({
+          email: formData.email,
+          password: formData.password,
+          displayName: formData.fullName,
+        }),
       ).unwrap();
 
-      await sendEmailVerification(result);
-
-      const user = auth.currentUser;
-      if (user) {
-        await setDoc(doc(db, 'users', user.uid), {
-          name: formData.fullName,
-          email: formData.email,
-          avatarUrl: '',
-        });
-      }
-
-      notify(t(SUCCESS_KEYS.SIGNUP_SUCCESS), 'success');
-      setError('');
-      navigate('/login');
+      // Success handling is done via useEffect watching lastSuccessMessage
     } catch (error) {
-      setError(t(ERROR_KEYS.ERROR_DEFAULT));
-      notify(t(ERROR_KEYS.SIGNUP_FAILURE), 'error');
+      // Error handling is done via useEffect watching lastErrorMessage
+      console.error('Signup error:', error);
     }
   };
 
@@ -104,9 +106,11 @@ const Signup = () => {
     <div className="flex h-screen w-full items-center justify-center bg-blue-950">
       <div className="shadow-blue flex h-4/5 w-4/5 rounded-md bg-white shadow-2xl">
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-5xl font-bold text-blue-950">Sign up</h1>
-          <h2 className="text-center text-blue-950">Create new account</h2>
-          <img className="w-4/5 object-contain" src={signup} alt="ảnh signup" />
+          <h1 className="text-5xl font-bold text-blue-950">Sign Up</h1>
+          <h2 className="text-center text-blue-950">
+            Join our community today
+          </h2>
+          <img className="w-4/5 object-contain" src={signup} alt="signup" />
         </div>
 
         <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
@@ -116,38 +120,34 @@ const Signup = () => {
 
           <form onSubmit={handleSubmit} className="flex w-3/5 flex-col gap-4">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="Fullname"
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleOnChange}
-                  placeholder="Enter fullname"
-                  className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
+              <Input
+                label="Full Name"
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
 
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="Email"
-                  type="text"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleOnChange}
-                  placeholder="Enter email"
-                  className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
+              <Input
+                label="Email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
 
-              <div className="relative flex flex-col items-center gap-1">
+              <div className="relative">
                 <Input
                   label="Password"
                   type={isShowPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
-                  onChange={handleOnChange}
-                  placeholder="Enter password"
+                  onChange={handleChange}
+                  placeholder="Enter your password"
                   className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
                 <div
@@ -158,41 +158,38 @@ const Signup = () => {
                 </div>
               </div>
 
-              <div className="relative flex flex-col items-center gap-1">
+              <div className="relative">
                 <Input
-                  label="Confirmed Password"
-                  type={isShowConfirmedPassword ? 'text' : 'password'}
-                  name="confirmedPassword"
-                  value={formData.confirmedPassword}
-                  onChange={handleOnChange}
-                  placeholder="Enter password"
+                  label="Confirm Password"
+                  type={isShowConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
                   className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
                 <div
                   className="absolute right-3 bottom-0 -translate-y-1/2 transform cursor-pointer text-gray-500"
-                  onClick={() => setIsShowConfirmedPassword((prev) => !prev)}
+                  onClick={() => setIsShowConfirmPassword((prev) => !prev)}
                 >
-                  {isShowConfirmedPassword ? <FaEyeSlash /> : <FaEye />}
+                  {isShowConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </div>
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
             <Button
               type="submit"
-              className="mt-4 w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
+              className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
+              disabled={loading}
             >
-              Sign up
+              {loading ? 'Creating Account...' : 'Sign Up'}
             </Button>
 
             <div className="flex items-center justify-center gap-0.5">
               <span className="text-black">Already have an account? </span>
               <Button
                 type="button"
-                onClick={() => {
-                  navigate('/login');
-                }}
+                onClick={() => navigate('/login')}
                 className="flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
               >
                 <span className="cursor-pointer text-blue-800 hover:text-blue-950">

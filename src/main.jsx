@@ -13,9 +13,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <AuthReduxProvider>
-        <StrictMode>
-          <App />
-        </StrictMode>
+        <App />
       </AuthReduxProvider>
     </Provider>
   </StrictMode>,

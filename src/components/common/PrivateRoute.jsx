@@ -1,20 +1,23 @@
 import React from 'react';
-import { useContext } from 'react';
+import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
-
-import { onAuthStateChanged } from 'firebase/auth';
-import { AuthContext } from '../../context/UseAuth';
 import { auth } from '../../firebase';
 
 const PrivateRoute = ({ children }) => {
-  const { loading, user, setUser, setLoading } = useContext(AuthContext);
+  const { loading, user } = useSelector((state) => state.auth);
 
+  // Show loading while checking auth state
   if (loading) {
-    return <span className="loading loading-dots loading-lg"></span>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <span className="loading loading-dots loading-lg"></span>
+      </div>
+    );
   }
 
-  if (auth.currentUser) {
+  // Check both Firebase auth and Redux state
+  if (auth.currentUser || user) {
     return children;
   }
 
@@ -22,7 +25,7 @@ const PrivateRoute = ({ children }) => {
 };
 
 PrivateRoute.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 };
 
 export default PrivateRoute;
