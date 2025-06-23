@@ -11,7 +11,6 @@ import { setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../firebase';
 import { loginUser, validateEmail } from '../../features/user/authActions';
 import { clearMessages } from '../../features/user/authReducer';
-import { t } from 'i18next';
 
 const Login = () => {
   const navigate = useNavigate();

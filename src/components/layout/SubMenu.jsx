@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logOut } from '../../../features/user/authActions';
 import { auth } from '../../firebase';
+import { FaHome } from 'react-icons/fa';
 
 const SubMenu = ({ className = '' }) => {
   const navigate = useNavigate();
@@ -25,6 +26,15 @@ const SubMenu = ({ className = '' }) => {
     <div
       className={`absolute z-10 w-80 rounded-xl bg-white p-2 shadow-xl ${className}`}
     >
+      <SubMenuItem
+        leftIcon={<FaHome />}
+        onClick={() => {
+          navigate('/');
+        }}
+      >
+        Home
+      </SubMenuItem>
+
       <SubMenuItem leftIcon={<AiOutlineSetting />}>Setting</SubMenuItem>
 
       <SubMenuItem

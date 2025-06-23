@@ -242,6 +242,25 @@ class UserService extends BaseRepository {
 
     return ServiceResponse.success({ contactId }, USER_MESSAGES.CONTACT_ADDED);
   });
+
+  handleFileRead = withErrorHandler(async (event) => {
+    const file = event.target.files[0];
+    const base64 = await this.convertBase64(file);
+    return base64;
+  });
+
+  convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
 }
 
 // Export singleton instance

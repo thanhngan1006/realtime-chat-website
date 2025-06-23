@@ -1,22 +1,17 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import SidebarLayout from '../components/layout/SidebarLayout';
 
 const Layout = () => {
   return (
-    <>
-      {/* <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/login">Login</Link>
-          </li>
-        </ul>
-      </nav> */}
-
-      <Outlet />
-    </>
+    <div className="grid min-h-screen w-full grid-cols-12">
+      <div className="col-span-3 bg-gray-100 text-gray-900">
+        <SidebarLayout />
+      </div>
+      <div className="col-span-9">
+        <Outlet />
+      </div>
+    </div>
   );
 };
 

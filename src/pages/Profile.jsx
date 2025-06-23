@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Avatar, Button, Input } from '../components/common';
 import { FaEdit } from 'react-icons/fa';
-import { db } from '../firebase';
-import { useParams } from 'react-router-dom';
+import { auth, db } from '../firebase';
+import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { IoMdArrowBack } from 'react-icons/io';
+import ProfileRow from '../components/layout/ProfileRow';
+import { userService } from '../service';
 
 const Profile = () => {
   const { uid } = useParams();
@@ -11,21 +14,33 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState('');
+  const [editedData, setEditedData] = useState({});
+  const navigate = useNavigate();
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
+        console.log('bbb');
         setLoading(true);
         const userDocRef = doc(db, 'users', uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
-          setProfileData(userDoc.data());
+          const data = userDoc.data();
+          setProfileData(data);
+          setEditedData(data);
+          setAvatarUrl(
+            profileData?.avatarUrl ||
+              'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+          );
         } else {
           setError('User not found');
         }
       } catch (err) {
+        console.log('aa');
+
         setError('Can not fetch profile data');
         console.error(err);
       } finally {
@@ -38,80 +53,138 @@ const Profile = () => {
     }
   }, [uid]);
 
-  const handleUpdateName = async () => {
+  const handleUpdate = async () => {
     try {
-      const userRef = doc(db, 'users', uid);
-      await updateDoc(userRef, { name: editedName });
-      setProfileData((prev) => ({ ...prev, name: editedName }));
+      const updatedDoc = await userService.update(uid, {
+        name: editedData.name,
+        avatarUrl: avatarUrl,
+      });
+
+      setProfileData(updatedDoc);
       setIsEditing(false);
     } catch (err) {
-      console.error('Can not update name:', err);
+      console.error('Can not update profile:', err);
+      setError('Failed to update profile');
     }
   };
 
-  const handleUpdateAvatar = async () => {};
+  const handleInputChange = (field, value) => {
+    setEditedData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    try {
+      const base64 = await userService.handleFileRead(e);
+      const userRef = doc(db, 'users', uid);
+
+      await updateDoc(userRef, { avatarUrl: base64 });
+      setAvatarUrl(base64);
+      setProfileData((prev) => ({ ...prev, avatarUrl: base64 }));
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      setError('Failed to upload avatar');
+    }
+  };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200 p-4">
-      <div className="flex w-full max-w-md flex-col items-center space-y-6 rounded-2xl bg-white p-8 shadow-xl">
-        <div className="relative">
-          <Avatar
-            src={profileData?.avatarUrl || ''}
-            className="h-24 w-24 rounded-full border-4 border-white shadow-md"
-          />
-          <button className="absolute right-0 bottom-0 rounded-full bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600">
-            <FaEdit />
-          </button>
-        </div>
+    <div className="relative">
+      <div className="relative flex h-screen w-full items-center justify-center bg-gray-200">
+        <div className="absolute top-0 h-[15%] w-full bg-blue-400"></div>
+        <div className="absolute bottom-0 h-[15%] w-full bg-blue-400"></div>
 
-        <div className="flex items-center space-x-4">
-          {isEditing ? (
-            <>
-              <Input
-                type="text"
-                value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                className="border-b border-gray-400 text-2xl focus:border-blue-500 focus:outline-none"
+        <div className="z-10 flex h-[90%] w-[85%] rounded-2xl bg-white shadow-2xl">
+          <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
+            <div className="relative h-32 w-32">
+              <Avatar
+                src={profileData.avatarUrl}
+                className="h-32 w-32 rounded-full bg-red-400"
               />
-              <Button
-                onClick={handleUpdateName}
-                className="rounded bg-blue-500 px-2 py-1 text-sm text-white hover:bg-blue-600"
-              >
-                Save
-              </Button>
-              <Button
-                onClick={() => setIsEditing(false)}
-                className="rounded px-2 py-1 text-sm text-gray-500 hover:text-gray-700"
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold text-gray-800">
-                {profileData?.name}
-              </h2>
-              <Button
-                className="flex items-center space-x-1 font-medium text-blue-500 hover:text-blue-600"
-                onClick={() => {
-                  setEditedName(profileData?.name || '');
-                  setIsEditing(true);
-                }}
-              >
-                <FaEdit />
-                <span>Edit</span>
-              </Button>
-            </>
-          )}
-        </div>
+              {auth.currentUser.uid === uid && (
+                <>
+                  <Button
+                    onClick={handleAvatarClick}
+                    className="absolute top-24 right-0 rounded-full bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600"
+                  >
+                    <FaEdit />
+                  </Button>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </>
+              )}
+            </div>
+            <span className="font-bold text-blue-500">
+              {profileData?.email}
+            </span>
+          </div>
 
-        <div className="text-lg text-gray-600">
-          <span>{profileData?.email}</span>
+          <div className="flex-2/3 p-4">
+            <div className="mx-auto mt-8 max-w-md space-y-4">
+              {isEditing ? (
+                <>
+                  <div>
+                    <Input
+                      label="Name"
+                      type="text"
+                      value={editedData.name || ''}
+                      onChange={(e) =>
+                        handleInputChange('name', e.target.value)
+                      }
+                      className="w-full border-b border-gray-400 text-xl focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="mt-4 flex space-x-4">
+                    <Button
+                      onClick={handleUpdate}
+                      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditedData(profileData);
+                      }}
+                      className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ProfileRow label="Name" value={profileData?.name} />
+                  <ProfileRow label="Email" value={profileData?.email} />
+                  {auth.currentUser.uid === uid && (
+                    <Button
+                      className="mt-4 flex items-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <FaEdit />
+                      <span>Edit Profile</span>
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      <Button className="absolute top-4 left-4" onClick={() => navigate('/')}>
+        <IoMdArrowBack className="h-6 w-6 font-bold text-white" />
+      </Button>
     </div>
   );
 };
