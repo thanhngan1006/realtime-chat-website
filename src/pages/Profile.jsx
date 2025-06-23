@@ -22,26 +22,21 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        console.log('bbb');
         setLoading(true);
-        const userDocRef = doc(db, 'users', uid);
-        const userDoc = await getDoc(userDocRef);
+        const data = await userService.getUser(uid);
 
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setProfileData(data);
-          setEditedData(data);
-          setAvatarUrl(
-            profileData?.avatarUrl ||
-              'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
-          );
-        } else {
+        const userData = data.data;
+        setProfileData(userData);
+        setEditedData(userData);
+        setAvatarUrl(
+          userData.avatarUrl ||
+            'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+        );
+      } catch (err) {
+        setError('Can not fetch profile data');
+        if (err.code === 404) {
           setError('User not found');
         }
-      } catch (err) {
-        console.log('aa');
-
-        setError('Can not fetch profile data');
         console.error(err);
       } finally {
         setLoading(false);
@@ -103,7 +98,7 @@ const Profile = () => {
           <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
             <div className="relative h-32 w-32">
               <Avatar
-                src={profileData.avatarUrl}
+                src={profileData?.avatarUrl}
                 className="h-32 w-32 rounded-full bg-red-400"
               />
               {auth.currentUser.uid === uid && (

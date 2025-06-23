@@ -1,28 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Avatar } from '../common';
 import SubMenu from './SubMenu';
 import { IoSearch } from 'react-icons/io5';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
 import Sidebar from './Sidebar';
+import { auth } from '../../firebase';
+import { userService } from '../../service';
+const userId = auth.currentUser?.uid;
 
 const SidebarLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
   };
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (userId) {
+          const data = await userService.getUser(userId);
+          setAvatarUrl(data.data.avatarUrl);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
+
   return (
     <div className="">
       <header className="flex items-center justify-between bg-white p-2.5 text-center shadow">
         <button onClick={handleOpen} className="relative cursor-pointer">
-          <Avatar
-            className="h-10 w-10"
-            isOnline={!!user}
-            src="https://ui-avatars.com/api/?name=Linda&background=random"
-          />
+          <Avatar className="h-10 w-10" isOnline={!!user} src={avatarUrl} />
         </button>
 
         {isOpen ? <SubMenu className="top-14 left-0" /> : null}
