@@ -79,6 +79,10 @@ const Profile = () => {
       await updateDoc(userRef, { avatarUrl: base64 });
 
       dispatch(setAvatarUrl(base64));
+
+      const updatedData = await userService.getUser(uid);
+      dispatch(setProfileData(updatedData.data));
+      // dispatch(setAvatarUrl(updatedData.data.avatarUrl));
     } catch (error) {
       console.error('Error uploading avatar:', error);
       setError('Failed to upload avatar');

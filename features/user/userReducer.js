@@ -14,7 +14,7 @@ const userSlice = createSlice({
   reducers: {
     setProfileData: (state, action) => {
       state.profileData = action.payload;
-      //   if (action.payload.avatarUrl) state.avatarUrl = action.payload.avatarUrl;
+      if (action.payload.avatarUrl) state.avatarUrl = action.payload.avatarUrl;
       if (action.payload.name) state.name = action.payload.name;
     },
     setAvatarUrl: (state, action) => {
