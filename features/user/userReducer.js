@@ -5,7 +5,6 @@ const initialState = {
   avatarUrl: '',
   name: '',
   loading: false,
-  error: null,
 };
 
 const userSlice = createSlice({
@@ -27,9 +26,6 @@ const userSlice = createSlice({
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
-    },
-    setError: (state, action) => {
-      state.error = action.payload;
     },
   },
 });

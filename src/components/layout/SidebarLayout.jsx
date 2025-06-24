@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Avatar } from '../common';
 import SubMenu from './SubMenu';
@@ -8,16 +8,14 @@ import Sidebar from './Sidebar';
 import { auth } from '../../firebase';
 import { userService } from '../../service';
 import { setAvatarUrl } from '../../../features/user/userReducer';
+import Modal from '../common/Modal';
+import { setIsOpen } from '../../../features/modal/modalReducer';
 
 const SidebarLayout = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen } = useSelector((state) => state.modal);
   const { user } = useSelector((state) => state.auth);
   const { avatarUrl } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-
-  const handleOpen = () => {
-    setIsOpen(!isOpen);
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -38,11 +36,20 @@ const SidebarLayout = () => {
   return (
     <div className="">
       <header className="flex items-center justify-between bg-white p-2.5 text-center shadow">
-        <button onClick={handleOpen} className="relative cursor-pointer">
+        <button
+          onClick={() => dispatch(setIsOpen(true))}
+          className="relative cursor-pointer"
+        >
           <Avatar className="h-10 w-10" isOnline={!!user} src={avatarUrl} />
         </button>
 
-        {isOpen ? <SubMenu className="top-14 left-0" /> : null}
+        <Modal isOpen={isOpen} onClose={() => dispatch(setIsOpen(false))}>
+          <>
+            <SubMenu className="top-14 left-0" />
+          </>
+        </Modal>
+
+        {/* {isOpen ? <SubMenu className="top-14 left-0" /> : null} */}
 
         <h3 className="text-2xl font-bold">Chat</h3>
         <div className="flex gap-2">
