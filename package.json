@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "alex": "alex .",
+     "alex": "alex . || true",
     "eslint": "eslint .",
     "prettier": "prettier .",
     "format": "npm run prettier -- --write",

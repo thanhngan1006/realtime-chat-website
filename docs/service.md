@@ -79,7 +79,7 @@ flowchart TD
 - **Separation of Concerns**: Clear responsibility boundaries
 - **Consistent Error Handling**: Standardized error responses
 - **Reusable Services**: Services can be used across components
-- **Testable**: Easy to unit test business logic
+- **Testable**: Simple to unit test business logic
 
 ---
 
@@ -92,7 +92,7 @@ BaseRepository cung cấp **CRUD operations cơ bản** cho tất cả Firestore
 - Standardize database operations
 - Reduce code duplication
 - Consistent error handling
-- Easy to extend và customize
+- Simple to extend và customize
 
 ## 🏗️ **Cấu trúc**
 
