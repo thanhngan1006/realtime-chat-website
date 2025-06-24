@@ -33,7 +33,7 @@ const SidebarLayout = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId, dispatch]);
 
   return (
     <div className="">

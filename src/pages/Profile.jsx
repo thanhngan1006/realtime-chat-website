@@ -47,7 +47,7 @@ const Profile = () => {
     if (uid) {
       fetchProfileData();
     }
-  }, [uid]);
+  }, [uid, dispatch]);
 
   const handleUpdate = async () => {
     try {
