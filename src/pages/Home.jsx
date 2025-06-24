@@ -10,7 +10,7 @@ import { MessageBox } from '../components/chat';
 const Home = () => {
   return (
     <div className="flex h-screen flex-col">
-      <HeadingMessageBar name="mon" activeTime="1h ago" />
+      <HeadingMessageBar name="Mon" activeTime="1h ago" />
       <div className="flex-1 overflow-y-auto bg-gray-200 p-4">
         <MessageBox
           messages={[

@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  IoIosInformationCircle,
-  IoIosNotificationsOutline,
-} from 'react-icons/io';
-import { SlOptionsVertical } from 'react-icons/sl';
+import { IoIosInformationCircle } from 'react-icons/io';
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdVideoCall } from 'react-icons/md';
 import { Avatar, Button } from '../common';

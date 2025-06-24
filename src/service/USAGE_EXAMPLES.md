@@ -236,6 +236,8 @@ function UserSearch() {
 }
 ```
 
+<!--alex ignore easy-->
+
 ### 7. Notification Hook for i18n Messages
 
 ```jsx

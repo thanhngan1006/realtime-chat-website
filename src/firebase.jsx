@@ -27,7 +27,7 @@ const auth = initializeAuth(app, {
 // @ts-ignore
 await auth._initializationPromise;
 
-const analytics = getAnalytics(app);
+export const analytics = getAnalytics(app);
 export const db = getFirestore(app);
 
 export { auth };

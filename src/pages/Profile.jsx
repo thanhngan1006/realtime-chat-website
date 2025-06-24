@@ -3,64 +3,59 @@ import { Avatar, Button, Input } from '../components/common';
 import { FaEdit } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { IoMdArrowBack } from 'react-icons/io';
 import ProfileRow from '../components/layout/ProfileRow';
 import { userService } from '../service';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setAvatarUrl,
+  setLoading,
+  setProfileData,
+} from '../../features/user/userReducer';
 
 const Profile = () => {
   const { uid } = useParams();
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState({});
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState('');
   const fileInputRef = useRef(null);
+
+  const { profileData, loading } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        console.log('bbb');
-        setLoading(true);
-        const userDocRef = doc(db, 'users', uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setProfileData(data);
-          setEditedData(data);
-          setAvatarUrl(
-            profileData?.avatarUrl ||
-              'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
-          );
-        } else {
+        dispatch(setLoading(true));
+        const data = await userService.getUser(uid);
+        const userData = data.data;
+        dispatch(setProfileData(userData));
+        setEditedData({ name: userData.name });
+      } catch (err) {
+        setError('Can not fetch profile data');
+        if (err.code === 404) {
           setError('User not found');
         }
-      } catch (err) {
-        console.log('aa');
-
-        setError('Can not fetch profile data');
         console.error(err);
       } finally {
-        setLoading(false);
+        dispatch(setLoading(false));
       }
     };
 
     if (uid) {
       fetchProfileData();
     }
-  }, [uid]);
+  }, [uid, dispatch]);
 
   const handleUpdate = async () => {
     try {
       const updatedDoc = await userService.update(uid, {
         name: editedData.name,
-        avatarUrl: avatarUrl,
       });
 
-      setProfileData(updatedDoc);
+      dispatch(setProfileData(updatedDoc));
       setIsEditing(false);
     } catch (err) {
       console.error('Can not update profile:', err);
@@ -82,8 +77,12 @@ const Profile = () => {
       const userRef = doc(db, 'users', uid);
 
       await updateDoc(userRef, { avatarUrl: base64 });
-      setAvatarUrl(base64);
-      setProfileData((prev) => ({ ...prev, avatarUrl: base64 }));
+
+      dispatch(setAvatarUrl(base64));
+
+      const updatedData = await userService.getUser(uid);
+      dispatch(setProfileData(updatedData.data));
+      // dispatch(setAvatarUrl(updatedData.data.avatarUrl));
     } catch (error) {
       console.error('Error uploading avatar:', error);
       setError('Failed to upload avatar');
@@ -103,7 +102,7 @@ const Profile = () => {
           <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
             <div className="relative h-32 w-32">
               <Avatar
-                src={profileData.avatarUrl}
+                src={profileData?.avatarUrl}
                 className="h-32 w-32 rounded-full bg-red-400"
               />
               {auth.currentUser.uid === uid && (
