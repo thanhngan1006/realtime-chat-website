@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Avatar } from '../common';
 import SubMenu from './SubMenu';
 import { IoSearch } from 'react-icons/io5';
@@ -7,12 +7,14 @@ import { HiOutlinePencilAlt } from 'react-icons/hi';
 import Sidebar from './Sidebar';
 import { auth } from '../../firebase';
 import { userService } from '../../service';
+import { setAvatarUrl } from '../../../features/user/userReducer';
 const userId = auth.currentUser?.uid;
 
 const SidebarLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const { avatarUrl } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const handleOpen = () => {
     setIsOpen(!isOpen);
@@ -23,7 +25,7 @@ const SidebarLayout = () => {
       try {
         if (userId) {
           const data = await userService.getUser(userId);
-          setAvatarUrl(data.data.avatarUrl);
+          dispatch(setAvatarUrl(data.data.avatarUrl));
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
