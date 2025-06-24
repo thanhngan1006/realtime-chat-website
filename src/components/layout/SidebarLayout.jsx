@@ -8,7 +8,6 @@ import Sidebar from './Sidebar';
 import { auth } from '../../firebase';
 import { userService } from '../../service';
 import { setAvatarUrl } from '../../../features/user/userReducer';
-const userId = auth.currentUser?.uid;
 
 const SidebarLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +22,7 @@ const SidebarLayout = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const userId = auth.currentUser?.uid;
         if (userId) {
           const data = await userService.getUser(userId);
           dispatch(setAvatarUrl(data.data.avatarUrl));
@@ -33,7 +33,7 @@ const SidebarLayout = () => {
     };
 
     fetchUserData();
-  }, [userId, dispatch]);
+  }, [dispatch]);
 
   return (
     <div className="">
