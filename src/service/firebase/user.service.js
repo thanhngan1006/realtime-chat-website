@@ -127,8 +127,8 @@ class UserService extends BaseRepository {
     // Search by display name
     const nameQuery = query(
       this.collectionRef,
-      where('displayName', '>=', searchTerm),
-      where('displayName', '<=', searchTerm + '\uf8ff'),
+      where('name', '>=', searchTerm),
+      where('name', '<=', searchTerm + '\uf8ff'),
     );
 
     const nameSnapshot = await getDocs(nameQuery);
@@ -156,13 +156,13 @@ class UserService extends BaseRepository {
     );
 
     // Filter out current user
-    const filteredResults = uniqueResults.filter(
-      (user) => user.id !== currentUserId,
-    );
+    // const filteredResults = uniqueResults.filter(
+    //   (user) => user.id !== currentUserId,
+    // );
 
     return ServiceResponse.success(
-      filteredResults,
-      `${USER_MESSAGES.USERS_FOUND}: ${filteredResults.length}`,
+      uniqueResults,
+      `${USER_MESSAGES.USERS_FOUND}: ${uniqueResults.length}`,
     );
   });
 

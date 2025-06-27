@@ -1,11 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MdSearch } from 'react-icons/md';
 import { Input } from '../common';
 import { UserList, UserStory } from '../user';
 import { ListUsersStory } from '../../mock_data/ListUsersStory';
-import { ListUser } from '../../mock_data/ListUser';
+import { auth } from '../../firebase';
+import { userService } from '../../service';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUsers } from '../../../features/user/userReducer';
 
 const Sidebar = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const userId = auth.currentUser?.uid;
+  const { users } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchUsers = async () => {
+      try {
+        let response;
+        if (searchValue.trim()) {
+          response = await userService.searchUsers(searchValue.trim(), userId);
+          dispatch(setUsers(response.data));
+        } else {
+          response = await userService.findAll({ orderByField: 'lastSeen' });
+          dispatch(setUsers(response));
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+        setUsers([]);
+      }
+    };
+
+    // fetchUsers();
+    const delayDebounce = setTimeout(() => {
+      fetchUsers();
+    }, 200);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchValue, userId, dispatch]);
+
+  const handleChange = (event) => {
+    setSearchValue(event.target.value);
+  };
+
   return (
     <div className="flex flex-col gap-3 px-4 pt-4">
       <div className="relative flex items-center text-gray-400 focus-within:text-gray-600">
@@ -13,6 +52,8 @@ const Sidebar = () => {
 
         <Input
           type="text"
+          value={searchValue}
+          onChange={handleChange}
           placeholder="Search messenger"
           className="rounded-2xl pr-3 pl-10"
         />
@@ -20,7 +61,7 @@ const Sidebar = () => {
 
       <UserStory userStorys={ListUsersStory} />
 
-      <UserList users={ListUser} />
+      <UserList users={users} />
     </div>
   );
 };

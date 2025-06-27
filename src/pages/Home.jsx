@@ -6,11 +6,14 @@ import { MdEmojiEmotions } from 'react-icons/md';
 import { Input } from '../components/common';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
+  const { selectedUser } = useSelector((state) => state.user);
+
   return (
     <div className="flex h-screen flex-col">
-      <HeadingMessageBar name="Mon" activeTime="1h ago" />
+      <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" />
       <div className="flex-1 overflow-y-auto bg-gray-200 p-4">
         <MessageBox
           messages={[

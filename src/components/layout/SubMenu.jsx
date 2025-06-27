@@ -17,6 +17,7 @@ const SubMenu = ({ className = '' }) => {
   const handleLogout = async () => {
     try {
       await dispatch(logOut()).unwrap();
+      dispatch(setIsOpen(false));
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);

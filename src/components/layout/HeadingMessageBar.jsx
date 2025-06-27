@@ -3,15 +3,15 @@ import { IoIosInformationCircle } from 'react-icons/io';
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdVideoCall } from 'react-icons/md';
 import { Avatar, Button } from '../common';
+import { useSelector } from 'react-redux';
 
 const HeadingMessageBar = ({ name, activeTime }) => {
+  const { selectedUser } = useSelector((state) => state.user);
+
   return (
     <div className="flex items-center justify-between border-1 border-gray-200 bg-white px-6 py-2">
       <div className="flex items-center gap-2">
-        <Avatar
-          className="h-10 w-10"
-          src="https://ui-avatars.com/api/?name=Linda&background=random"
-        />
+        <Avatar className="h-10 w-10" src={selectedUser.avatarUrl} />
 
         <div className="flex flex-col">
           <span className="font-bold text-black">{name}</span>
