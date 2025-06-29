@@ -5,14 +5,7 @@ import { setSelectedUser } from '../../../features/user/userReducer';
 import { conversationService } from '../../service/firebase/conversation.service';
 import { auth } from '../../firebase';
 
-const UserItem = ({
-  name,
-  imgUrl,
-  timeSendMessage,
-  messageContent,
-  user,
-  id,
-}) => {
+const UserItem = ({ name, imgUrl, timeSendMessage, user }) => {
   const senderUserId = auth.currentUser.uid;
   const dispatch = useDispatch();
 

@@ -113,7 +113,7 @@ class UserService extends BaseRepository {
   /**
    * Search users by display name or email
    */
-  searchUsers = withErrorHandler(async (searchTerm, currentUserId) => {
+  searchUsers = withErrorHandler(async (searchTerm) => {
     if (!searchTerm) {
       throw new ServiceError(
         USER_MESSAGES.SEARCH_TERM_REQUIRED,
