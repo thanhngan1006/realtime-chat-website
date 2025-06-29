@@ -47,6 +47,11 @@
     "contact_user_not_found": "Contact user not found",
     "invalid_status": "Invalid status. Must be one of"
   },
+  "conversation": {
+    "conversation_created_success": "Conversation created successfully",
+    "sender_id_and_receiver_id_required": "Sender id and receiver id are required",
+    "conversation_already_exist": "Conversation has already exist"
+  },
   "common": {
     "submit": "Sent",
     "cancel": "Cancel"

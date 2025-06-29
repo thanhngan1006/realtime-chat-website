@@ -75,6 +75,7 @@ export class BaseRepository {
     }
 
     const snapshot = await getDocs(q);
+
     return formatDocuments(snapshot);
   });
 

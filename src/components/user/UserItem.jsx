@@ -2,16 +2,35 @@ import React from 'react';
 import { Avatar } from '../common';
 import { useDispatch } from 'react-redux';
 import { setSelectedUser } from '../../../features/user/userReducer';
+import { conversationService } from '../../service/firebase/conversation.service';
+import { auth } from '../../firebase';
 
-const UserItem = ({ name, imgUrl, timeSendMessage, messageContent, user }) => {
+const UserItem = ({
+  name,
+  imgUrl,
+  timeSendMessage,
+  messageContent,
+  user,
+  id,
+}) => {
+  const senderUserId = auth.currentUser.uid;
   const dispatch = useDispatch();
+
+  const handleClickItem = async () => {
+    try {
+      console.log('Current user:', auth.currentUser);
+      console.log('senderUserId and id:', senderUserId, user.id);
+      dispatch(setSelectedUser(user));
+      await conversationService.createNewChat(senderUserId, user.id);
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
 
   return (
     <div
       className="flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100"
-      onClick={() => {
-        dispatch(setSelectedUser(user));
-      }}
+      onClick={handleClickItem}
     >
       <Avatar src={imgUrl} className="h-12 w-12 rounded-full" />
       <div className="flex-1">

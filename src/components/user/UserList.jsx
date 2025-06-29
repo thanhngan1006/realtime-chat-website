@@ -7,6 +7,7 @@ const UserList = ({ users }) => {
     <div className="w-full">
       {users.map((user, index) => (
         <UserItem
+          id={user.id}
           key={index}
           user={user}
           name={user.name}

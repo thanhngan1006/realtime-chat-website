@@ -1,0 +1,52 @@
+import { collection, getDocs } from 'firebase/firestore';
+import { BaseRepository } from '../repository/base.repository';
+import { ServiceError, withErrorHandler } from '../utils/error-handler';
+import { db } from '../../firebase';
+
+const CONVERSATION_MESSAGES = {
+  CONVESATION_CREATED: 'conversation.conversation_created_success',
+  SENDER_ID_OR_RECEIVER_ID_REQUIRED:
+    'conversation.sender_id_and_receiver_id_required',
+  CONVERSATION_ALREADY_EXIST: conversationService.conversation_already_exist,
+};
+
+class ConversationService extends BaseRepository {
+  constructor() {
+    super('conversations');
+  }
+
+  createNewChat = withErrorHandler(async (senderId, receiverId) => {
+    if (!senderId || !receiverId) {
+      throw new ServiceError(
+        CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
+      );
+    }
+
+    const snapshot = await getDocs(collection(db, 'conversations'));
+
+    const existingConversation = snapshot.docs.find((doc) => {
+      const participants = doc.data().participants;
+
+      return (
+        Array.isArray(participants) &&
+        participants.length === 2 &&
+        participants.includes(senderId) &&
+        participants.includes(receiverId)
+      );
+    });
+
+    if (existingConversation) {
+      console.log('ton tai r');
+      throw new ServiceError(CONVERSATION_MESSAGES.CONVERSATION_ALREADY_EXIST);
+    }
+
+    const conversationDoc = {
+      participants: [senderId, receiverId],
+      lastMessage: null,
+    };
+
+    await this.create(conversationDoc);
+  });
+}
+
+export const conversationService = new ConversationService();
