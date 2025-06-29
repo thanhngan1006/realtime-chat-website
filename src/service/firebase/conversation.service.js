@@ -7,7 +7,7 @@ const CONVERSATION_MESSAGES = {
   CONVESATION_CREATED: 'conversation.conversation_created_success',
   SENDER_ID_OR_RECEIVER_ID_REQUIRED:
     'conversation.sender_id_and_receiver_id_required',
-  CONVERSATION_ALREADY_EXIST: conversationService.conversation_already_exist,
+  CONVERSATION_ALREADY_EXIST: 'conversation.conversation_already_exist',
 };
 
 class ConversationService extends BaseRepository {
