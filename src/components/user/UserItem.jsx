@@ -14,7 +14,7 @@ const UserItem = ({ name, imgUrl, timeSendMessage, user }) => {
       console.log('Current user:', auth.currentUser);
       console.log('senderUserId and id:', senderUserId, user.id);
       dispatch(setSelectedUser(user));
-      await conversationService.createNewChat(senderUserId, user.id);
+      await conversationService.findOrCreateNewChat(senderUserId, user.id);
     } catch (error) {
       console.error('Error creating chat:', error);
     }

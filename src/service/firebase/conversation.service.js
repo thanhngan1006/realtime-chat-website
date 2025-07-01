@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDoc, query, where } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
 import { ServiceError, withErrorHandler } from '../utils/error-handler';
 import { db } from '../../firebase';
@@ -15,7 +15,7 @@ class ConversationService extends BaseRepository {
     super('conversations');
   }
 
-  createNewChat = withErrorHandler(async (senderId, receiverId) => {
+  findOrCreateConversation = withErrorHandler(async (senderId, receiverId) => {
     if (!senderId || !receiverId) {
       throw new ServiceError(
         CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
@@ -26,21 +26,13 @@ class ConversationService extends BaseRepository {
     const q = query(
       conversationsRef,
       where('participants', 'array-contains', senderId),
+      where('participants', 'array-contains', receiverId),
+      where('isGroup', '==', false),
     );
-    const snapshot = await getDocs(q);
+    const snapshot = await getDoc(q);
 
-    const existingConversation = snapshot.docs.find((doc) => {
-      const participants = doc.data().participants;
-      return (
-        Array.isArray(participants) &&
-        participants.includes(receiverId) &&
-        doc.data().isGroup === false
-      );
-    });
-
-    if (existingConversation) {
-      console.log('ton taiiiiii');
-      return;
+    if (snapshot.exists()) {
+      return snapshot.data();
     }
 
     const conversationDoc = {
@@ -49,7 +41,7 @@ class ConversationService extends BaseRepository {
       isGroup: false,
     };
 
-    await this.create(conversationDoc);
+    return await this.create(conversationDoc);
   });
 }
 
