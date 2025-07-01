@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
 import { ServiceError, withErrorHandler } from '../utils/error-handler';
 import { db } from '../../firebase';
@@ -22,27 +22,31 @@ class ConversationService extends BaseRepository {
       );
     }
 
-    const snapshot = await getDocs(collection(db, 'conversations'));
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participants', 'array-contains', senderId),
+    );
+    const snapshot = await getDocs(q);
 
     const existingConversation = snapshot.docs.find((doc) => {
       const participants = doc.data().participants;
-
       return (
         Array.isArray(participants) &&
-        participants.length === 2 &&
-        participants.includes(senderId) &&
-        participants.includes(receiverId)
+        participants.includes(receiverId) &&
+        doc.data().isGroup === false
       );
     });
 
     if (existingConversation) {
-      console.log('ton tai r');
-      throw new ServiceError(CONVERSATION_MESSAGES.CONVERSATION_ALREADY_EXIST);
+      console.log('ton taiiiiii');
+      return;
     }
 
     const conversationDoc = {
       participants: [senderId, receiverId],
       lastMessage: null,
+      isGroup: false,
     };
 
     await this.create(conversationDoc);

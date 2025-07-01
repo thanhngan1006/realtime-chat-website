@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   serverTimestamp,
+  orderBy,
 } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { db, auth } from '../../firebase';
@@ -115,10 +116,17 @@ class UserService extends BaseRepository {
    */
   searchUsers = withErrorHandler(async (searchTerm) => {
     if (!searchTerm) {
-      throw new ServiceError(
-        USER_MESSAGES.SEARCH_TERM_REQUIRED,
-        ErrorCodes.INVALID_INPUT,
-        400,
+      const allQuery = query(this.collectionRef, orderBy('lastSeen', 'desc'));
+      const snapshot = await getDocs(allQuery);
+
+      const allUsers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return ServiceResponse.success(
+        allUsers,
+        `${USER_MESSAGES.USERS_FOUND}: ${allUsers.length}`,
       );
     }
 

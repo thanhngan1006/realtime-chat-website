@@ -43,7 +43,6 @@ export const {
   setAvatarUrl,
   setName,
   setLoading,
-  setError,
   setUsers,
   setSelectedUser,
 } = userSlice.actions;

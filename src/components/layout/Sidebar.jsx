@@ -19,14 +19,11 @@ const Sidebar = () => {
 
     const fetchUsers = async () => {
       try {
-        let response;
-        if (searchValue.trim()) {
-          response = await userService.searchUsers(searchValue.trim(), userId);
-          dispatch(setUsers(response.data));
-        } else {
-          response = await userService.findAll({ orderByField: 'lastSeen' });
-          dispatch(setUsers(response));
-        }
+        const response = await userService.searchUsers(
+          searchValue.trim(),
+          userId,
+        );
+        dispatch(setUsers(response.data));
       } catch (error) {
         console.error('Error loading users:', error);
         setUsers([]);

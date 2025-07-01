@@ -2,8 +2,8 @@ import React from 'react';
 import { Avatar } from '../common';
 import { useDispatch } from 'react-redux';
 import { setSelectedUser } from '../../../features/user/userReducer';
-import { conversationService } from '../../service/firebase/conversation.service';
 import { auth } from '../../firebase';
+import { conversationService } from '../../service';
 
 const UserItem = ({ name, imgUrl, timeSendMessage, user }) => {
   const senderUserId = auth.currentUser.uid;
