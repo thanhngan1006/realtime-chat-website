@@ -1,13 +1,7 @@
-import {
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  where,
-} from 'firebase/firestore';
+import { serverTimestamp } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
 import { ServiceError, withErrorHandler } from '../utils/error-handler';
-import { formatDocuments, ServiceResponse } from '../utils/response-formatter';
+import { ServiceResponse } from '../utils/response-formatter';
 
 const MESSAGES_NOTIFICATION = {
   DATA_TO_CREATE_MESSAGE_REQUIRE: 'messages.data_to_create_message_required',
