@@ -50,7 +50,8 @@
   "conversation": {
     "conversation_created_success": "Conversation created successfully",
     "sender_id_and_receiver_id_required": "Sender id and receiver id are required",
-    "conversation_already_exist": "Conversation has already exist"
+    "conversation_already_exist": "Conversation has already exist",
+    "group_min_participants_required": "Group conversation need at least 2 participants"
   },
   "common": {
     "submit": "Sent",

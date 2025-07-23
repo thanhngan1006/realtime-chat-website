@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '../common/Avatar';
 import OptionsForMessage from './OptionsForMessage';
 
@@ -9,9 +9,18 @@ const Message = ({
   className = '',
   src = '',
   isYourMessage,
-  isShowAvatar,
+  msg,
 }) => {
   const [isHover, setIsHover] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(src || '');
+
+  useEffect(() => {
+    if (typeof src === 'function') {
+      src(msg.senderId).then((url) => setAvatarUrl(url));
+    } else {
+      setAvatarUrl(src);
+    }
+  }, [src, msg.senderId]);
 
   return (
     <div
@@ -19,23 +28,27 @@ const Message = ({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
-      {!isYourMessage && isShowAvatar && (
-        <Avatar src={src} className="h-8 w-8 flex-shrink-0 rounded-full" />
+      {!isYourMessage && (
+        <Avatar
+          src={avatarUrl}
+          alt="Avatar"
+          className="h-8 w-8 flex-shrink-0 rounded-full"
+        />
       )}
 
       <div
         className={`flex w-full items-center gap-2 ${
           isYourMessage ? 'justify-end' : 'justify-start'
-        } ${!isYourMessage && !isShowAvatar ? 'ml-10' : ''}`}
+        }`}
       >
         {isHover &&
           (isYourMessage ? (
             <div className="">
-              <OptionsForMessage />
+              <OptionsForMessage msg={msg} />
             </div>
           ) : (
             <div className="order-1">
-              <OptionsForMessage />
+              <OptionsForMessage msg={msg} />
             </div>
           ))}
 

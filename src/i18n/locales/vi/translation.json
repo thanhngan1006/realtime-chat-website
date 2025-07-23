@@ -50,7 +50,8 @@
   "conversation": {
     "conversation_created_success": "Tạo thành công cuộc trò chuyện",
     "sender_id_or_receiver_id_required": "Id người gửi và id người nhận là bắt buộc",
-    "conversation_already_exist": "Cuộc trò chuyện đã tồn tại"
+    "conversation_already_exist": "Cuộc trò chuyện đã tồn tại",
+    "group_min_participants_required": "Cuộc trò chuyện nhóm cần ít nhất 2 thành viên"
   },
   "common": {
     "submit": "Gửi",

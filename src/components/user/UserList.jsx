@@ -13,7 +13,6 @@ const UserList = ({ users }) => {
           name={user.name}
           imgUrl={user.avatarUrl}
           timeSendMessage={formatTimestamp(user?.lastSeen)}
-          // messageContent={user.messageContent}
         />
       ))}
     </div>
