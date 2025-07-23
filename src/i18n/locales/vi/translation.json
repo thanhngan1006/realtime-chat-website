@@ -53,6 +53,11 @@
     "conversation_already_exist": "Cuộc trò chuyện đã tồn tại",
     "group_min_participants_required": "Cuộc trò chuyện nhóm cần ít nhất 2 thành viên"
   },
+  "messages": {
+    "data_to_create_message_required": "Id người gửi, id người nhận, id cuộc trò chuyện và nội dung tin nhắn là bắt buộc",
+    "fetch_messages_success": "Lấy dữ liệu tin nhắn thành công",
+    "conversation_id_required": "Id cuộc trò chuyện là bắt buộc"
+  },
   "common": {
     "submit": "Gửi",
     "cancel": "Hủy"

@@ -8,7 +8,11 @@ import {
   where,
 } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
-import { ServiceError, withErrorHandler } from '../utils/error-handler';
+import {
+  ErrorCodes,
+  ServiceError,
+  withErrorHandler,
+} from '../utils/error-handler';
 import { db } from '../../firebase';
 import { formatDocuments, ServiceResponse } from '../utils/response-formatter';
 
@@ -121,6 +125,20 @@ class ConversationService extends BaseRepository {
       console.error('Error fetching avatar:', error);
       return '';
     }
+  });
+
+  getConversation = withErrorHandler(async (conversationId) => {
+    const user = await this.findById(conversationId);
+
+    if (!user) {
+      throw new ServiceError(
+        'Conversation not found',
+        ErrorCodes.CONVERSATION_NOT_FOUND,
+        404,
+      );
+    }
+
+    return ServiceResponse.success(user);
   });
 }
 

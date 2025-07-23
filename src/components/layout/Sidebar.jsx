@@ -18,12 +18,13 @@ import { IoAddSharp } from 'react-icons/io5';
 
 const Sidebar = () => {
   const [searchValue, setSearchValue] = useState('');
+  const [isOpenUserToAddGroup, setIsOpenUserToAddGroup] = useState(false);
   const senderId = auth.currentUser?.uid;
+  const dispatch = useDispatch();
+
   const { conversations, isGroupModeSelected, selectedPeopleToCreateGroup } =
     useSelector((state) => state.chat);
   const { users } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-  const [isOpenUserToAddGroup, setIsOpenUserToAddGroup] = useState(false);
 
   const usersExceptSender = users.filter((user) => user.id !== senderId);
 
@@ -71,7 +72,6 @@ const Sidebar = () => {
       }
     };
 
-    // fetchUsers();
     const delayDebounce = setTimeout(() => {
       fetchUsers();
     }, 0);

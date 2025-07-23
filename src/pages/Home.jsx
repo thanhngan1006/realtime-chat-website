@@ -13,18 +13,15 @@ import {
   setReceiverData,
 } from '../../features/chat/chatReducer';
 import {
-  addDoc,
   collection,
-  doc,
-  getDoc,
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
   where,
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { conversationService } from '../service';
+import { conversationService, userService } from '../service';
+import { messageService } from '../service/firebase/message.service';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -48,15 +45,12 @@ const Home = () => {
         ? selectedUser.id
         : [selectedUser.id || ''];
 
-      await addDoc(collection(db, 'messages'), {
-        conversationId: conversationId,
-        readStatus: false,
-        messageText: messageContent,
-        receiverIds: receiverIds,
-        senderId: uid,
-        type: 0,
-        sentTime: serverTimestamp(),
-      });
+      await messageService.createNewMessage(
+        uid,
+        receiverIds,
+        conversationId,
+        messageContent,
+      );
 
       inputRef.current.value = '';
       dispatch(setMessageContent(''));
@@ -87,9 +81,13 @@ const Home = () => {
             }),
           );
         } else {
-          const userDoc = await getDoc(doc(db, 'users', selectedUser.id));
-          if (userDoc.exists()) {
-            dispatch(setReceiverData(userDoc.data()));
+          // const userDoc = await getDoc(doc(db, 'users', selectedUser.id));
+          const userDoc = await userService.getUser(selectedUser.id);
+
+          // console.log('userDoc', userDoc);
+
+          if (userDoc.success) {
+            dispatch(setReceiverData(userDoc.data));
           } else {
             dispatch(setReceiverData({ name: 'Unknown User', avatarUrl: '' }));
           }
@@ -141,7 +139,6 @@ const Home = () => {
             const url = await conversationService.fetchAvatarUrl(
               message.senderId,
             );
-            console.log('url for senderId', message.senderId, ':', url);
             urls[message.senderId] = url || '';
           }
         }

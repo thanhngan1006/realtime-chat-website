@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Avatar } from '../common';
-import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import { formatTimestampFromText } from '../../service/utils/format-date';
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedUser } from '../../../features/user/userReducer';
 import { useNavigate } from 'react-router-dom';
-import { conversationService } from '../../service';
+import { conversationService, userService } from '../../service';
 
 const ConversationItem = ({ conversationItem }) => {
   const senderUserId = auth.currentUser.uid;
@@ -50,11 +49,13 @@ const ConversationItem = ({ conversationItem }) => {
             return;
           }
 
-          const userDocRef = doc(db, 'users', receiverId);
-          const userDocSnap = await getDoc(userDocRef);
+          // const userDocRef = doc(db, 'users', receiverId);
+          // const userDocSnap = await getDoc(userDocRef);
 
-          if (userDocSnap.exists()) {
-            setReceiverData(userDocSnap.data());
+          const userDocSnap = await userService.getUser(receiverId);
+
+          if (userDocSnap.success) {
+            setReceiverData(userDocSnap.data);
           } else {
             console.error('No user found for receiverId:', receiverId);
           }
@@ -76,16 +77,18 @@ const ConversationItem = ({ conversationItem }) => {
   const handleClickItem = async () => {
     try {
       const conversationId = conversationItem.id;
-      const docRef = doc(db, 'conversations', conversationId);
-      const docSnap = await getDoc(docRef);
-      const conversationData = docSnap.data();
+
+      // const docRef = doc(db, 'conversations', conversationId);
+      // const docSnap = await getDoc(docRef);
+      // const conversationData1 = docSnap.data();
+
+      const getConversationData =
+        await conversationService.getConversation(conversationId);
+      const conversationData = getConversationData.data;
 
       const otherParticipants = conversationData.participants.filter(
         (id) => id !== senderUserId,
       );
-
-      // console.log('otherParticipants', otherParticipants);
-      // console.log('conversationId', conversationId);
 
       dispatch(
         setSelectedUser({
