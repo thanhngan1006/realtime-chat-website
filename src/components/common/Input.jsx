@@ -19,7 +19,7 @@ const Input = (
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <label>{label}</label>
+      <label className="dark:text-white">{label}</label>
       <input
         ref={ref}
         type={`${type}`}

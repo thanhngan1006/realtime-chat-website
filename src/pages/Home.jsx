@@ -97,7 +97,7 @@ const Home = () => {
       }
     };
     fetchReceiverData();
-  }, [selectedUser?.id, dispatch]);
+  }, [selectedUser.id, dispatch]);
 
   useEffect(() => {
     if (!conversationId) {
@@ -165,14 +165,14 @@ const Home = () => {
       <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" />
       <div
         id="chat-screen"
-        className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4"
+        className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
       >
         {selectedUser && conversationId && messages.length > 0 && (
           <MessageBox messages={messages} src={avatarUrls} />
         )}
       </div>
 
-      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl">
+      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
         <div className="flex items-center gap-2 text-blue-400">
           <IoMdAddCircle className="h-8 w-8" />
           <FaRegImage className="h-8 w-8" />
@@ -185,7 +185,7 @@ const Home = () => {
             <Input
               type="text"
               placeholder="Aa"
-              className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
               value={messageContent}
               onChange={(e) => {
                 dispatch(setMessageContent(e.target.value));

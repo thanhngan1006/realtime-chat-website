@@ -9,7 +9,7 @@ const UserStoryItem = ({ src, name }) => {
           <Avatar src={src} className="h-10 w-10" />
         </div>
       </div>
-      <p className="mt-2 text-sm text-black">{name}</p>
+      <p className="mt-2 text-sm text-black dark:text-white">{name}</p>
     </div>
   );
 };

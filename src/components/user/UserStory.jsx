@@ -14,7 +14,7 @@ const UserStory = ({ userStorys }) => {
               </button>
             </div>
           </div>
-          <p className="mt-2 text-sm text-black">Add</p>
+          <p className="mt-2 text-sm text-black dark:text-white">Add</p>
         </div>
 
         <div className="flex gap-2">

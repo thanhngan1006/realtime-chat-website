@@ -9,12 +9,12 @@ const HeadingMessageBar = ({ name, activeTime }) => {
   const { selectedUser } = useSelector((state) => state.user);
 
   return (
-    <div className="flex items-center justify-between border-1 border-gray-200 bg-white px-6 py-2">
+    <div className="flex items-center justify-between border-1 border-gray-200 bg-white px-6 py-2 dark:bg-zinc-800 dark:text-white">
       <div className="flex items-center gap-2">
         <Avatar className="h-10 w-10" src={selectedUser.avatarUrl} />
 
         <div className="flex flex-col">
-          <span className="font-bold text-black">{name}</span>
+          <span className="font-bold text-black dark:text-white">{name}</span>
           <span className="text-sm">{activeTime}</span>
         </div>
       </div>

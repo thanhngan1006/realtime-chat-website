@@ -113,7 +113,7 @@ const Sidebar = () => {
           value={searchValue}
           onChange={handleChange}
           placeholder="Search messenger"
-          className="rounded-2xl pr-3 pl-10"
+          className="rounded-2xl pr-3 pl-10 dark:text-white"
         />
       </div>
 
