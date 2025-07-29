@@ -130,3 +130,43 @@ Dự án thể hiện một nền tảng vững chắc cho một ứng dụng tr
 Tuy nhiên, có một số lĩnh vực cần cải thiện, đặc biệt liên quan đến các phương pháp hay nhất của React (các component được kiểm soát, các prop `key`), tính nhất quán của kiến trúc (chuyển logic thời gian thực vào các dịch vụ, tái cấu trúc các tiện ích) và quan trọng nhất là **Firebase Security Rules**. Việc thiếu các quy tắc bảo mật rõ ràng là một lỗ hổng lớn cần được chú ý ngay lập tức để bảo vệ dữ liệu người dùng và tính toàn vẹn của ứng dụng.
 
 Giải quyết các điểm này sẽ nâng cao đáng kể tính mạnh mẽ, khả năng bảo trì, khả năng mở rộng và bảo mật của ứng dụng.
+
+---
+
+### **Đề xuất cải thiện tổng thể (Overall Improvement Suggestions)**
+
+Dựa trên phân tích chi tiết từng phần, dưới đây là các đề xuất cải thiện tổng thể cho dự án:
+
+1.  **Ưu tiên Bảo mật Firebase (Firebase Security Rules):**
+    *   **Hành động:** Triển khai và kiểm tra kỹ lưỡng các quy tắc bảo mật cho Firestore và Firebase Storage. Đảm bảo rằng chỉ những người dùng được ủy quyền mới có thể truy cập và sửa đổi dữ liệu liên quan đến họ.
+    *   **Lợi ích:** Bảo vệ dữ liệu người dùng khỏi các truy cập trái phép, ngăn chặn các lỗ hổng bảo mật nghiêm trọng.
+
+2.  **Tái cấu trúc Component `Input`:**
+    *   **Hành động:** Chuyển đổi component `Input` ([`src/components/common/Input.jsx`](src/components/common/Input.jsx)) thành một component được kiểm soát hoàn toàn. Loại bỏ trạng thái nội bộ và để component cha quản lý `value` và `onChange`.
+    *   **Lợi ích:** Đơn giản hóa việc quản lý trạng thái biểu mẫu, cải thiện khả năng kiểm thử và tái sử dụng của `Input` trong các biểu mẫu phức tạp hơn.
+
+3.  **Trừu tượng hóa Logic Real-time vào Service Layer:**
+    *   **Hành động:** Di chuyển logic `onSnapshot` hiện đang nằm trực tiếp trong [`src/pages/Home.jsx`](src/pages/Home.jsx) vào [`src/service/firebase/message.service.js`](src/service/firebase/message.service.js). `messageService` nên cung cấp các phương thức để đăng ký và hủy đăng ký các cập nhật tin nhắn thời gian thực.
+    *   **Lợi ích:** Tăng cường sự phân tách các mối quan tâm, làm cho code dễ bảo trì và kiểm thử hơn, đồng thời giữ cho các component UI sạch sẽ và tập trung vào việc hiển thị.
+
+4.  **Cải thiện Quản lý `key` trong danh sách:**
+    *   **Hành động:** Thay thế việc sử dụng `index` làm prop `key` trong các danh sách như [`ConversationList.jsx`](src/components/chat/ConversationList.jsx) và [`MessageBox.jsx`](src/components/chat/MessageBox) bằng một ID duy nhất và ổn định cho mỗi mục (ví dụ: `conversation.id`, `message.id`).
+    *   **Lợi ích:** Ngăn ngừa các lỗi hiển thị và vấn đề hiệu suất khi các mục trong danh sách thay đổi thứ tự, được thêm hoặc xóa.
+
+5.  **Tái cấu trúc Tiện ích Xử lý Tệp:**
+    *   **Hành động:** Di chuyển các phương thức xử lý tệp như `handleFileRead` và `convertBase64` từ [`src/service/firebase/user.service.js`](src/service/firebase/user.service.js) sang một tệp tiện ích chung (ví dụ: `src/service/utils/file-utils.js`) hoặc một dịch vụ tải lên tệp chuyên dụng.
+    *   **Lợi ích:** Cải thiện sự phân tách các mối quan tâm và làm cho `UserService` tập trung hơn vào các hoạt động quản lý người dùng.
+
+6.  **Tối ưu hóa Xử lý Lỗi và Thông báo:**
+    *   **Hành động:** Mở rộng `withErrorHandler` để ánh xạ các mã lỗi Firebase cụ thể thành các thông báo lỗi thân thiện hơn với người dùng và có thể bản địa hóa. Thay thế các lệnh gọi `console.error` trực tiếp bằng một giải pháp ghi nhật ký lỗi tập trung cho môi trường sản xuất.
+    *   **Lợi ích:** Cải thiện trải nghiệm người dùng bằng cách cung cấp phản hồi rõ ràng hơn và hỗ trợ gỡ lỗi/giám sát ứng dụng tốt hơn trong sản xuất.
+
+7.  **Hoàn thiện Chức năng Tìm kiếm:**
+    *   **Hành động:** Triển khai logic tìm kiếm thực tế trong [`src/components/user/SearchPeople.jsx`](src/components/user/SearchPeople.jsx), bao gồm việc gửi các hành động Redux để gọi `userService.searchUsers`. Đảm bảo lọc người dùng hiện tại khỏi kết quả tìm kiếm.
+    *   **Lợi ích:** Cung cấp đầy đủ chức năng tìm kiếm người dùng như mong đợi.
+
+8.  **Cải thiện Mô hình Dữ liệu Hội thoại và Tin nhắn:**
+    *   **Hành động:** Xem xét lại mô hình dữ liệu cho các cuộc hội thoại và tin nhắn. Thay vì tạo các bộ sưu tập con hội thoại dưới mỗi người dùng hoặc lưu trữ `receiverIds` trong mỗi tài liệu tin nhắn, hãy cân nhắc một bộ sưu tập `conversations` cấp cao nhất với các tài liệu tin nhắn được lồng trong đó hoặc trong một bộ sưu tập con riêng biệt của cuộc hội thoại.
+    *   **Lợi ích:** Đơn giản hóa việc truy vấn, giảm trùng lặp dữ liệu và cải thiện khả năng mở rộng của cơ sở dữ liệu.
+
+Việc giải quyết các đề xuất này sẽ giúp dự án trở nên mạnh mẽ, dễ bảo trì và an toàn hơn.
