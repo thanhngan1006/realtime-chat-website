@@ -55,6 +55,10 @@ class ConversationService extends BaseRepository {
 
     const conversationDoc = {
       participants: [senderId, receiverId],
+      typingStatuses: {
+        [senderId]: false,
+        [receiverId]: false,
+      },
       lastMessage: null,
       isGroup: false,
       key: this.generateConversationId(senderId, receiverId),
@@ -81,9 +85,15 @@ class ConversationService extends BaseRepository {
       return snapshot.docs[0].data();
     }
 
+    const typingStatuses = participants.reduce((acc, participant) => {
+      acc[participant] = false;
+      return acc;
+    }, {});
+
     const groupDoc = {
       participants,
       lastMessage: null,
+      typingStatuses,
       isGroup: true,
       key: this.generateConversationId(participants),
     };

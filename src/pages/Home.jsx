@@ -8,30 +8,37 @@ import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  setIsFocused,
   setMessageContent,
   setMessages,
   setReceiverData,
+  setTypingStatus,
 } from '../../features/chat/chatReducer';
 import {
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { conversationService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
+import TypingDots from '../components/chat/TypingDots';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
-  const { messageContent } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
   const conversationId = selectedUser.conversationId;
-  const { messages } = useSelector((state) => state.chat);
+  const { messages, messageContent, isFocused, typingStatus } = useSelector(
+    (state) => state.chat,
+  );
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
   const [avatarUrls, setAvatarUrls] = useState({});
+  const [typingUsers, setTypingUsers] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -160,6 +167,99 @@ const Home = () => {
     }
   }, [messages]);
 
+  // =======Chức năng hiển thị ai đang nhập tin nhắn =========
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const updateTypingStatus = async (isTyping) => {
+      const conversationRef = doc(db, 'conversations', conversationId);
+      await updateDoc(conversationRef, {
+        [`typingStatuses.${uid}`]: isTyping,
+      });
+    };
+
+    const debounce = (func, delay) => {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(null, args), delay);
+      };
+    };
+
+    const handleTyping = debounce(async () => {
+      if (messageContent.trim() !== '' && isFocused) {
+        await updateTypingStatus(true);
+      }
+    }, 300);
+
+    const handleStopTyping = async () => {
+      if (messageContent.trim() === '' || !isFocused) {
+        await updateTypingStatus(false);
+      }
+    };
+
+    const inputElement = inputRef.current;
+
+    if (inputElement) {
+      inputElement.addEventListener('input', handleTyping);
+      inputElement.addEventListener('blur', handleStopTyping);
+
+      return () => {
+        inputElement.removeEventListener('input', handleTyping);
+        inputElement.removeEventListener('blur', handleStopTyping);
+      };
+    }
+  }, [conversationId, messageContent, isFocused, uid]);
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const conversationRef = doc(db, 'conversations', conversationId);
+    const unsubscribe = onSnapshot(
+      conversationRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          const typingStatuses = data.typingStatuses || {};
+          const typingUsers = Object.entries(typingStatuses)
+            .filter(
+              ([uid, isTyping]) => isTyping && uid !== auth.currentUser.uid,
+            )
+            .map(([uid]) => uid);
+
+          setTypingUsers(typingUsers);
+
+          if (typingUsers.length > 0) {
+            const fetchUserAvatars = async () => {
+              const avatars = await Promise.all(
+                typingUsers.map(async (userId) => {
+                  const userDoc = await userService.getUser(userId);
+                  return userDoc.success ? userDoc.data.avatarUrl : '';
+                }),
+              );
+
+              setAvatarUrls((prev) => ({
+                ...prev,
+                ...Object.fromEntries(
+                  typingUsers.map((userId, index) => [userId, avatars[index]]),
+                ),
+              }));
+              dispatch(setTypingStatus(true));
+            };
+            fetchUserAvatars();
+          } else {
+            dispatch(setTypingStatus(false));
+          }
+        }
+      },
+      (error) => {
+        console.error('Error listening to typing status: ', error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [conversationId, dispatch, uid]);
+
   return (
     <div className="flex h-screen flex-col">
       <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" />
@@ -169,6 +269,21 @@ const Home = () => {
       >
         {selectedUser && conversationId && messages.length > 0 && (
           <MessageBox messages={messages} src={avatarUrls} />
+        )}
+
+        {typingStatus && (
+          <div className="flex items-center gap-2 p-2 dark:bg-zinc-700">
+            {typingUsers.map((userId) => (
+              <div key={userId} className="flex items-center">
+                <img
+                  src={avatarUrls[userId] || '/default-avatar.png'}
+                  alt="Avatar"
+                  className="mr-2 h-8 w-8 rounded-full"
+                />
+                <TypingDots />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -190,8 +305,11 @@ const Home = () => {
               onChange={(e) => {
                 dispatch(setMessageContent(e.target.value));
               }}
+              onFocus={() => dispatch(setIsFocused(true))}
+              onBlur={() => dispatch(setIsFocused(false))}
               ref={inputRef}
             />
+            {/* <div id="typing_on">{typingStatus}</div> */}
             <MdEmojiEmotions
               onClick={() => console.log('ok')}
               className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"

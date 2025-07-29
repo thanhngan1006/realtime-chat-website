@@ -7,12 +7,20 @@ const initialState = {
   conversations: [],
   isGroupModeSelected: 'notGroup',
   selectedPeopleToCreateGroup: [],
+  isFocused: false,
+  typingStatus: '',
 };
 
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
+    setIsFocused: (state, action) => {
+      state.isFocused = action.payload;
+    },
+    setTypingStatus: (state, action) => {
+      state.typingStatus = action.payload;
+    },
     setMessageContent: (state, action) => {
       state.messageContent = action.payload;
     },
@@ -41,6 +49,8 @@ export const {
   setConversations,
   setIsGroupModeSelected,
   setSelectedPeopleToCreateGroup,
+  setIsFocused,
+  setTypingStatus,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
