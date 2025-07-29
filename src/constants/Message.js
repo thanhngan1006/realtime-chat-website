@@ -32,3 +32,10 @@ export const INFO = {
   CHECK_EMAIL_VERIFICATION: 'auth.check_email_verification',
   CHECK_EMAIL_RESET: 'auth.check_email_reset',
 };
+
+export const CONVERSATION_MESSAGES = {
+  CONVESATION_CREATED: 'conversation.conversation_created_success',
+  SENDER_ID_OR_RECEIVER_ID_REQUIRED:
+    'conversation.sender_id_and_receiver_id_required',
+  CONVERSATION_ALREADY_EXIST: 'conversation.conversation_already_exist',
+};

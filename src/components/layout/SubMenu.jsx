@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { logOut } from '../../../features/user/authActions';
 import { auth } from '../../firebase';
 import { FaHome } from 'react-icons/fa';
+import { setIsOpen } from '../../../features/modal/modalReducer';
 
 const SubMenu = ({ className = '' }) => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const SubMenu = ({ className = '' }) => {
   const handleLogout = async () => {
     try {
       await dispatch(logOut()).unwrap();
+      dispatch(setIsOpen(false));
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -29,6 +31,7 @@ const SubMenu = ({ className = '' }) => {
       <SubMenuItem
         leftIcon={<FaHome />}
         onClick={() => {
+          dispatch(setIsOpen(false));
           navigate('/');
         }}
       >
@@ -39,7 +42,10 @@ const SubMenu = ({ className = '' }) => {
 
       <SubMenuItem
         leftIcon={<CgProfile />}
-        onClick={() => navigate(`/profile/${auth.currentUser?.uid}`)}
+        onClick={() => {
+          navigate(`/profile/${auth.currentUser?.uid}`);
+          dispatch(setIsOpen(false));
+        }}
       >
         Profile
       </SubMenuItem>

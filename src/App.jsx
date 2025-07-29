@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import AppRoutes from './routes';
 
-function App() {
+const App = () => {
   return (
     <SnackbarProvider
       maxSnack={3}
@@ -14,6 +14,6 @@ function App() {
       </BrowserRouter>
     </SnackbarProvider>
   );
-}
+};
 
 export default App;

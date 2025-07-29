@@ -81,8 +81,8 @@ const Profile = () => {
       dispatch(setAvatarUrl(base64));
 
       const updatedData = await userService.getUser(uid);
-      dispatch(setProfileData(updatedData.data));
-      // dispatch(setAvatarUrl(updatedData.data.avatarUrl));
+      // dispatch(setProfileData(updatedData.data));
+      dispatch(setAvatarUrl(updatedData.data.avatarUrl));
     } catch (error) {
       console.error('Error uploading avatar:', error);
       setError('Failed to upload avatar');
@@ -94,11 +94,11 @@ const Profile = () => {
 
   return (
     <div className="relative">
-      <div className="relative flex h-screen w-full items-center justify-center bg-gray-200">
-        <div className="absolute top-0 h-[15%] w-full bg-blue-400"></div>
-        <div className="absolute bottom-0 h-[15%] w-full bg-blue-400"></div>
+      <div className="relative flex h-screen w-full items-center justify-center bg-gray-200 dark:bg-zinc-800">
+        <div className="absolute top-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
+        <div className="absolute bottom-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
 
-        <div className="z-10 flex h-[90%] w-[85%] rounded-2xl bg-white shadow-2xl">
+        <div className="z-10 flex h-[90%] w-[85%] rounded-2xl bg-white shadow-2xl dark:bg-zinc-700">
           <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
             <div className="relative h-32 w-32">
               <Avatar
@@ -140,7 +140,7 @@ const Profile = () => {
                       onChange={(e) =>
                         handleInputChange('name', e.target.value)
                       }
-                      className="w-full border-b border-gray-400 text-xl focus:border-blue-500 focus:outline-none"
+                      className="w-full border-b border-gray-400 text-xl focus:border-blue-500 focus:outline-none dark:text-white"
                     />
                   </div>
                   <div className="mt-4 flex space-x-4">

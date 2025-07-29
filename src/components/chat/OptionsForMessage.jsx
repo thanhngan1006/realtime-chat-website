@@ -4,7 +4,7 @@ import { FaShare } from 'react-icons/fa';
 import { MdEmojiEmotions } from 'react-icons/md';
 import { Button } from '../common';
 
-const OptionsForMessage = () => {
+const OptionsForMessage = ({ msg }) => {
   return (
     <div className="flex items-center gap-1">
       <Button
@@ -25,6 +25,7 @@ const OptionsForMessage = () => {
       >
         <MdEmojiEmotions className="h-4 w-4" />
       </Button>
+      <span>{msg?.sentTime?.toDate().toLocaleString()}</span>
     </div>
   );
 };

@@ -1,16 +1,18 @@
 import React from 'react';
 import UserItem from './UserItem';
+import { formatTimestamp } from '../../service';
 
 const UserList = ({ users }) => {
   return (
     <div className="w-full">
       {users.map((user, index) => (
         <UserItem
+          id={user.id}
           key={index}
+          user={user}
           name={user.name}
-          imgUrl={user.imgUrl}
-          timeSendMessage={user.timeSendMessage}
-          messageContent={user.messageContent}
+          imgUrl={user.avatarUrl}
+          timeSendMessage={formatTimestamp(user?.lastSeen)}
         />
       ))}
     </div>

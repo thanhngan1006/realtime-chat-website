@@ -75,6 +75,7 @@ export class BaseRepository {
     }
 
     const snapshot = await getDocs(q);
+
     return formatDocuments(snapshot);
   });
 
@@ -130,6 +131,39 @@ export class BaseRepository {
     const newDoc = await getDoc(docRef);
     return formatDocument(newDoc);
   });
+
+  /**
+   * Create a new subcollection
+   */
+  createSubCollection = withErrorHandler(
+    async (parentId, subCollection, data) => {
+      if (!data || typeof data !== 'object') {
+        throw new ServiceError(
+          'Invalid data provided',
+          ErrorCodes.INVALID_INPUT,
+          400,
+        );
+      }
+
+      if (!parentId || !subCollection) {
+        throw new ServiceError(
+          'Do not have enough data',
+          ErrorCodes.MISSING_REQUIRED_FIELD,
+        );
+      }
+
+      const parentRef = doc(db, this.collectionRef, parentId);
+      const subRef = collection(parentRef, subCollection);
+      const docRef = await addDoc(subRef, {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      const newDoc = await getDoc(docRef);
+      return formatDocument(newDoc);
+    },
+  );
 
   /**
    * Update a document

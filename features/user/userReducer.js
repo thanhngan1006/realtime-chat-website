@@ -5,7 +5,8 @@ const initialState = {
   avatarUrl: '',
   name: '',
   loading: false,
-  error: null,
+  users: [],
+  selectedUser: {},
 };
 
 const userSlice = createSlice({
@@ -16,6 +17,12 @@ const userSlice = createSlice({
       state.profileData = action.payload;
       if (action.payload.avatarUrl) state.avatarUrl = action.payload.avatarUrl;
       if (action.payload.name) state.name = action.payload.name;
+    },
+    setUsers: (state, action) => {
+      state.users = action.payload;
+    },
+    setSelectedUser: (state, action) => {
+      state.selectedUser = action.payload;
     },
     setAvatarUrl: (state, action) => {
       state.avatarUrl = action.payload;
@@ -28,12 +35,15 @@ const userSlice = createSlice({
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
-    setError: (state, action) => {
-      state.error = action.payload;
-    },
   },
 });
 
-export const { setProfileData, setAvatarUrl, setName, setLoading, setError } =
-  userSlice.actions;
+export const {
+  setProfileData,
+  setAvatarUrl,
+  setName,
+  setLoading,
+  setUsers,
+  setSelectedUser,
+} = userSlice.actions;
 export default userSlice.reducer;

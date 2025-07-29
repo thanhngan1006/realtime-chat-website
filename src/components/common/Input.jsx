@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 
-const Input = ({
-  type = 'text',
-  label = '',
-  placeholder = '',
-  error = '',
-  className = '',
-  ...otherProps
-}) => {
+const Input = (
+  {
+    type = 'text',
+    label = '',
+    placeholder = '',
+    error = '',
+    className = '',
+    ...otherProps
+  },
+  ref,
+) => {
   const [value, setValue] = useState('');
 
   const handleChange = (event) => {
@@ -16,8 +19,9 @@ const Input = ({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <label>{label}</label>
+      <label className="dark:text-white">{label}</label>
       <input
+        ref={ref}
         type={`${type}`}
         id={otherProps.id}
         value={value}

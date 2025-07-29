@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   serverTimestamp,
+  orderBy,
 } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { db, auth } from '../../firebase';
@@ -17,6 +18,7 @@ import {
   withErrorHandler,
 } from '../utils/error-handler';
 import { ServiceResponse } from '../utils/response-formatter';
+import { CONVERSATION_MESSAGES } from '../../constants/Message';
 
 // User service specific message keys
 const USER_MESSAGES = {
@@ -53,8 +55,8 @@ class UserService extends BaseRepository {
     const userDoc = {
       uid,
       email: userData.email,
-      displayName: userData.displayName || '',
-      photoURL: userData.photoURL || '',
+      name: userData.displayName || '',
+      avatarUrl: userData.photoURL || '',
       bio: userData.bio || '',
       status: 'online',
       lastSeen: serverTimestamp(),
@@ -113,12 +115,17 @@ class UserService extends BaseRepository {
   /**
    * Search users by display name or email
    */
-  searchUsers = withErrorHandler(async (searchTerm, currentUserId) => {
+  searchUsers = withErrorHandler(async (searchTerm) => {
     if (!searchTerm) {
-      throw new ServiceError(
-        USER_MESSAGES.SEARCH_TERM_REQUIRED,
-        ErrorCodes.INVALID_INPUT,
-        400,
+      const allQuery = query(this.collectionRef, orderBy('lastSeen', 'desc'));
+      const snapshot = await getDocs(allQuery);
+      const allUsers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      return ServiceResponse.success(
+        allUsers,
+        `${USER_MESSAGES.USERS_FOUND}: ${allUsers.length}`,
       );
     }
 
@@ -127,8 +134,8 @@ class UserService extends BaseRepository {
     // Search by display name
     const nameQuery = query(
       this.collectionRef,
-      where('displayName', '>=', searchTerm),
-      where('displayName', '<=', searchTerm + '\uf8ff'),
+      where('name', '>=', searchTerm),
+      where('name', '<=', searchTerm + '\uf8ff'),
     );
 
     const nameSnapshot = await getDocs(nameQuery);
@@ -156,13 +163,13 @@ class UserService extends BaseRepository {
     );
 
     // Filter out current user
-    const filteredResults = uniqueResults.filter(
-      (user) => user.id !== currentUserId,
-    );
+    // const filteredResults = uniqueResults.filter(
+    //   (user) => user.id !== currentUserId,
+    // );
 
     return ServiceResponse.success(
-      filteredResults,
-      `${USER_MESSAGES.USERS_FOUND}: ${filteredResults.length}`,
+      uniqueResults,
+      `${USER_MESSAGES.USERS_FOUND}: ${uniqueResults.length}`,
     );
   });
 
@@ -261,6 +268,33 @@ class UserService extends BaseRepository {
       };
     });
   };
+
+  createNewConversationInUser = withErrorHandler(
+    async (senderId, receiverId, id) => {
+      if (!senderId || !receiverId) {
+        throw new ServiceError(
+          CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
+        );
+      }
+
+      const conversationDoc = {
+        conversationId: id,
+        unreadMessage: '',
+        lastMessage: '',
+      };
+
+      await this.createSubCollection(
+        senderId,
+        'conversations',
+        conversationDoc,
+      );
+      await this.createSubCollection(
+        receiverId,
+        'conversations',
+        conversationDoc,
+      );
+    },
+  );
 }
 
 // Export singleton instance

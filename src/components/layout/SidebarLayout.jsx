@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Avatar } from '../common';
 import SubMenu from './SubMenu';
-import { IoSearch } from 'react-icons/io5';
-import { HiOutlinePencilAlt } from 'react-icons/hi';
 import Sidebar from './Sidebar';
 import { auth } from '../../firebase';
 import { userService } from '../../service';
 import { setAvatarUrl } from '../../../features/user/userReducer';
+import Modal from '../common/Modal';
+import { setIsOpen } from '../../../features/modal/modalReducer';
+import { LuMoon, LuSun } from 'react-icons/lu';
+import { setTheme } from '../../../features/common/commonReducer';
 
 const SidebarLayout = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen } = useSelector((state) => state.modal);
   const { user } = useSelector((state) => state.auth);
   const { avatarUrl } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.common);
   const dispatch = useDispatch();
-
-  const handleOpen = () => {
-    setIsOpen(!isOpen);
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,19 +34,41 @@ const SidebarLayout = () => {
     fetchUserData();
   }, [dispatch]);
 
+  console.log('Current theme:', theme);
   return (
     <div className="">
-      <header className="flex items-center justify-between bg-white p-2.5 text-center shadow">
-        <button onClick={handleOpen} className="relative cursor-pointer">
+      <header className="flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
+        <button
+          onClick={() => dispatch(setIsOpen(true))}
+          className="relative cursor-pointer"
+        >
           <Avatar className="h-10 w-10" isOnline={!!user} src={avatarUrl} />
         </button>
 
-        {isOpen ? <SubMenu className="top-14 left-0" /> : null}
+        <Modal isOpen={isOpen} onClose={() => dispatch(setIsOpen(false))}>
+          <>
+            <SubMenu className="top-14 left-0" />
+          </>
+        </Modal>
 
         <h3 className="text-2xl font-bold">Chat</h3>
-        <div className="flex gap-2">
-          <IoSearch className="h-8 w-8" onClick={() => {}} />
-          <HiOutlinePencilAlt className="h-8 w-8" onClick={() => {}} />
+        <div className="flex">
+          <button
+            onClick={() => {
+              dispatch(setTheme(''));
+            }}
+            className="rounded-lg bg-transparent p-3 text-black hover:bg-zinc-200 dark:text-white dark:hover:bg-zinc-100"
+          >
+            <LuSun />
+          </button>
+          <button
+            onClick={() => {
+              dispatch(setTheme('dark'));
+            }}
+            className="rounded-lg bg-transparent p-3 text-black hover:bg-zinc-200 dark:text-white dark:hover:bg-zinc-100"
+          >
+            <LuMoon />
+          </button>
         </div>
       </header>
 

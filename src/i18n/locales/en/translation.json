@@ -47,6 +47,17 @@
     "contact_user_not_found": "Contact user not found",
     "invalid_status": "Invalid status. Must be one of"
   },
+  "conversation": {
+    "conversation_created_success": "Conversation created successfully",
+    "sender_id_and_receiver_id_required": "Sender id and receiver id are required",
+    "conversation_already_exist": "Conversation has already exist",
+    "group_min_participants_required": "Group conversation need at least 2 participants"
+  },
+  "messages": {
+    "data_to_create_message_required": "Sender id, conversation id, message content and receiver id are required",
+    "fetch_messages_success": "Fetch message success",
+    "conversation_id_required": "Conversation id is required"
+  },
   "common": {
     "submit": "Sent",
     "cancel": "Cancel"
