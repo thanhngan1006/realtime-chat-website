@@ -12,7 +12,7 @@ import {
 const UserItem = ({ name, imgUrl, user }) => {
   const senderUserId = auth.currentUser.uid;
   const dispatch = useDispatch();
-  const { isGroupModeSelected, selectedPeopleToCreateGroup } = useSelector(
+  const { modeType, selectedPeopleToCreateGroup } = useSelector(
     (state) => state.chat,
   );
 
@@ -29,7 +29,7 @@ const UserItem = ({ name, imgUrl, user }) => {
   const handleClickItem = async (e) => {
     e.stopPropagation();
 
-    if (isGroupModeSelected == 'notGroup') {
+    if (modeType == 'notGroup') {
       try {
         const conversationId = await conversationService.createNewChat(
           senderUserId,
@@ -40,7 +40,7 @@ const UserItem = ({ name, imgUrl, user }) => {
       } catch (error) {
         console.error('Error creating chat:', error);
       }
-    } else if (isGroupModeSelected == 'isGroup') {
+    } else if (modeType == 'isGroup') {
       const isSelected = selectedPeopleToCreateGroup.some(
         (selectedUser) => selectedUser.id === user.id,
       );
