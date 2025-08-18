@@ -14,7 +14,6 @@ const MessageBox = ({ messages, src }) => {
             isYourMessage={msg.senderId === uid}
             src={src[msg.senderId] || ''}
             alt="Avatar"
-            bgColor={msg.senderId === uid ? 'blue-500' : 'gray-600'}
             textColor="white"
             msg={msg}
           >

@@ -15,8 +15,22 @@ class MessageService extends BaseRepository {
   }
 
   createNewMessage = withErrorHandler(
-    async (senderId, receiverIds, conversationId, messageContent) => {
-      if (!senderId || !receiverIds || !messageContent || !conversationId) {
+    async ({
+      senderId,
+      receiverIds,
+      conversationId,
+      messageContent,
+      typeContent,
+      imageUrl = '',
+      file = '',
+      fileName = '',
+    }) => {
+      if (
+        !senderId ||
+        !receiverIds ||
+        !conversationId ||
+        typeContent === undefined
+      ) {
         throw new ServiceError(
           MESSAGES_NOTIFICATION.DATA_TO_CREATE_MESSAGE_REQUIRE,
         );
@@ -25,10 +39,13 @@ class MessageService extends BaseRepository {
       const messageDoc = {
         conversationId: conversationId,
         readStatus: false,
-        messageText: messageContent,
+        messageText: typeContent === 0 ? messageContent : '',
         receiverIds: receiverIds,
         senderId: senderId,
-        type: 0,
+        type: typeContent,
+        imageUrl: typeContent === 1 ? imageUrl : '',
+        file: typeContent === 2 ? file : '',
+        fileName: typeContent === 2 ? fileName : '',
         sentTime: serverTimestamp(),
       };
 

@@ -5,7 +5,7 @@ const initialState = {
   messages: [],
   receiverData: {},
   conversations: [],
-  isGroupModeSelected: 'notGroup',
+  modeType: 'notGroup',
   selectedPeopleToCreateGroup: [],
   isFocused: false,
   typingStatus: '',
@@ -33,8 +33,8 @@ const chatSlice = createSlice({
     setConversations: (state, action) => {
       state.conversations = action.payload;
     },
-    setIsGroupModeSelected: (state, action) => {
-      state.isGroupModeSelected = action.payload;
+    setModeType: (state, action) => {
+      state.modeType = action.payload;
     },
     setSelectedPeopleToCreateGroup: (state, action) => {
       state.selectedPeopleToCreateGroup = action.payload;
@@ -47,7 +47,7 @@ export const {
   setMessages,
   setReceiverData,
   setConversations,
-  setIsGroupModeSelected,
+  setModeType,
   setSelectedPeopleToCreateGroup,
   setIsFocused,
   setTypingStatus,
