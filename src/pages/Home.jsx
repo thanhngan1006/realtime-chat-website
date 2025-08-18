@@ -188,7 +188,9 @@ const Home = () => {
         }));
 
         dispatch(setMessages(messagesData));
+        console.log('Is array', Array.isArray(messagesData));
       },
+
       (error) => {
         console.error('Error fetching messages: ', error);
       },

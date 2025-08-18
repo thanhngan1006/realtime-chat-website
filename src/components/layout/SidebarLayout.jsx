@@ -15,7 +15,6 @@ const SidebarLayout = () => {
   const { isOpen } = useSelector((state) => state.modal);
   const { user } = useSelector((state) => state.auth);
   const { avatarUrl } = useSelector((state) => state.user);
-  const { theme } = useSelector((state) => state.common);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -34,7 +33,6 @@ const SidebarLayout = () => {
     fetchUserData();
   }, [dispatch]);
 
-  console.log('Current theme:', theme);
   return (
     <div className="">
       <header className="flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
