@@ -12,12 +12,35 @@ const initialState = {
   selectedMessageId: '',
   editedMessage: '',
   updatedMessageText: '',
+  showEmojiPicker: false,
+  selectedMessageToReactEmoji: '',
+  showFullEmojiPicker: false,
+  emojiPickerPosition: {
+    top: 0,
+    left: 0,
+  },
+  selectedReactionDetail: '',
 };
 
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
+    setSelectedReactionDetail: (state, action) => {
+      state.selectedReactionDetail = action.payload;
+    },
+    setEmojiPickerPosition: (state, action) => {
+      state.emojiPickerPosition = action.payload;
+    },
+    setShowFullEmojiPicker: (state, action) => {
+      state.showFullEmojiPicker = action.payload;
+    },
+    setShowEmojiPicker: (state, action) => {
+      state.showEmojiPicker = action.payload;
+    },
+    setSelectedMessageToReactEmoji: (state, action) => {
+      state.selectedMessageToReactEmoji = action.payload;
+    },
     setIsFocused: (state, action) => {
       state.isFocused = action.payload;
     },
@@ -36,9 +59,6 @@ const chatSlice = createSlice({
     setMessageContent: (state, action) => {
       state.messageContent = action.payload;
     },
-    // setMessages: (state, action) => {
-    //   state.messages = action.payload;
-    // },
     setMessages: (state, action) => {
       if (typeof action.payload === 'function') {
         state.messages = action.payload(state.messages);
@@ -62,6 +82,10 @@ const chatSlice = createSlice({
 });
 
 export const {
+  setSelectedReactionDetail,
+  setShowFullEmojiPicker,
+  setSelectedMessageToReactEmoji,
+  setShowEmojiPicker,
   setEditedMessage,
   setUpdatedMessageText,
   setMessageContent,
@@ -73,6 +97,7 @@ export const {
   setIsFocused,
   setTypingStatus,
   setSelectedMessageId,
+  setEmojiPickerPosition,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

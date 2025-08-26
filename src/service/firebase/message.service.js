@@ -85,8 +85,7 @@ class MessageService extends BaseRepository {
     const data = {
       messageText: 'Tin nhắn đã được thu hồi',
     };
-
-    const updatedDoc = await this.update(id, data); // Lấy kết quả từ update
+    const updatedDoc = await this.update(id, data);
     return updatedDoc;
   });
 
@@ -96,6 +95,22 @@ class MessageService extends BaseRepository {
       updatedAt: serverTimestamp(),
     };
     const updateDoc = await this.update(id, data);
+    return updateDoc;
+  });
+
+  addReaction = withErrorHandler(async (messageId, userId, emoji) => {
+    const data = {
+      [`reactions.${userId}`]: emoji,
+    };
+    const updateDoc = await this.update(messageId, data);
+    return updateDoc;
+  });
+
+  removeReaction = withErrorHandler(async (messageId, userId) => {
+    const data = {
+      [`reactions.${userId}`]: null,
+    };
+    const updateDoc = await this.update(messageId, data);
     return updateDoc;
   });
 }

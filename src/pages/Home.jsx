@@ -8,10 +8,12 @@ import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  setEmojiPickerPosition,
   setIsFocused,
   setMessageContent,
   setMessages,
   setReceiverData,
+  setShowEmojiPicker,
   setTypingStatus,
 } from '../../features/chat/chatReducer';
 import {
@@ -27,14 +29,20 @@ import { auth, db } from '../firebase';
 import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
+import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const conversationId = selectedUser.conversationId;
-  const { messages, messageContent, isFocused, typingStatus } = useSelector(
-    (state) => state.chat,
-  );
+  const {
+    messages,
+    messageContent,
+    emojiPickerPosition,
+    isFocused,
+    typingStatus,
+    showEmojiPicker,
+  } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -333,6 +341,15 @@ const Home = () => {
           <MessageBox messages={messages} src={avatarUrls} />
         )}
 
+        <EmojiPickerPortal
+          show={showEmojiPicker}
+          onEmojiClick={(e) => {
+            dispatch(setMessageContent(messageContent + e.emoji));
+            dispatch(setShowEmojiPicker(false));
+          }}
+          position={emojiPickerPosition}
+        />
+
         {typingStatus && (
           <div className="flex items-center gap-2 p-2 dark:bg-zinc-700">
             {typingUsers.map((userId) => (
@@ -389,9 +406,19 @@ const Home = () => {
               onBlur={() => dispatch(setIsFocused(false))}
               ref={inputRef}
             />
-            {/* <div id="typing_on">{typingStatus}</div> */}
+
             <MdEmojiEmotions
-              onClick={() => console.log('ok')}
+              onClick={(e) => {
+                const rect = e.target.getBoundingClientRect();
+                dispatch(
+                  setEmojiPickerPosition({
+                    top: rect.top - 320,
+                    left: rect.left,
+                  }),
+                );
+                dispatch(setShowEmojiPicker(!showEmojiPicker));
+                console.log('nhan emoji');
+              }}
               className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
             />
           </div>

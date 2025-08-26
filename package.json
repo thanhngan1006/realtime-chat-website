@@ -23,6 +23,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.10",
     "dayjs": "^1.11.13",
+    "emoji-picker-react": "^4.13.2",
     "firebase": "^11.9.1",
     "husky": "^9.1.7",
     "i18next": "^25.2.1",

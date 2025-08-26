@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Avatar, Button, Input } from '../components/common';
 import { FaEdit } from 'react-icons/fa';
 import { auth, db } from '../firebase';
