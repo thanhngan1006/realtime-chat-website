@@ -12,7 +12,7 @@ const ConversationItem = ({ conversationItem }) => {
   const [receiverData, setReceiverData] = useState({});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isGroupModeSelected } = useSelector((state) => state.chat);
+  const { modeType } = useSelector((state) => state.chat);
 
   const receiverId = useMemo(() => {
     if (!conversationItem?.participants) return null;
@@ -25,7 +25,7 @@ const ConversationItem = ({ conversationItem }) => {
   useEffect(() => {
     const fetchReceiverData = async () => {
       try {
-        if (isGroupModeSelected === 'isGroup') {
+        if (modeType === 'isGroup') {
           const participants = conversationItem.participants.filter(
             (id) => id !== senderUserId,
           );
@@ -66,13 +66,7 @@ const ConversationItem = ({ conversationItem }) => {
     };
 
     fetchReceiverData();
-  }, [
-    conversationItem,
-    senderUserId,
-    dispatch,
-    receiverId,
-    isGroupModeSelected,
-  ]);
+  }, [conversationItem, senderUserId, dispatch, receiverId, modeType]);
 
   const handleClickItem = async () => {
     try {
@@ -92,7 +86,7 @@ const ConversationItem = ({ conversationItem }) => {
 
       dispatch(
         setSelectedUser({
-          id: isGroupModeSelected == 'isGroup' ? otherParticipants : receiverId,
+          id: modeType == 'isGroup' ? otherParticipants : receiverId,
           name: receiverData.name || 'Unknown User',
           avatarUrl: receiverData.avatarUrl || '',
           conversationId: conversationId,

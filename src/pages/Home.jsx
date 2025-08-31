@@ -2,16 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
 import { FaMicrophone, FaRegImage } from 'react-icons/fa';
-import { MdEmojiEmotions } from 'react-icons/md';
+import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
 import { Input } from '../components/common';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  setEmojiPickerPosition,
   setIsFocused,
   setMessageContent,
   setMessages,
   setReceiverData,
+  setShowEmojiPicker,
   setTypingStatus,
 } from '../../features/chat/chatReducer';
 import {
@@ -24,21 +26,31 @@ import {
   where,
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { conversationService, userService } from '../service';
+import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
+import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const conversationId = selectedUser.conversationId;
-  const { messages, messageContent, isFocused, typingStatus } = useSelector(
-    (state) => state.chat,
-  );
+  const {
+    messages,
+    messageContent,
+    emojiPickerPosition,
+    isFocused,
+    typingStatus,
+    showEmojiPicker,
+  } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [avatarUrls, setAvatarUrls] = useState({});
   const [typingUsers, setTypingUsers] = useState([]);
+  const cloudinaryRef = useRef();
+  const widgetRef = useRef();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,18 +64,112 @@ const Home = () => {
         ? selectedUser.id
         : [selectedUser.id || ''];
 
-      await messageService.createNewMessage(
-        uid,
-        receiverIds,
-        conversationId,
-        messageContent,
-      );
+      await messageService.createNewMessage({
+        senderId: uid,
+        receiverIds: receiverIds,
+        conversationId: conversationId,
+        messageContent: messageContent || '',
+        typeContent: 0,
+      });
 
       inputRef.current.value = '';
       dispatch(setMessageContent(''));
       inputRef.current.focus();
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const handleSendFile = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleUploadFile = async (e) => {
+    try {
+      const receiverIds = Array.isArray(selectedUser.id)
+        ? selectedUser.id
+        : [selectedUser.id || ''];
+
+      const { base64, fileName } = await fileService.handleFileRead(e);
+
+      await messageService.createNewMessage({
+        senderId: uid,
+        receiverIds: receiverIds,
+        conversationId: conversationId,
+        messageContent: messageContent || '',
+        fileName: fileName,
+        file: base64,
+        typeContent: 2,
+      });
+
+      fileInputRef.current.value = '';
+      inputRef.current.focus();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  const handleSendImage = () => {
+    imageInputRef.current.click();
+  };
+
+  const handleUploadImage = async (e) => {
+    try {
+      const receiverIds = Array.isArray(selectedUser.id)
+        ? selectedUser.id
+        : [selectedUser.id || ''];
+
+      const { base64 } = await fileService.handleFileRead(e);
+
+      await messageService.createNewMessage({
+        senderId: uid,
+        receiverIds: receiverIds,
+        conversationId: conversationId,
+        messageContent: messageContent || '',
+        imageUrl: base64,
+        typeContent: 1,
+      });
+
+      imageInputRef.current.value = '';
+      inputRef.current.focus();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  useEffect(() => {
+    cloudinaryRef.current = window.cloudinary;
+    widgetRef.current = cloudinaryRef.current.createUploadWidget(
+      {
+        cloudName: 'dbwmvrxbd',
+        uploadPreset: 'smycavha',
+        resourceType: 'video',
+        clientAllowedFormats: ['mp4', 'mov'],
+      },
+      async (error, result) => {
+        if (!error && result && result.event === 'success') {
+          const videoUrl = result.info.secure_url;
+
+          const receiverIds = Array.isArray(selectedUser.id)
+            ? selectedUser.id
+            : [selectedUser.id || ''];
+
+          await messageService.createNewMessage({
+            senderId: uid,
+            receiverIds: receiverIds,
+            conversationId: conversationId,
+            messageContent: messageContent || '',
+            video: videoUrl,
+            typeContent: 3,
+          });
+        }
+      },
+    );
+  }, [conversationId, messageContent, selectedUser.id, uid]);
+
+  const handleOpenWidget = () => {
+    if (widgetRef.current) {
+      widgetRef.current.open(); // Mở widget khi click
     }
   };
 
@@ -128,7 +234,9 @@ const Home = () => {
         }));
 
         dispatch(setMessages(messagesData));
+        console.log('Is array', Array.isArray(messagesData));
       },
+
       (error) => {
         console.error('Error fetching messages: ', error);
       },
@@ -271,6 +379,15 @@ const Home = () => {
           <MessageBox messages={messages} src={avatarUrls} />
         )}
 
+        <EmojiPickerPortal
+          show={showEmojiPicker}
+          onEmojiClick={(e) => {
+            dispatch(setMessageContent(messageContent + e.emoji));
+            dispatch(setShowEmojiPicker(false));
+          }}
+          position={emojiPickerPosition}
+        />
+
         {typingStatus && (
           <div className="flex items-center gap-2 p-2 dark:bg-zinc-700">
             {typingUsers.map((userId) => (
@@ -289,10 +406,31 @@ const Home = () => {
 
       <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
         <div className="flex items-center gap-2 text-blue-400">
-          <IoMdAddCircle className="h-8 w-8" />
-          <FaRegImage className="h-8 w-8" />
+          <div>
+            <IoMdAddCircle onClick={handleSendFile} className="h-8 w-8" />
+            <Input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleUploadFile}
+              className="hidden"
+            />
+          </div>
+
+          <div>
+            <FaRegImage onClick={handleSendImage} className="h-8 w-8" />
+            <Input
+              type="file"
+              accept="image/*"
+              ref={imageInputRef}
+              onChange={handleUploadImage}
+              className="hidden"
+            />
+          </div>
           <IoIosCamera className="h-8 w-8" />
           <FaMicrophone className="h-8 w-8" />
+          <div>
+            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="">
@@ -309,9 +447,19 @@ const Home = () => {
               onBlur={() => dispatch(setIsFocused(false))}
               ref={inputRef}
             />
-            {/* <div id="typing_on">{typingStatus}</div> */}
+
             <MdEmojiEmotions
-              onClick={() => console.log('ok')}
+              onClick={(e) => {
+                const rect = e.target.getBoundingClientRect();
+                dispatch(
+                  setEmojiPickerPosition({
+                    top: rect.top - 320,
+                    left: rect.left,
+                  }),
+                );
+                dispatch(setShowEmojiPicker(!showEmojiPicker));
+                console.log('nhan emoji');
+              }}
               className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
             />
           </div>

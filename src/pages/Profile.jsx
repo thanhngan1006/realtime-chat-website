@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Avatar, Button, Input } from '../components/common';
 import { FaEdit } from 'react-icons/fa';
 import { auth, db } from '../firebase';
@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { IoMdArrowBack } from 'react-icons/io';
 import ProfileRow from '../components/layout/ProfileRow';
-import { userService } from '../service';
+import { fileService, userService } from '../service';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setAvatarUrl,
@@ -21,7 +21,6 @@ const Profile = () => {
   const [editedData, setEditedData] = useState({});
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
   const { profileData, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -73,15 +72,12 @@ const Profile = () => {
 
   const handleFileChange = async (e) => {
     try {
-      const base64 = await userService.handleFileRead(e);
+      const { base64 } = await fileService.handleFileRead(e);
       const userRef = doc(db, 'users', uid);
 
       await updateDoc(userRef, { avatarUrl: base64 });
 
-      dispatch(setAvatarUrl(base64));
-
       const updatedData = await userService.getUser(uid);
-      // dispatch(setProfileData(updatedData.data));
       dispatch(setAvatarUrl(updatedData.data.avatarUrl));
     } catch (error) {
       console.error('Error uploading avatar:', error);

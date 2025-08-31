@@ -7,6 +7,7 @@ export { authService } from './firebase/auth.service';
 export { userService } from './firebase/user.service';
 export { conversationService } from './firebase/conversation.service';
 export { messageService } from './firebase/message.service';
+export { fileService } from './firebase/file.service';
 
 // Repository pattern
 export { BaseRepository } from './repository/base.repository';

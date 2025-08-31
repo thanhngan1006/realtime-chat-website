@@ -5,18 +5,53 @@ const initialState = {
   messages: [],
   receiverData: {},
   conversations: [],
-  isGroupModeSelected: 'notGroup',
+  modeType: 'notGroup',
   selectedPeopleToCreateGroup: [],
   isFocused: false,
   typingStatus: '',
+  selectedMessageId: '',
+  editedMessage: '',
+  updatedMessageText: '',
+  showEmojiPicker: false,
+  selectedMessageToReactEmoji: '',
+  showFullEmojiPicker: false,
+  emojiPickerPosition: {
+    top: 0,
+    left: 0,
+  },
+  selectedReactionDetail: '',
 };
 
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
+    setSelectedReactionDetail: (state, action) => {
+      state.selectedReactionDetail = action.payload;
+    },
+    setEmojiPickerPosition: (state, action) => {
+      state.emojiPickerPosition = action.payload;
+    },
+    setShowFullEmojiPicker: (state, action) => {
+      state.showFullEmojiPicker = action.payload;
+    },
+    setShowEmojiPicker: (state, action) => {
+      state.showEmojiPicker = action.payload;
+    },
+    setSelectedMessageToReactEmoji: (state, action) => {
+      state.selectedMessageToReactEmoji = action.payload;
+    },
     setIsFocused: (state, action) => {
       state.isFocused = action.payload;
+    },
+    setEditedMessage: (state, action) => {
+      state.editedMessage = action.payload;
+    },
+    setUpdatedMessageText: (state, action) => {
+      state.updatedMessageText = action.payload;
+    },
+    setSelectedMessageId: (state, action) => {
+      state.selectedMessageId = action.payload;
     },
     setTypingStatus: (state, action) => {
       state.typingStatus = action.payload;
@@ -25,7 +60,11 @@ const chatSlice = createSlice({
       state.messageContent = action.payload;
     },
     setMessages: (state, action) => {
-      state.messages = action.payload;
+      if (typeof action.payload === 'function') {
+        state.messages = action.payload(state.messages);
+      } else {
+        state.messages = Array.isArray(action.payload) ? action.payload : [];
+      }
     },
     setReceiverData: (state, action) => {
       state.receiverData = action.payload;
@@ -33,8 +72,8 @@ const chatSlice = createSlice({
     setConversations: (state, action) => {
       state.conversations = action.payload;
     },
-    setIsGroupModeSelected: (state, action) => {
-      state.isGroupModeSelected = action.payload;
+    setModeType: (state, action) => {
+      state.modeType = action.payload;
     },
     setSelectedPeopleToCreateGroup: (state, action) => {
       state.selectedPeopleToCreateGroup = action.payload;
@@ -43,14 +82,22 @@ const chatSlice = createSlice({
 });
 
 export const {
+  setSelectedReactionDetail,
+  setShowFullEmojiPicker,
+  setSelectedMessageToReactEmoji,
+  setShowEmojiPicker,
+  setEditedMessage,
+  setUpdatedMessageText,
   setMessageContent,
   setMessages,
   setReceiverData,
   setConversations,
-  setIsGroupModeSelected,
+  setModeType,
   setSelectedPeopleToCreateGroup,
   setIsFocused,
   setTypingStatus,
+  setSelectedMessageId,
+  setEmojiPickerPosition,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

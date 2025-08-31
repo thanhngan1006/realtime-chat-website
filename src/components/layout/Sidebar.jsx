@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ConversationList } from '../chat';
 import {
   setConversations,
-  setIsGroupModeSelected,
+  setModeType,
   setSelectedPeopleToCreateGroup,
 } from '../../../features/chat/chatReducer';
 import { setUsers } from '../../../features/user/userReducer';
@@ -22,8 +22,9 @@ const Sidebar = () => {
   const senderId = auth.currentUser?.uid;
   const dispatch = useDispatch();
 
-  const { conversations, isGroupModeSelected, selectedPeopleToCreateGroup } =
-    useSelector((state) => state.chat);
+  const { conversations, modeType, selectedPeopleToCreateGroup } = useSelector(
+    (state) => state.chat,
+  );
   const { users } = useSelector((state) => state.user);
 
   const usersExceptSender = users.filter((user) => user.id !== senderId);
@@ -84,7 +85,7 @@ const Sidebar = () => {
 
     const fetchConversations = async () => {
       try {
-        const isGroup = isGroupModeSelected === 'isGroup';
+        const isGroup = modeType === 'isGroup';
         const response = await conversationService.fetchConversation(
           senderId,
           isGroup,
@@ -97,7 +98,7 @@ const Sidebar = () => {
     };
 
     fetchConversations();
-  }, [dispatch, senderId, isGroupModeSelected]);
+  }, [dispatch, senderId, modeType]);
 
   const handleChange = (event) => {
     setSearchValue(event.target.value);
@@ -122,14 +123,14 @@ const Sidebar = () => {
       <div className="flex">
         <button
           onClick={() => {
-            dispatch(setIsGroupModeSelected('notGroup'));
+            dispatch(setModeType('notGroup'));
           }}
           className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
         >
           <FaUserGroup className="" />
         </button>
         <button
-          onClick={() => dispatch(setIsGroupModeSelected('isGroup'))}
+          onClick={() => dispatch(setModeType('isGroup'))}
           className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
         >
           <MdGroups />
@@ -138,7 +139,7 @@ const Sidebar = () => {
 
       {/* khac nhom la hai nguoi */}
       {
-        isGroupModeSelected !== 'isGroup' ? (
+        modeType !== 'isGroup' ? (
           !searchValue ? (
             <ConversationList
               conversationList={conversations.filter((c) => !c.isGroup)}
