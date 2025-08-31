@@ -8,6 +8,7 @@ import {
   setEditedMessage,
   setMessages,
   setSelectedMessageId,
+  setSelectedMessageToReactEmoji,
   setUpdatedMessageText,
 } from '../../../features/chat/chatReducer';
 import { messageService } from '../../service';
@@ -15,9 +16,8 @@ import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 const OptionsForMessage = ({ msg, isYourMessage }) => {
-  const { selectedMessageId, editedMessage } = useSelector(
-    (state) => state.chat,
-  );
+  const { selectedMessageId, editedMessage, selectedMessageToReactEmoji } =
+    useSelector((state) => state.chat);
   const dispatch = useDispatch();
   const [optionsOpen, setOptionsOpen] = useState({});
   const uid = auth.currentUser.uid;
@@ -144,6 +144,11 @@ const OptionsForMessage = ({ msg, isYourMessage }) => {
     fetchSenderInformation();
   }, [selectedMessageId, uid]);
 
+  const handleReactEmojiForEachMessage = (id) => {
+    const updatedEmojiMessage = selectedMessageToReactEmoji === id ? null : id;
+    dispatch(setSelectedMessageToReactEmoji(updatedEmojiMessage));
+  };
+
   return (
     <div className="relative flex items-center gap-1">
       {isYourMessage ? (
@@ -157,7 +162,7 @@ const OptionsForMessage = ({ msg, isYourMessage }) => {
           </span>{' '}
           <Button
             className="cursor-pointer rounded-full p-1"
-            onClick={() => console.log('emoji clicked')}
+            onClick={() => handleReactEmojiForEachMessage(msg.messageId)}
           >
             <MdEmojiEmotions className="h-4 w-4" />
           </Button>
@@ -190,7 +195,7 @@ const OptionsForMessage = ({ msg, isYourMessage }) => {
           </Button>
           <Button
             className="cursor-pointer rounded-full p-1"
-            onClick={() => console.log('emoji clicked')}
+            onClick={() => handleReactEmojiForEachMessage(msg.messageId)}
           >
             <MdEmojiEmotions className="h-4 w-4" />
           </Button>
