@@ -92,25 +92,13 @@ const Message = ({
     }, 500);
   };
 
-  // const handleReactionClick = async (emoji) => {
-  //   await messageService.addReaction(
-  //     msg.messageId,
-  //     auth.currentUser.uid,
-  //     emoji,
-  //   );
-  //   dispatch(setSelectedMessageToReactEmoji(''));
-  // };
-
   const handleReactionClick = async (emoji) => {
     const userId = auth.currentUser.uid;
     const currentReactions = msg.reactions || {};
 
-    // Kiểm tra nếu người dùng đã thả emoji này
     if (currentReactions[userId] === emoji) {
-      // Nếu chọn lại cùng emoji, xóa reaction
       await messageService.removeReaction(msg.messageId, userId);
     } else {
-      // Thêm reaction mới hoặc cập nhật
       await messageService.addReaction(msg.messageId, userId, emoji);
     }
     dispatch(setSelectedMessageToReactEmoji(''));
@@ -127,16 +115,11 @@ const Message = ({
     dispatch(setShowFullEmojiPicker(true));
   };
 
-  // const handleEmojiSelect = (emojiData) => {
-  //   handleReactionClick(emojiData.emoji);
-  //   dispatch(setShowFullEmojiPicker(false));
-  // };
-
   const handleEmojiSelect = (emojiData) => {
     const userId = auth.currentUser.uid;
     const currentReactions = msg.reactions || {};
     if (currentReactions[userId] === emojiData.emoji) {
-      handleReactionClick(''); // Xóa reaction nếu chọn lại
+      handleReactionClick('');
     } else {
       handleReactionClick(emojiData.emoji);
     }
@@ -343,6 +326,47 @@ const Message = ({
           </>
         )}
 
+        {msg.type === 3 ? (
+          <>
+            {msg.messageText && msg.messageText.trim() ? (
+              <div
+                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
+                  isYourMessage
+                    ? `rounded-br-none bg-blue-500`
+                    : `rounded-bl-none bg-gray-600`
+                } ${className}`}
+                ref={messageContentRef}
+              >
+                {msg.messageText}
+                <ReactionDisplay
+                  reactions={msg.reactions}
+                  parentRef={messageContentRef}
+                  onReactionClick={handleReactionClickDetail}
+                />
+              </div>
+            ) : msg.video ? (
+              <div className="relative max-w-[75%]" ref={messageContentRef}>
+                <video controls width="300">
+                  <source src={msg.video} type="video/mp4" />
+                  <track
+                    kind="captions"
+                    src="captions_en.vtt"
+                    srcLang="en"
+                    label="English captions"
+                    default
+                  />
+                  Your browser does not support the video tag.
+                </video>
+                <ReactionDisplay
+                  reactions={msg.reactions}
+                  parentRef={messageContentRef}
+                  onReactionClick={handleReactionClickDetail}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
         {selectedReactionDetail === msg.messageId &&
           reactionUsers.length > 0 && (
             <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center px-4 py-1">
@@ -391,7 +415,7 @@ const Message = ({
               borderRadius: '10px',
               padding: '5px',
               boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-              zIndex: 1000,
+              zIndex: 10000,
             }}
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={handleMouseLeave}

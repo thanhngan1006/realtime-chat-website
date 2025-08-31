@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
 import { FaMicrophone, FaRegImage } from 'react-icons/fa';
-import { MdEmojiEmotions } from 'react-icons/md';
+import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
 import { Input } from '../components/common';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
@@ -49,6 +49,8 @@ const Home = () => {
   const fileInputRef = useRef(null);
   const [avatarUrls, setAvatarUrls] = useState({});
   const [typingUsers, setTypingUsers] = useState([]);
+  const cloudinaryRef = useRef();
+  const widgetRef = useRef();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,6 +134,42 @@ const Home = () => {
       inputRef.current.focus();
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  useEffect(() => {
+    cloudinaryRef.current = window.cloudinary;
+    widgetRef.current = cloudinaryRef.current.createUploadWidget(
+      {
+        cloudName: 'dbwmvrxbd',
+        uploadPreset: 'smycavha',
+        resourceType: 'video',
+        clientAllowedFormats: ['mp4', 'mov'],
+      },
+      async (error, result) => {
+        if (!error && result && result.event === 'success') {
+          const videoUrl = result.info.secure_url;
+
+          const receiverIds = Array.isArray(selectedUser.id)
+            ? selectedUser.id
+            : [selectedUser.id || ''];
+
+          await messageService.createNewMessage({
+            senderId: uid,
+            receiverIds: receiverIds,
+            conversationId: conversationId,
+            messageContent: messageContent || '',
+            video: videoUrl,
+            typeContent: 3,
+          });
+        }
+      },
+    );
+  }, [conversationId, messageContent, selectedUser.id, uid]);
+
+  const handleOpenWidget = () => {
+    if (widgetRef.current) {
+      widgetRef.current.open(); // Mở widget khi click
     }
   };
 
@@ -390,6 +428,9 @@ const Home = () => {
           </div>
           <IoIosCamera className="h-8 w-8" />
           <FaMicrophone className="h-8 w-8" />
+          <div>
+            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="">

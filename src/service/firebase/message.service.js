@@ -32,6 +32,7 @@ class MessageService extends BaseRepository {
       imageUrl = '',
       file = '',
       fileName = '',
+      video = '',
     }) => {
       if (
         !senderId ||
@@ -60,6 +61,7 @@ class MessageService extends BaseRepository {
         fileName: typeContent === 2 ? fileName : '',
         sentTime: serverTimestamp(),
         deletedBy: [],
+        video: typeContent === 3 ? video : '',
       };
 
       await setDoc(newDocRef, messageDoc);

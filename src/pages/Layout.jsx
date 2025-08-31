@@ -13,7 +13,7 @@ const Layout = () => {
       <div className="col-span-3 bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-white">
         <SidebarLayout />
       </div>
-      <div className="col-span-9">
+      <div className="col-span-9" style={{ zIndex: 1000 }}>
         <Outlet />
       </div>
     </div>

@@ -35,7 +35,7 @@ const SidebarLayout = () => {
 
   return (
     <div className="">
-      <header className="flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
+      <header className="z-10 flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
         <button
           onClick={() => dispatch(setIsOpen(true))}
           className="relative cursor-pointer"
