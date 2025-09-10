@@ -37,6 +37,7 @@ const Message = ({
     selectedMessageToReactEmoji,
     showFullEmojiPicker,
     selectedReactionDetail,
+    recordBlobLink,
   } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
   const messageContentRef = useRef(null);
@@ -357,6 +358,47 @@ const Message = ({
                   />
                   Your browser does not support the video tag.
                 </video>
+                <ReactionDisplay
+                  reactions={msg.reactions}
+                  parentRef={messageContentRef}
+                  onReactionClick={handleReactionClickDetail}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
+        {msg.type === 4 ? (
+          <>
+            {msg.messageText && msg.messageText.trim() ? (
+              <div
+                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
+                  isYourMessage
+                    ? `rounded-br-none bg-blue-500`
+                    : `rounded-bl-none bg-gray-600`
+                } ${className}`}
+                ref={messageContentRef}
+              >
+                {msg.messageText}
+                <ReactionDisplay
+                  reactions={msg.reactions}
+                  parentRef={messageContentRef}
+                  onReactionClick={handleReactionClickDetail}
+                />
+              </div>
+            ) : msg.audio ? (
+              <div className="relative max-w-[75%]" ref={messageContentRef}>
+                <div className="">
+                  {msg.audio ? (
+                    <audio controls className="">
+                      <source src={msg.audio} type="audio/mpeg" />
+                      <track kind="captions" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  ) : (
+                    ''
+                  )}
+                </div>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}

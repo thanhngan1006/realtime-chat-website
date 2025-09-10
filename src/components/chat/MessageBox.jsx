@@ -2,24 +2,22 @@ import React from 'react';
 import Message from './Message';
 import { auth } from '../../firebase';
 
-const MessageBox = ({ messages, src }) => {
+const MessageBox = ({ messages, avatarUrls }) => {
   const uid = auth.currentUser.uid;
 
-  // console.log('Messages in MessageBox:', messages, Array.isArray(messages));
+  const visibleMessages = messages.filter(
+    (msg) => !msg.deletedBy?.includes(uid),
+  );
 
   return (
     <div className="relative flex flex-col">
       <div className="mb-4">
-        {messages.map((msg, index) => {
-          if (msg.deletedBy?.includes(uid)) {
-            return null;
-          }
-
+        {visibleMessages.map((msg, index) => {
           return (
             <Message
               key={msg.messageId || index}
               isYourMessage={msg.senderId === uid}
-              src={src[msg.senderId] || ''}
+              src={avatarUrls[msg.senderId] || ''}
               alt="Avatar"
               textColor="white"
               msg={msg}

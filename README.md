@@ -15,18 +15,22 @@ A real-time chat application built with React, Vite, Tailwind CSS, and Firebase.
 Follow these steps to get the project up and running locally:
 
 1.  **Clone the repository:**
+
     ```bash
     git clone <repository-url>
     cd web-chat
     ```
 
 2.  **Set up environment variables:**
+
     ```bash
     cp .env.example .env
     ```
+
     Then edit `.env` and fill in your actual Firebase configuration values. You can get these from your Firebase project settings.
 
 3.  **Install dependencies:**
+
     ```bash
     npm install
     ```

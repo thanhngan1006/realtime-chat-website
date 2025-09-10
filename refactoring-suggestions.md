@@ -16,7 +16,7 @@ This document outlines potential refactoring improvements for the codebase.
 
 ## Complex Conditionals
 
-- **`MessageBox.jsx`:** Filter the `messages` array for deleted messages *before* mapping over it to make the logic more explicit.
+- **`MessageBox.jsx`:** Filter the `messages` array for deleted messages _before_ mapping over it to make the logic more explicit.
 - **`user.service.js`:** Split the `searchUsers` method into `searchUsers` and `getAllUsers` to eliminate the complex conditional based on the `searchTerm`.
 
 ## SOLID Principles

@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   setEmojiPickerPosition,
   setIsFocused,
+  setIsOpenMicro,
   setMessageContent,
   setMessages,
   setReceiverData,
@@ -30,6 +31,7 @@ import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
 import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
+import ReactRecorder from '../components/chat/Recorder';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -42,6 +44,7 @@ const Home = () => {
     isFocused,
     typingStatus,
     showEmojiPicker,
+    isOpenMicro,
   } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
@@ -51,6 +54,13 @@ const Home = () => {
   const [typingUsers, setTypingUsers] = useState([]);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
+  // const propsRef = useRef();
+
+  const handleOpenMicro = () => {
+    dispatch(setIsOpenMicro(!isOpenMicro));
+
+    console.log('isOpenMicro', isOpenMicro);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -376,8 +386,10 @@ const Home = () => {
         className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
       >
         {selectedUser && conversationId && messages.length > 0 && (
-          <MessageBox messages={messages} src={avatarUrls} />
+          <MessageBox messages={messages} avatarUrls={avatarUrls} />
         )}
+
+        {/* <ReactRecorder /> */}
 
         <EmojiPickerPortal
           show={showEmojiPicker}
@@ -427,42 +439,47 @@ const Home = () => {
             />
           </div>
           <IoIosCamera className="h-8 w-8" />
-          <FaMicrophone className="h-8 w-8" />
+
+          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
           <div>
             <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="">
-          <div className="relative flex items-center">
-            <Input
-              type="text"
-              placeholder="Aa"
-              className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
-              value={messageContent}
-              onChange={(e) => {
-                dispatch(setMessageContent(e.target.value));
-              }}
-              onFocus={() => dispatch(setIsFocused(true))}
-              onBlur={() => dispatch(setIsFocused(false))}
-              ref={inputRef}
-            />
+          {isOpenMicro ? (
+            <ReactRecorder />
+          ) : (
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="Aa"
+                className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
+                value={messageContent}
+                onChange={(e) => {
+                  dispatch(setMessageContent(e.target.value));
+                }}
+                onFocus={() => dispatch(setIsFocused(true))}
+                onBlur={() => dispatch(setIsFocused(false))}
+                ref={inputRef}
+              />
 
-            <MdEmojiEmotions
-              onClick={(e) => {
-                const rect = e.target.getBoundingClientRect();
-                dispatch(
-                  setEmojiPickerPosition({
-                    top: rect.top - 320,
-                    left: rect.left,
-                  }),
-                );
-                dispatch(setShowEmojiPicker(!showEmojiPicker));
-                console.log('nhan emoji');
-              }}
-              className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
-            />
-          </div>
+              <MdEmojiEmotions
+                onClick={(e) => {
+                  const rect = e.target.getBoundingClientRect();
+                  dispatch(
+                    setEmojiPickerPosition({
+                      top: rect.top - 320,
+                      left: rect.left,
+                    }),
+                  );
+                  dispatch(setShowEmojiPicker(!showEmojiPicker));
+                  console.log('nhan emoji');
+                }}
+                className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
+              />
+            </div>
+          )}
         </form>
 
         <div className="text-blue-400">

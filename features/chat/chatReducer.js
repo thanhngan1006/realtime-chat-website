@@ -20,12 +20,16 @@ const initialState = {
     left: 0,
   },
   selectedReactionDetail: '',
+  isOpenMicro: false,
 };
 
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
+    setIsOpenMicro: (state, action) => {
+      state.isOpenMicro = action.payload;
+    },
     setSelectedReactionDetail: (state, action) => {
       state.selectedReactionDetail = action.payload;
     },
@@ -98,6 +102,7 @@ export const {
   setTypingStatus,
   setSelectedMessageId,
   setEmojiPickerPosition,
+  setIsOpenMicro,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
