@@ -8,6 +8,7 @@ import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  clearRecordingState,
   setEmojiPickerPosition,
   setIsFocused,
   setIsOpenMicro,
@@ -32,6 +33,7 @@ import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
 import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
 import ReactRecorder from '../components/chat/Recorder';
+import { IoSend } from 'react-icons/io5';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -45,6 +47,8 @@ const Home = () => {
     typingStatus,
     showEmojiPicker,
     isOpenMicro,
+    recorderStatus,
+    mediaBlobUrl,
   } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
@@ -54,39 +58,83 @@ const Home = () => {
   const [typingUsers, setTypingUsers] = useState([]);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
-  // const propsRef = useRef();
+  const propsRef = useRef();
+
+  useEffect(() => {
+    propsRef.current = {
+      selectedUser,
+      uid: auth.currentUser?.uid,
+    };
+  }, [selectedUser]);
+
+  const hasTextContent = messageContent.trim() !== '';
+  const hasAudioContent = recorderStatus === 'stopped' && mediaBlobUrl;
+  const canSendMessage = hasTextContent || hasAudioContent;
 
   const handleOpenMicro = () => {
     dispatch(setIsOpenMicro(!isOpenMicro));
-
-    console.log('isOpenMicro', isOpenMicro);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (messageContent.trim() === '') {
-      console.log('Hãy nhập nội dung tin nhắn');
-      return;
-    }
 
-    try {
-      const receiverIds = Array.isArray(selectedUser.id)
-        ? selectedUser.id
-        : [selectedUser.id || ''];
+    if (hasTextContent) {
+      try {
+        const receiverIds = Array.isArray(selectedUser.id)
+          ? selectedUser.id
+          : [selectedUser.id || ''];
 
-      await messageService.createNewMessage({
-        senderId: uid,
-        receiverIds: receiverIds,
-        conversationId: conversationId,
-        messageContent: messageContent || '',
-        typeContent: 0,
-      });
+        await messageService.createNewMessage({
+          senderId: uid,
+          receiverIds: receiverIds,
+          conversationId: conversationId,
+          messageContent: messageContent || '',
+          typeContent: 0,
+        });
 
-      inputRef.current.value = '';
-      dispatch(setMessageContent(''));
-      inputRef.current.focus();
-    } catch (error) {
-      console.error('Error sending message:', error);
+        inputRef.current.value = '';
+        dispatch(setMessageContent(''));
+        inputRef.current.focus();
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    } else if (hasAudioContent) {
+      const audioBlob = await fetch(mediaBlobUrl).then((res) => res.blob());
+
+      const { selectedUser: currentUser, uid } = propsRef.current;
+      if (!currentUser || !uid) {
+        console.error('Dữ liệu không hợp lệ.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice-message.wav');
+      formData.append('upload_preset', 'smycavha');
+      formData.append('resource_type', 'raw');
+
+      try {
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/dbwmvrxbd/raw/upload`,
+          { method: 'POST', body: formData },
+        );
+        const data = await response.json();
+        const audioUrl = data.secure_url;
+
+        await messageService.createNewMessage({
+          senderId: uid,
+          receiverIds: Array.isArray(currentUser.id)
+            ? currentUser.id
+            : [currentUser.id],
+          conversationId: currentUser.conversationId,
+          audio: audioUrl,
+          typeContent: 4,
+        });
+
+        dispatch(setIsOpenMicro(false));
+        dispatch(clearRecordingState());
+      } catch (error) {
+        console.error('Upload failed:', error);
+      }
     }
   };
 
@@ -446,7 +494,7 @@ const Home = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="">
+        <form onSubmit={handleSubmit} id="chatForm" className="">
           {isOpenMicro ? (
             <ReactRecorder />
           ) : (
@@ -483,7 +531,13 @@ const Home = () => {
         </form>
 
         <div className="text-blue-400">
-          <AiFillLike className="h-8 w-8" />
+          {canSendMessage ? (
+            <button type="submit" form="chatForm">
+              <IoSend size={24} />
+            </button>
+          ) : !isOpenMicro ? (
+            <AiFillLike className="h-8 w-8" />
+          ) : null}
         </div>
       </div>
     </div>

@@ -21,6 +21,9 @@ const initialState = {
   },
   selectedReactionDetail: '',
   isOpenMicro: false,
+  recorderStatus: 'idle',
+  // 'idle', 'recording', 'stopped'
+  mediaBlobUrl: null,
 };
 
 const chatSlice = createSlice({
@@ -28,8 +31,24 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     setIsOpenMicro: (state, action) => {
+      if (!action.payload) {
+        state.recorderStatus = 'idle';
+        state.mediaBlobUrl = null;
+      }
       state.isOpenMicro = action.payload;
     },
+
+    setRecorderStatus: (state, action) => {
+      state.recorderStatus = action.payload;
+    },
+    setMediaBlobUrl: (state, action) => {
+      state.mediaBlobUrl = action.payload;
+    },
+    clearRecordingState: (state) => {
+      state.recorderStatus = 'idle';
+      state.mediaBlobUrl = null;
+    },
+
     setSelectedReactionDetail: (state, action) => {
       state.selectedReactionDetail = action.payload;
     },
@@ -86,6 +105,9 @@ const chatSlice = createSlice({
 });
 
 export const {
+  setRecorderStatus,
+  setMediaBlobUrl,
+  clearRecordingState,
   setSelectedReactionDetail,
   setShowFullEmojiPicker,
   setSelectedMessageToReactEmoji,

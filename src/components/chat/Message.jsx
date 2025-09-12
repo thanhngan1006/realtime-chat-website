@@ -37,7 +37,6 @@ const Message = ({
     selectedMessageToReactEmoji,
     showFullEmojiPicker,
     selectedReactionDetail,
-    recordBlobLink,
   } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
   const messageContentRef = useRef(null);
