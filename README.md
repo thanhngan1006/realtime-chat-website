@@ -1,38 +1,55 @@
-# realtime-chat-website
+# Web Chat
 
-A React.js web chat application built with Vite and Tailwind CSS.
+A real-time chat application built with React, Vite, Tailwind CSS, and Firebase.
+
+## Features
+
+- User authentication (signup, login, logout, password reset)
+- Real-time messaging with individuals and groups
+- User profiles and status (online, offline, etc.)
+- Search for other users
+- Send text messages, emojis, and file attachments
 
 ## Getting Started
 
 Follow these steps to get the project up and running locally:
 
-1. Clone the repository:
+1.  **Clone the repository:**
 
-   ```bash
-   git clone <repository-url>
-   cd web-chat
-   ```
+    ```bash
+    git clone <repository-url>
+    cd web-chat
+    ```
 
-2. Set up environment variables:
+2.  **Set up environment variables:**
 
-   ```bash
-   cp .env.example .env
-   ```
+    ```bash
+    cp .env.example .env
+    ```
 
-   Then edit `.env` and fill in your actual Firebase configuration values. You can get these from your Firebase project settings.
+    Then edit `.env` and fill in your actual Firebase configuration values. You can get these from your Firebase project settings.
 
-3. Install dependencies:
+3.  **Install dependencies:**
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+4.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
 
-## Environment Variables
+## Usage
+
+Once the development server is running, you can:
+
+1.  **Sign up for a new account** or **log in** with an existing one.
+2.  **Search for other users** on the platform.
+3.  **Start a new conversation** by selecting a user from the search results.
+4.  **Send and receive messages** in real-time.
+
+## Configuration
 
 The application requires the following environment variables for Firebase integration:
 
@@ -46,43 +63,49 @@ The application requires the following environment variables for Firebase integr
 
 **Note:** Never commit your `.env` file to version control. Use `.env.example` as a template.
 
-## Available Scripts
+## API Documentation
 
-- `npm run dev` - Start the development server with hot reload
-- `npm run build` - Build the project for production
-- `npm run preview` - Preview the production build locally
-- `npm run lint` - Run ESLint to check code quality
+The application's backend is powered by Firebase, and the interaction with Firebase is handled through a service layer. Here are the main services and their methods:
 
-## Project Structure
+### AuthService (`src/service/firebase/auth.service.js`)
 
-```
-web-chat/
-├── public/          # Static assets
-├── src/             # Source code
-│   ├── assets/      # Images, fonts, etc.
-│   ├── components/  # Reusable React components
-│   ├── pages/       # Page components
-│   ├── mock_data/   # Mock data for development
-│   ├── App.jsx      # Main App component
-│   ├── App.css      # App styles
-│   ├── index.css    # Global styles
-│   ├── firebase.jsx # Firebase configuration
-│   └── main.jsx     # Application entry point
-├── .env.example     # Environment variables template
-├── index.html       # HTML template
-├── package.json     # Dependencies and scripts
-└── vite.config.js   # Vite configuration
-```
+- `register(email, password, additionalData)`: Registers a new user.
+- `login(email, password)`: Logs in a user.
+- `logout()`: Logs out the current user.
+- `resetPassword(email)`: Sends a password reset email.
+- `updatePassword(currentPassword, newPassword)`: Updates the user's password.
+- `resendVerificationEmail()`: Resends the email verification email.
+- `getCurrentUser()`: Gets the current authenticated user.
+- `isAuthenticated()`: Checks if a user is authenticated.
+- `onAuthStateChange(callback)`: Subscribes to authentication state changes.
 
-## Technologies Used
+### UserService (`src/service/firebase/user.service.js`)
 
-- **React 18** - UI library
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Firebase** - Backend services (Firestore, Analytics)
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
+- `createUserProfile(uid, userData)`: Creates a new user profile in Firestore.
+- `getUser(userId)`: Gets a user's profile by their ID.
+- `updateUserProfile(userId, updates)`: Updates a user's profile.
+- `searchUsers(searchTerm)`: Searches for users by display name or email.
+- `updateUserStatus(userId, status)`: Updates a user's online status.
+- `getUserContacts(userId)`: Gets a user's contacts.
+- `addContact(userId, contactId)`: Adds a new contact.
+- `createNewConversationInUser(senderId, receiverId, id)`: Creates a new conversation between two users.
 
-## Development
+## Contributing
 
-The project uses Vite for fast development with Hot Module Replacement (HMR). Changes to your code will automatically reflect in the browser without losing component state.
+Contributions are welcome! Please follow these steps:
+
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/your-feature-name`).
+3.  Make your changes.
+4.  Run the linter and formatter to ensure your code follows the project's style guidelines:
+    ```bash
+    npm run lint:fix
+    npm run format
+    ```
+5.  Commit your changes (`git commit -m 'Add some feature'`).
+6.  Push to the branch (`git push origin feature/your-feature-name`).
+7.  Open a pull request.
+
+## License
+
+This project is not currently licensed.

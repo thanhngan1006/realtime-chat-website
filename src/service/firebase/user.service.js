@@ -21,7 +21,7 @@ import { ServiceResponse } from '../utils/response-formatter';
 import { CONVERSATION_MESSAGES } from '../../constants/Message';
 
 // User service specific message keys
-const USER_MESSAGES = {
+const userMessages = {
   PROFILE_CREATED: 'user.profile_created_success',
   PROFILE_UPDATED: 'user.profile_updated_success',
   STATUS_UPDATED: 'user.status_updated_success',
@@ -41,16 +41,36 @@ class UserService extends BaseRepository {
   }
 
   /**
+   * Private helper to validate the presence of required parameters.
+   * Throws a ServiceError if any parameter is falsy.
+   * @param {object} params - An object where keys are param names and values are the params to check.
+   * @param {string} messageKey - The error message key to use if validation fails.
+   * @private
+   */
+  _validatePresence(params, messageKey) {
+    for (const key in params) {
+      if (!params[key]) {
+        throw new ServiceError(messageKey, ErrorCodes.INVALID_INPUT, 400);
+      }
+    }
+  }
+
+  /**
    * Create a new user profile in Firestore
    */
   createUserProfile = withErrorHandler(async (uid, userData) => {
-    if (!uid || !userData) {
-      throw new ServiceError(
-        USER_MESSAGES.USER_ID_DATA_REQUIRED,
-        ErrorCodes.INVALID_INPUT,
-        400,
-      );
-    }
+    // if (!uid || !userData) {
+    //   throw new ServiceError(
+    //     userMessages.USER_ID_DATA_REQUIRED,
+    //     ErrorCodes.INVALID_INPUT,
+    //     400,
+    //   );
+    // }
+
+    this._validatePresence(
+      { uid, userData },
+      userMessages.USER_ID_DATA_REQUIRED,
+    );
 
     const userDoc = {
       uid,
@@ -66,7 +86,7 @@ class UserService extends BaseRepository {
 
     await setDoc(doc(this.collectionRef, uid), userDoc);
 
-    return ServiceResponse.success(userDoc, USER_MESSAGES.PROFILE_CREATED);
+    return ServiceResponse.success(userDoc, userMessages.PROFILE_CREATED);
   });
 
   /**
@@ -87,13 +107,18 @@ class UserService extends BaseRepository {
    * Update user profile
    */
   updateUserProfile = withErrorHandler(async (userId, updates) => {
-    if (!userId || !updates) {
-      throw new ServiceError(
-        USER_MESSAGES.USER_ID_UPDATES_REQUIRED,
-        ErrorCodes.INVALID_INPUT,
-        400,
-      );
-    }
+    // if (!userId || !updates) {
+    //   throw new ServiceError(
+    //     userMessages.USER_ID_UPDATES_REQUIRED,
+    //     ErrorCodes.INVALID_INPUT,
+    //     400,
+    //   );
+    // }
+
+    this._validatePresence(
+      { userId, updates },
+      userMessages.USER_ID_UPDATES_REQUIRED,
+    );
 
     // Update Firestore document
     const updatedUser = await this.update(userId, updates);
@@ -109,7 +134,7 @@ class UserService extends BaseRepository {
       }
     }
 
-    return ServiceResponse.success(updatedUser, USER_MESSAGES.PROFILE_UPDATED);
+    return ServiceResponse.success(updatedUser, userMessages.PROFILE_UPDATED);
   });
 
   /**
@@ -125,7 +150,7 @@ class UserService extends BaseRepository {
       }));
       return ServiceResponse.success(
         allUsers,
-        `${USER_MESSAGES.USERS_FOUND}: ${allUsers.length}`,
+        `${userMessages.USERS_FOUND}: ${allUsers.length}`,
       );
     }
 
@@ -169,7 +194,7 @@ class UserService extends BaseRepository {
 
     return ServiceResponse.success(
       uniqueResults,
-      `${USER_MESSAGES.USERS_FOUND}: ${uniqueResults.length}`,
+      `${userMessages.USERS_FOUND}: ${uniqueResults.length}`,
     );
   });
 
@@ -181,7 +206,7 @@ class UserService extends BaseRepository {
 
     if (!validStatuses.includes(status)) {
       throw new ServiceError(
-        `${USER_MESSAGES.INVALID_STATUS}: ${validStatuses.join(', ')}`,
+        `${userMessages.INVALID_STATUS}: ${validStatuses.join(', ')}`,
         ErrorCodes.INVALID_INPUT,
         400,
       );
@@ -194,7 +219,7 @@ class UserService extends BaseRepository {
 
     await updateDoc(doc(this.collectionRef, userId), updates);
 
-    return ServiceResponse.success({ status }, USER_MESSAGES.STATUS_UPDATED);
+    return ServiceResponse.success({ status }, userMessages.STATUS_UPDATED);
   });
 
   /**
@@ -225,7 +250,7 @@ class UserService extends BaseRepository {
   addContact = withErrorHandler(async (userId, contactId) => {
     if (userId === contactId) {
       throw new ServiceError(
-        USER_MESSAGES.CANNOT_ADD_YOURSELF,
+        userMessages.CANNOT_ADD_YOURSELF,
         ErrorCodes.INVALID_INPUT,
         400,
       );
@@ -235,7 +260,7 @@ class UserService extends BaseRepository {
     const contactExists = await this.exists(contactId);
     if (!contactExists) {
       throw new ServiceError(
-        USER_MESSAGES.CONTACT_USER_NOT_FOUND,
+        userMessages.CONTACT_USER_NOT_FOUND,
         ErrorCodes.USER_NOT_FOUND,
         404,
       );
@@ -247,16 +272,21 @@ class UserService extends BaseRepository {
       addedAt: serverTimestamp(),
     });
 
-    return ServiceResponse.success({ contactId }, USER_MESSAGES.CONTACT_ADDED);
+    return ServiceResponse.success({ contactId }, userMessages.CONTACT_ADDED);
   });
 
   createNewConversationInUser = withErrorHandler(
     async (senderId, receiverId, id) => {
-      if (!senderId || !receiverId) {
-        throw new ServiceError(
-          CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
-        );
-      }
+      // if (!senderId || !receiverId) {
+      //   throw new ServiceError(
+      //     CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
+      //   );
+      // }
+
+      this._validatePresence(
+        { senderId, receiverId },
+        CONVERSATION_MESSAGES.SENDER_ID_OR_RECEIVER_ID_REQUIRED,
+      );
 
       const conversationDoc = {
         conversationId: id,

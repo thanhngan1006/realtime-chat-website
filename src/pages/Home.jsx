@@ -8,8 +8,10 @@ import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  clearRecordingState,
   setEmojiPickerPosition,
   setIsFocused,
+  setIsOpenMicro,
   setMessageContent,
   setMessages,
   setReceiverData,
@@ -30,6 +32,8 @@ import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
 import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
+import ReactRecorder from '../components/chat/Recorder';
+import { IoSend } from 'react-icons/io5';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -42,6 +46,9 @@ const Home = () => {
     isFocused,
     typingStatus,
     showEmojiPicker,
+    isOpenMicro,
+    recorderStatus,
+    mediaBlobUrl,
   } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
   const inputRef = useRef(null);
@@ -51,32 +58,83 @@ const Home = () => {
   const [typingUsers, setTypingUsers] = useState([]);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
+  const propsRef = useRef();
+
+  useEffect(() => {
+    propsRef.current = {
+      selectedUser,
+      uid: auth.currentUser?.uid,
+    };
+  }, [selectedUser]);
+
+  const hasTextContent = messageContent.trim() !== '';
+  const hasAudioContent = recorderStatus === 'stopped' && mediaBlobUrl;
+  const canSendMessage = hasTextContent || hasAudioContent;
+
+  const handleOpenMicro = () => {
+    dispatch(setIsOpenMicro(!isOpenMicro));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (messageContent.trim() === '') {
-      console.log('Hãy nhập nội dung tin nhắn');
-      return;
-    }
 
-    try {
-      const receiverIds = Array.isArray(selectedUser.id)
-        ? selectedUser.id
-        : [selectedUser.id || ''];
+    if (hasTextContent) {
+      try {
+        const receiverIds = Array.isArray(selectedUser.id)
+          ? selectedUser.id
+          : [selectedUser.id || ''];
 
-      await messageService.createNewMessage({
-        senderId: uid,
-        receiverIds: receiverIds,
-        conversationId: conversationId,
-        messageContent: messageContent || '',
-        typeContent: 0,
-      });
+        await messageService.createNewMessage({
+          senderId: uid,
+          receiverIds: receiverIds,
+          conversationId: conversationId,
+          messageContent: messageContent || '',
+          typeContent: 0,
+        });
 
-      inputRef.current.value = '';
-      dispatch(setMessageContent(''));
-      inputRef.current.focus();
-    } catch (error) {
-      console.error('Error sending message:', error);
+        inputRef.current.value = '';
+        dispatch(setMessageContent(''));
+        inputRef.current.focus();
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    } else if (hasAudioContent) {
+      const audioBlob = await fetch(mediaBlobUrl).then((res) => res.blob());
+
+      const { selectedUser: currentUser, uid } = propsRef.current;
+      if (!currentUser || !uid) {
+        console.error('Dữ liệu không hợp lệ.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice-message.wav');
+      formData.append('upload_preset', 'smycavha');
+      formData.append('resource_type', 'raw');
+
+      try {
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/dbwmvrxbd/raw/upload`,
+          { method: 'POST', body: formData },
+        );
+        const data = await response.json();
+        const audioUrl = data.secure_url;
+
+        await messageService.createNewMessage({
+          senderId: uid,
+          receiverIds: Array.isArray(currentUser.id)
+            ? currentUser.id
+            : [currentUser.id],
+          conversationId: currentUser.conversationId,
+          audio: audioUrl,
+          typeContent: 4,
+        });
+
+        dispatch(setIsOpenMicro(false));
+        dispatch(clearRecordingState());
+      } catch (error) {
+        console.error('Upload failed:', error);
+      }
     }
   };
 
@@ -376,8 +434,10 @@ const Home = () => {
         className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
       >
         {selectedUser && conversationId && messages.length > 0 && (
-          <MessageBox messages={messages} src={avatarUrls} />
+          <MessageBox messages={messages} avatarUrls={avatarUrls} />
         )}
+
+        {/* <ReactRecorder /> */}
 
         <EmojiPickerPortal
           show={showEmojiPicker}
@@ -427,46 +487,57 @@ const Home = () => {
             />
           </div>
           <IoIosCamera className="h-8 w-8" />
-          <FaMicrophone className="h-8 w-8" />
+
+          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
           <div>
             <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="">
-          <div className="relative flex items-center">
-            <Input
-              type="text"
-              placeholder="Aa"
-              className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
-              value={messageContent}
-              onChange={(e) => {
-                dispatch(setMessageContent(e.target.value));
-              }}
-              onFocus={() => dispatch(setIsFocused(true))}
-              onBlur={() => dispatch(setIsFocused(false))}
-              ref={inputRef}
-            />
+        <form onSubmit={handleSubmit} id="chatForm" className="">
+          {isOpenMicro ? (
+            <ReactRecorder />
+          ) : (
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="Aa"
+                className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
+                value={messageContent}
+                onChange={(e) => {
+                  dispatch(setMessageContent(e.target.value));
+                }}
+                onFocus={() => dispatch(setIsFocused(true))}
+                onBlur={() => dispatch(setIsFocused(false))}
+                ref={inputRef}
+              />
 
-            <MdEmojiEmotions
-              onClick={(e) => {
-                const rect = e.target.getBoundingClientRect();
-                dispatch(
-                  setEmojiPickerPosition({
-                    top: rect.top - 320,
-                    left: rect.left,
-                  }),
-                );
-                dispatch(setShowEmojiPicker(!showEmojiPicker));
-                console.log('nhan emoji');
-              }}
-              className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
-            />
-          </div>
+              <MdEmojiEmotions
+                onClick={(e) => {
+                  const rect = e.target.getBoundingClientRect();
+                  dispatch(
+                    setEmojiPickerPosition({
+                      top: rect.top - 320,
+                      left: rect.left,
+                    }),
+                  );
+                  dispatch(setShowEmojiPicker(!showEmojiPicker));
+                  console.log('nhan emoji');
+                }}
+                className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
+              />
+            </div>
+          )}
         </form>
 
         <div className="text-blue-400">
-          <AiFillLike className="h-8 w-8" />
+          {canSendMessage ? (
+            <button type="submit" form="chatForm">
+              <IoSend size={24} />
+            </button>
+          ) : !isOpenMicro ? (
+            <AiFillLike className="h-8 w-8" />
+          ) : null}
         </div>
       </div>
     </div>
