@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedUser } from '../../../features/user/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { conversationService, userService } from '../../service';
+import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
 
 const ConversationItem = ({ conversationItem }) => {
   const senderUserId = auth.currentUser.uid;
@@ -49,15 +50,19 @@ const ConversationItem = ({ conversationItem }) => {
             return;
           }
 
-          // const userDocRef = doc(db, 'users', receiverId);
-          // const userDocSnap = await getDoc(userDocRef);
-
-          const userDocSnap = await userService.getUser(receiverId);
-
-          if (userDocSnap.success) {
-            setReceiverData(userDocSnap.data);
+          if (receiverId == AI_ASSISTANT_ID) {
+            setReceiverData({ ...AI_ASSISTANT_PROFILE });
           } else {
-            console.error('No user found for receiverId:', receiverId);
+            // const userDocRef = doc(db, 'users', receiverId);
+            // const userDocSnap = await getDoc(userDocRef);
+
+            const userDocSnap = await userService.getUser(receiverId);
+
+            if (userDocSnap.success) {
+              setReceiverData(userDocSnap.data);
+            } else {
+              console.error('No user found for receiverId:', receiverId);
+            }
           }
         }
       } catch (error) {

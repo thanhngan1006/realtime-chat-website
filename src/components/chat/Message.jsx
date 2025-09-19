@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import Avatar from '../common/Avatar';
 import { FaFile } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
+import ReactMarkdown from 'react-markdown';
+import aiAvatarPath from '../../assets/ai_avatar.jpg';
+
 import { Button, Input } from '../common';
 import {
   setEditedMessage,
@@ -19,6 +22,7 @@ import { auth, db } from '../../firebase';
 import OptionsForMessage from './OptionsForMessage';
 import ReactionDisplay from './ReactionDisplay';
 import { IoMdCloseCircle } from 'react-icons/io';
+import { AI_ASSISTANT_ID } from '../../constants/ai';
 
 const Message = ({
   children,
@@ -174,7 +178,13 @@ const Message = ({
     >
       {!isYourMessage && (
         <Avatar
-          src={avatarUrl}
+          src={`${
+            avatarUrl
+              ? avatarUrl
+              : msg.senderId == AI_ASSISTANT_ID
+                ? aiAvatarPath
+                : null
+          }`}
           alt="Avatar"
           className="h-8 w-8 flex-shrink-0 rounded-full"
         />
@@ -233,11 +243,11 @@ const Message = ({
               className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
                 isYourMessage
                   ? `rounded-br-none bg-blue-500`
-                  : `rounded-bl-none bg-gray-600`
+                  : `rounded-bl-none bg-gray-500`
               } ${className}`}
               ref={messageContentRef}
             >
-              {children}
+              <ReactMarkdown>{children}</ReactMarkdown>
               <ReactionDisplay
                 reactions={msg.reactions}
                 parentRef={messageContentRef}
