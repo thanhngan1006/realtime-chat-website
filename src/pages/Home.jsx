@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AiFillLike } from 'react-icons/ai';
 import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
-import { FaMicrophone, FaRegImage } from 'react-icons/fa';
+import { FaMicrophone, FaRegImage, FaRobot } from 'react-icons/fa';
 import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
-import { Input } from '../components/common';
+import { Button, Input } from '../components/common';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   clearRecordingState,
+  setConversations,
   setEmojiPickerPosition,
   setIsFocused,
   setIsOpenMicro,
@@ -34,6 +35,9 @@ import TypingDots from '../components/chat/TypingDots';
 import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
 import ReactRecorder from '../components/chat/Recorder';
 import { IoSend } from 'react-icons/io5';
+import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../constants/ai';
+import { setSelectedUser } from '../../features/user/userReducer';
+import { aiService } from '../service/firebase/ai.service';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -78,6 +82,8 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const currentMessageText = messageContent;
+
     if (hasTextContent) {
       try {
         const receiverIds = Array.isArray(selectedUser.id)
@@ -91,6 +97,28 @@ const Home = () => {
           messageContent: messageContent || '',
           typeContent: 0,
         });
+
+        dispatch(setMessageContent(''));
+
+        if (selectedUser.id === AI_ASSISTANT_ID) {
+          const history = messages.map((msg) => ({
+            role: msg.senderId === uid ? 'user' : 'model',
+            parts: [{ text: msg.messageText }],
+          }));
+          history.push({ role: 'user', parts: [{ text: currentMessageText }] });
+
+          const aiResponseText = await aiService.generateResponse(history);
+
+          if (aiResponseText) {
+            await messageService.createNewMessage({
+              senderId: AI_ASSISTANT_ID,
+              receiverIds: [uid],
+              conversationId: conversationId,
+              messageContent: aiResponseText,
+              typeContent: 0,
+            });
+          }
+        }
 
         inputRef.current.value = '';
         dispatch(setMessageContent(''));
@@ -253,14 +281,22 @@ const Home = () => {
           );
         } else {
           // const userDoc = await getDoc(doc(db, 'users', selectedUser.id));
-          const userDoc = await userService.getUser(selectedUser.id);
+          if (selectedUser.id == AI_ASSISTANT_ID) {
+            dispatch(setReceiverData(AI_ASSISTANT_PROFILE));
 
-          // console.log('userDoc', userDoc);
-
-          if (userDoc.success) {
-            dispatch(setReceiverData(userDoc.data));
+            console.log('AI_ASSISTANT_PROFILE', AI_ASSISTANT_PROFILE);
           } else {
-            dispatch(setReceiverData({ name: 'Unknown User', avatarUrl: '' }));
+            const userDoc = await userService.getUser(selectedUser.id);
+
+            console.log('userDoc', userDoc);
+
+            if (userDoc.success) {
+              dispatch(setReceiverData(userDoc.data));
+            } else {
+              dispatch(
+                setReceiverData({ name: 'Unknown User', avatarUrl: '' }),
+              );
+            }
           }
         }
       } catch (error) {
@@ -426,8 +462,37 @@ const Home = () => {
     return () => unsubscribe();
   }, [conversationId, dispatch, uid]);
 
+  const fetchConversations = async () => {
+    try {
+      const response = await conversationService.fetchConversation(uid);
+      dispatch(setConversations(response.data));
+    } catch (error) {
+      console.error('Error reloading conversations:', error);
+    }
+  };
+
+  const handleCreateAiChat = async () => {
+    try {
+      const conversationId = await conversationService.createNewChat(
+        uid,
+        AI_ASSISTANT_ID,
+      );
+      dispatch(
+        setSelectedUser({
+          id: AI_ASSISTANT_ID,
+          conversationId: conversationId,
+          name: AI_ASSISTANT_PROFILE.name,
+          avatarUrl: AI_ASSISTANT_PROFILE.avatarUrl,
+        }),
+      );
+      await fetchConversations();
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
+
   return (
-    <div className="flex h-screen flex-col">
+    <div className="relative flex h-screen flex-col">
       <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" />
       <div
         id="chat-screen"
@@ -436,8 +501,6 @@ const Home = () => {
         {selectedUser && conversationId && messages.length > 0 && (
           <MessageBox messages={messages} avatarUrls={avatarUrls} />
         )}
-
-        {/* <ReactRecorder /> */}
 
         <EmojiPickerPortal
           show={showEmojiPicker}
@@ -540,6 +603,13 @@ const Home = () => {
           ) : null}
         </div>
       </div>
+
+      <Button
+        className="absolute right-4 bottom-20 cursor-pointer rounded-full bg-gray-300 p-3 hover:bg-gray-400"
+        onClick={handleCreateAiChat}
+      >
+        <FaRobot className="h-8 w-8" />
+      </Button>
     </div>
   );
 };
