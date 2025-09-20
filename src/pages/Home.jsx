@@ -283,12 +283,8 @@ const Home = () => {
           // const userDoc = await getDoc(doc(db, 'users', selectedUser.id));
           if (selectedUser.id == AI_ASSISTANT_ID) {
             dispatch(setReceiverData(AI_ASSISTANT_PROFILE));
-
-            console.log('AI_ASSISTANT_PROFILE', AI_ASSISTANT_PROFILE);
           } else {
             const userDoc = await userService.getUser(selectedUser.id);
-
-            console.log('userDoc', userDoc);
 
             if (userDoc.success) {
               dispatch(setReceiverData(userDoc.data));

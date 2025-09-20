@@ -3,7 +3,6 @@ import Avatar from '../common/Avatar';
 import { FaFile } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import aiAvatarPath from '../../assets/ai_avatar.jpg';
 
 import { Button, Input } from '../common';
 import {
@@ -182,7 +181,7 @@ const Message = ({
             avatarUrl
               ? avatarUrl
               : msg.senderId == AI_ASSISTANT_ID
-                ? aiAvatarPath
+                ? '/ai_avatar.jpg'
                 : null
           }`}
           alt="Avatar"

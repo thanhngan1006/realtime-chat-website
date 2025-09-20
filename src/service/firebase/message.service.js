@@ -5,6 +5,7 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
 import { ServiceError, withErrorHandler } from '../utils/error-handler';
@@ -67,6 +68,49 @@ class MessageService extends BaseRepository {
       };
 
       await setDoc(newDocRef, messageDoc);
+
+      // CẬP NHẬT CONVERSATION (LOGIC MỚI) CHO CHỨC NĂNG NHẬN THÔNG BÁO KHI CÓ TIN NHẮN MỚI VÀ HIỂN THỊ LASTMESSAGE LÊN CUỘC TRÒ CHUYÊNH===
+      try {
+        const conversationRef = doc(db, 'conversations', conversationId);
+
+        let lastMessageText = '';
+        switch (typeContent) {
+          case 0:
+            lastMessageText = messageContent;
+            break;
+          case 1:
+            lastMessageText = `đã gửi một ảnh.`;
+            break;
+          case 2:
+            lastMessageText = `đã gửi một tệp.`;
+            break;
+          case 3:
+            lastMessageText = `đã gửi một video.`;
+            break;
+          case 4:
+            lastMessageText = `đã gửi một tin nhắn thoại.`;
+            break;
+          default:
+            lastMessageText = 'Đã có tin nhắn mới.';
+        }
+
+        await updateDoc(conversationRef, {
+          lastMessage: {
+            text: lastMessageText,
+            senderId: senderId,
+            sentTime: serverTimestamp(),
+          },
+          // Dùng arrayUnion để thêm những người nhận vào danh sách chưa đọc.
+          // Nó sẽ không thêm nếu ID đã tồn tại.
+          unReadBy: arrayUnion(...receiverIds),
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        console.error(
+          'Lỗi khi cập nhật conversation sau khi gửi tin nhắn:',
+          error,
+        );
+      }
 
       const newDoc = await getDoc(newDocRef);
       const formattedDoc = formatDocument(newDoc);
