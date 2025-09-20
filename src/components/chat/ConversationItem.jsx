@@ -154,6 +154,7 @@ const ConversationItem = ({ conversationItem }) => {
 
     fetchSenderName();
   }, [conversationItem, receiverId]);
+
   return (
     <div
       className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
@@ -174,10 +175,9 @@ const ConversationItem = ({ conversationItem }) => {
           </span>
         </div>
         {}
-        {/* <span>{`${conversationItem.lastMessage?.senderId == senderUserId ? 'Bạn: ' : ''} ${truncateText(conversationItem.lastMessage?.text)} `}</span> */}
 
         <span>
-          {`${conversationItem.lastMessage?.senderId === senderUserId ? 'Bạn ' : senderNameInLastMessage ? `${senderNameInLastMessage} ` : ''}${truncateText(conversationItem.lastMessage?.text)} `}
+          {`${conversationItem.lastMessage?.senderId === senderUserId ? `Bạn` : senderNameInLastMessage ? `${senderNameInLastMessage}` : ''}${truncateText(conversationItem.lastMessage?.text)} `}
         </span>
       </div>
 

@@ -76,19 +76,19 @@ class MessageService extends BaseRepository {
         let lastMessageText = '';
         switch (typeContent) {
           case 0:
-            lastMessageText = messageContent;
+            lastMessageText = `: ${messageContent}`;
             break;
           case 1:
-            lastMessageText = `đã gửi một ảnh.`;
+            lastMessageText = ` đã gửi một ảnh.`;
             break;
           case 2:
-            lastMessageText = `đã gửi một tệp.`;
+            lastMessageText = ` đã gửi một tệp.`;
             break;
           case 3:
-            lastMessageText = `đã gửi một video.`;
+            lastMessageText = ` đã gửi một video.`;
             break;
           case 4:
-            lastMessageText = `đã gửi một tin nhắn thoại.`;
+            lastMessageText = ` đã gửi một tin nhắn thoại.`;
             break;
           default:
             lastMessageText = 'Đã có tin nhắn mới.';
