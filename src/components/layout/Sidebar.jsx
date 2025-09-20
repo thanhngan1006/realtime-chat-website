@@ -83,22 +83,22 @@ const Sidebar = () => {
   useEffect(() => {
     if (!senderId) return;
 
-    const fetchConversations = async () => {
-      try {
-        const isGroup = modeType === 'isGroup';
-        const response = await conversationService.fetchConversation(
-          senderId,
-          isGroup,
-        );
-        dispatch(setConversations(response.data));
-      } catch (error) {
-        console.error('Error loading conversations: ', error);
-        setConversations([]);
-      }
-    };
+    const isGroup = modeType === 'isGroup';
 
-    fetchConversations();
-  }, [dispatch, senderId, modeType]);
+    const unsubscribe = conversationService.listenToConversations(
+      senderId,
+      isGroup,
+      (response) => {
+        if (response.success) {
+          dispatch(setConversations(response.data));
+        } else {
+          console.error('Failed to listen to conversations:', response.error);
+        }
+      },
+    );
+
+    return () => unsubscribe();
+  }, [senderId, modeType, dispatch]);
 
   const handleChange = (event) => {
     setSearchValue(event.target.value);

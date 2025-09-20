@@ -1,8 +1,10 @@
 import {
+  arrayRemove,
   collection,
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   orderBy,
   query,
   where,
@@ -62,6 +64,7 @@ class ConversationService extends BaseRepository {
       lastMessage: null,
       isGroup: false,
       key: this.generateConversationId(senderId, receiverId),
+      unReadBy: [],
     };
 
     const docRef = await this.create(conversationDoc);
@@ -96,10 +99,55 @@ class ConversationService extends BaseRepository {
       typingStatuses,
       isGroup: true,
       key: this.generateConversationId(participants),
+      unReadBy: [],
     };
 
     const docRef = await this.create(groupDoc);
     return { id: docRef.id, ...groupDoc };
+  });
+
+  listenToConversations = (userId, isGroup, callback) => {
+    if (!userId) {
+      console.error('User ID is required to listen to conversations.');
+      return () => {};
+    }
+
+    const q = query(
+      this.collectionRef,
+      where('participants', 'array-contains', userId),
+      where('isGroup', '==', isGroup),
+      orderBy('updatedAt', 'desc'),
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const conversations = formatDocuments(snapshot);
+        callback(ServiceResponse.success(conversations));
+      },
+      (error) => {
+        console.error('Error listening to conversations:', error);
+        callback(
+          ServiceResponse.fail(null, 'Error listening to conversations'),
+        );
+      },
+    );
+
+    return unsubscribe;
+  };
+
+  markAsRead = withErrorHandler(async (conversationId, userId) => {
+    if (!conversationId || !userId) return;
+    const data = {
+      unReadBy: arrayRemove(userId),
+    };
+
+    const updateDoc = await this.update(conversationId, data);
+
+    console.log(
+      `Cuộc trò chuyện ${conversationId} đã được đánh dấu là đã đọc bởi ${userId}`,
+    );
+    return updateDoc;
   });
 
   fetchConversation = withErrorHandler(async (senderId, isGroup = false) => {
@@ -138,9 +186,9 @@ class ConversationService extends BaseRepository {
   });
 
   getConversation = withErrorHandler(async (conversationId) => {
-    const user = await this.findById(conversationId);
+    const conversation = await this.findById(conversationId);
 
-    if (!user) {
+    if (!conversation) {
       throw new ServiceError(
         'Conversation not found',
         ErrorCodes.CONVERSATION_NOT_FOUND,
@@ -148,7 +196,7 @@ class ConversationService extends BaseRepository {
       );
     }
 
-    return ServiceResponse.success(user);
+    return ServiceResponse.success(conversation);
   });
 }
 

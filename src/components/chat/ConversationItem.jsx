@@ -14,6 +14,7 @@ const ConversationItem = ({ conversationItem }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { modeType } = useSelector((state) => state.chat);
+  const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
 
   const receiverId = useMemo(() => {
     if (!conversationItem?.participants) return null;
@@ -22,6 +23,27 @@ const ConversationItem = ({ conversationItem }) => {
       ? conversationItem.participants[0]
       : conversationItem.participants.find((id) => id !== senderUserId) || null;
   }, [conversationItem, senderUserId]);
+
+  const isSelfConversation = useMemo(() => {
+    if (
+      !conversationItem?.participants ||
+      conversationItem.participants.length < 2
+    )
+      return false;
+    const uniqueIds = new Set(conversationItem.participants);
+    return uniqueIds.size < conversationItem.participants.length;
+  }, [conversationItem]);
+
+  const baseUnread = conversationItem.unReadBy?.includes(senderUserId);
+  const showUnreadIndicator =
+    baseUnread && !isSelfConversation && receiverId !== AI_ASSISTANT_ID;
+
+  const truncateText = (text, maxLength = 15) => {
+    if (!text) return 'No messages yet';
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + '...'
+      : text;
+  };
 
   useEffect(() => {
     const fetchReceiverData = async () => {
@@ -53,9 +75,6 @@ const ConversationItem = ({ conversationItem }) => {
           if (receiverId == AI_ASSISTANT_ID) {
             setReceiverData({ ...AI_ASSISTANT_PROFILE });
           } else {
-            // const userDocRef = doc(db, 'users', receiverId);
-            // const userDocSnap = await getDoc(userDocRef);
-
             const userDocSnap = await userService.getUser(receiverId);
 
             if (userDocSnap.success) {
@@ -77,10 +96,6 @@ const ConversationItem = ({ conversationItem }) => {
     try {
       const conversationId = conversationItem.id;
 
-      // const docRef = doc(db, 'conversations', conversationId);
-      // const docSnap = await getDoc(docRef);
-      // const conversationData1 = docSnap.data();
-
       const getConversationData =
         await conversationService.getConversation(conversationId);
       const conversationData = getConversationData.data;
@@ -98,22 +113,58 @@ const ConversationItem = ({ conversationItem }) => {
         }),
       );
 
+      if (baseUnread) {
+        await conversationService.markAsRead(conversationId, senderUserId);
+      }
+
       navigate(`/${conversationId}`);
     } catch (error) {
       console.error('Error creating chat:', error);
     }
   };
 
+  console.log('receiverData', receiverData);
+
+  useEffect(() => {
+    const fetchSenderName = async () => {
+      if (receiverId === AI_ASSISTANT_ID) {
+        return;
+      }
+
+      try {
+        if (conversationItem.lastMessage?.senderId) {
+          const senderData = await userService.getUser(
+            conversationItem.lastMessage.senderId,
+          );
+          if (senderData.success) {
+            setSenderNameInLastMessage(
+              senderData.data.name || 'Người dùng ẩn danh',
+            );
+          } else {
+            setSenderNameInLastMessage(conversationItem.lastMessage.senderId);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching sender name:', error);
+        setSenderNameInLastMessage(
+          conversationItem.lastMessage?.senderId || 'Unknown',
+        );
+      }
+    };
+
+    fetchSenderName();
+  }, [conversationItem, receiverId]);
+
   return (
     <div
-      className="flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500"
+      className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
       onClick={handleClickItem}
     >
       <Avatar
         src={receiverData.avatarUrl || ''}
         className="h-12 w-12 rounded-full"
       />
-      <div className="flex-1">
+      <div className="flex-1 flex-col">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">
             {receiverData.name || 'Unknown User'}{' '}
@@ -123,7 +174,16 @@ const ConversationItem = ({ conversationItem }) => {
               'No messages yet'}{' '}
           </span>
         </div>
+        {}
+
+        <span>
+          {`${conversationItem.lastMessage?.senderId === senderUserId ? `Bạn` : senderNameInLastMessage ? `${senderNameInLastMessage}` : ''}${truncateText(conversationItem.lastMessage?.text)} `}
+        </span>
       </div>
+
+      {showUnreadIndicator && (
+        <span className="h-3 w-3 rounded-full bg-blue-500"></span>
+      )}
     </div>
   );
 };
