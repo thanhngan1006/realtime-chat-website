@@ -74,6 +74,7 @@ class MessageService extends BaseRepository {
         const conversationRef = doc(db, 'conversations', conversationId);
 
         let lastMessageText = '';
+
         switch (typeContent) {
           case 0:
             lastMessageText = `: ${messageContent}`;
@@ -91,7 +92,7 @@ class MessageService extends BaseRepository {
             lastMessageText = ` đã gửi một tin nhắn thoại.`;
             break;
           default:
-            lastMessageText = 'Đã có tin nhắn mới.';
+            lastMessageText = ' đã gửi một tin nhắn.';
         }
 
         await updateDoc(conversationRef, {
@@ -134,6 +135,25 @@ class MessageService extends BaseRepository {
       messageText: 'Tin nhắn đã được thu hồi',
     };
     const updatedDoc = await this.update(id, data);
+
+    const messageRef = doc(db, 'messages', id);
+    const messageDoc = await getDoc(messageRef);
+    const messageData = messageDoc.data();
+    const conversationId = messageData.conversationId;
+    const senderId = messageData.senderId;
+
+    if (conversationId) {
+      const conversationRef = doc(db, 'conversations', conversationId);
+      await updateDoc(conversationRef, {
+        lastMessage: {
+          text: '     đã thu hồi một tin nhắn.',
+          senderId: senderId,
+          sentTime: serverTimestamp(),
+        },
+        updatedAt: serverTimestamp(),
+      });
+    }
+
     return updatedDoc;
   });
 

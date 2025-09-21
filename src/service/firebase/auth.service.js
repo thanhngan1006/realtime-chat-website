@@ -17,6 +17,7 @@ import {
 } from '../utils/error-handler';
 import { ServiceResponse } from '../utils/response-formatter';
 import { ERROR, SUCCESS } from '../../constants/Message';
+import { presenceService } from './presence.service';
 
 class AuthService {
   /**
@@ -82,7 +83,7 @@ class AuthService {
     const user = userCredential.user;
 
     // Update user online status
-    await userService.updateUserStatus(user.uid, 'online');
+    // await userService.updateUserStatus(user.uid, 'online');
 
     // Get user profile from Firestore
     const userProfile = await userService.getUser(user.uid);
@@ -102,12 +103,14 @@ class AuthService {
    * Logout user
    */
   logout = withErrorHandler(async () => {
-    const currentUser = auth.currentUser;
+    // const currentUser = auth.currentUser;
 
-    if (currentUser) {
-      // Update user status to offline
-      await userService.updateUserStatus(currentUser.uid, 'offline');
-    }
+    // if (currentUser) {
+    //   // Update user status to offline
+    //   await userService.updateUserStatus(currentUser.uid, 'offline');
+    // }
+
+    presenceService.goOffline();
 
     await signOut(auth);
 

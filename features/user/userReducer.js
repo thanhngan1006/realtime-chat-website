@@ -7,12 +7,19 @@ const initialState = {
   loading: false,
   users: [],
   selectedUser: {},
+  presenceStatuses: {},
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    setPresenceStatus: (state, action) => {
+      const { userId, status } = action.payload;
+      if (userId) {
+        state.presenceStatuses[userId] = status;
+      }
+    },
     setProfileData: (state, action) => {
       state.profileData = action.payload;
       if (action.payload.avatarUrl) state.avatarUrl = action.payload.avatarUrl;
@@ -39,6 +46,7 @@ const userSlice = createSlice({
 });
 
 export const {
+  setPresenceStatus,
   setProfileData,
   setAvatarUrl,
   setName,

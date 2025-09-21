@@ -1,34 +1,92 @@
-import React from 'react';
-import { IoIosInformationCircle } from 'react-icons/io';
-import { FaPhoneAlt } from 'react-icons/fa';
-import { MdVideoCall } from 'react-icons/md';
-import { Avatar, Button } from '../common';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { Avatar } from '../common';
+import { AI_ASSISTANT_ID } from '../../constants/ai';
+import { useTimeAgo } from '../../hooks/useTimeAgo';
 
-const HeadingMessageBar = ({ name, activeTime }) => {
-  const { selectedUser } = useSelector((state) => state.user);
+const HeadingMessageBar = () => {
+  const { selectedUser, presenceStatuses } = useSelector((state) => state.user);
+
+  const displayStatus = useMemo(() => {
+    if (!selectedUser?.id) return null;
+
+    if (selectedUser.id === AI_ASSISTANT_ID) return { state: 'online' };
+
+    const isGroupChat = Array.isArray(selectedUser.id);
+
+    if (!isGroupChat) {
+      return presenceStatuses[selectedUser.id];
+    }
+
+    if (isGroupChat) {
+      const otherParticipantsIds = selectedUser.id;
+
+      let anyoneOnline = false;
+      let mostRecentOfflineUserStatus = null;
+
+      for (const id of otherParticipantsIds) {
+        const status = presenceStatuses[id];
+        if (status?.state === 'online') {
+          anyoneOnline = true;
+          break;
+        }
+        if (status?.state === 'offline' && status.last_changed) {
+          if (
+            !mostRecentOfflineUserStatus ||
+            status.last_changed > mostRecentOfflineUserStatus.last_changed
+          ) {
+            mostRecentOfflineUserStatus = status;
+          }
+        }
+      }
+
+      if (anyoneOnline) {
+        return { state: 'online' };
+      }
+      return mostRecentOfflineUserStatus;
+    }
+
+    return null;
+  }, [selectedUser, presenceStatuses]);
+
+  const timeAgoText = useTimeAgo(displayStatus?.last_changed);
+
+  const renderActiveStatus = () => {
+    if (!displayStatus) {
+      if (Array.isArray(selectedUser?.id)) {
+        const memberCount = selectedUser.id.length + 1;
+        return (
+          <span className="text-sm text-gray-500">
+            {memberCount} thành viên
+          </span>
+        );
+      }
+      return null;
+    }
+
+    if (displayStatus.state === 'online') {
+      return <span className="text-sm text-green-500">Đang hoạt động</span>;
+    }
+
+    if (displayStatus.state === 'offline' && displayStatus.last_changed) {
+      return (
+        <span className="text-sm text-gray-500">
+          Hoạt động {timeAgoText} trước
+        </span>
+      );
+    }
+
+    return <span className="text-sm text-gray-500">Không hoạt động</span>;
+  };
 
   return (
-    <div className="flex items-center justify-between border-1 border-gray-200 bg-white px-6 py-2 dark:bg-zinc-800 dark:text-white">
-      <div className="flex items-center gap-2">
-        <Avatar className="h-10 w-10" src={selectedUser.avatarUrl} />
-
-        <div className="flex flex-col">
-          <span className="font-bold text-black dark:text-white">{name}</span>
-          <span className="text-sm">{activeTime}</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button className="px-2 py-2" onClick={() => {}}>
-          <FaPhoneAlt className="h-6 w-6 text-blue-500 hover:text-blue-600" />
-        </Button>
-        <Button className="px-2 py-2" onClick={() => {}}>
-          <MdVideoCall className="h-6 w-6 text-blue-500 hover:text-blue-600" />
-        </Button>
-
-        <Button className="px-2 py-2" onClick={() => {}}>
-          <IoIosInformationCircle className="h-6 w-6 text-blue-500 hover:text-blue-600" />
-        </Button>
+    <div className="flex items-center gap-4 border-b p-2 dark:border-gray-700">
+      <Avatar src={selectedUser?.avatarUrl || ''} className="h-10 w-10" />
+      <div className="flex flex-col">
+        <span className="font-bold">
+          {selectedUser?.name || 'Chọn một cuộc trò chuyện'}
+        </span>
+        {renderActiveStatus()}
       </div>
     </div>
   );

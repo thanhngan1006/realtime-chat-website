@@ -13,7 +13,6 @@ import { setTheme } from '../../../features/common/commonReducer';
 
 const SidebarLayout = () => {
   const { isOpen } = useSelector((state) => state.modal);
-  const { user } = useSelector((state) => state.auth);
   const { avatarUrl } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -40,7 +39,7 @@ const SidebarLayout = () => {
           onClick={() => dispatch(setIsOpen(true))}
           className="relative cursor-pointer"
         >
-          <Avatar className="h-10 w-10" isOnline={!!user} src={avatarUrl} />
+          <Avatar className="h-10 w-10" src={avatarUrl} />
         </button>
 
         <Modal isOpen={isOpen} onClose={() => dispatch(setIsOpen(false))}>
