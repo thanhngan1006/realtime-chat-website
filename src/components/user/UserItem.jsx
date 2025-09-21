@@ -70,9 +70,11 @@ const UserItem = ({ name, imgUrl, user }) => {
   );
 
   return (
-    <div
-      className="flex cursor-pointer items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100"
+    <button
+      type="button"
+      className="flex w-full cursor-pointer items-center gap-3 border-b border-gray-200 p-2 text-left transition-colors hover:bg-gray-100"
       onClick={handleClickItem}
+      aria-label={`Select user ${name}`}
     >
       <Avatar src={imgUrl} className="h-12 w-12 rounded-full" />
       <div className="flex-1">
@@ -83,7 +85,7 @@ const UserItem = ({ name, imgUrl, user }) => {
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

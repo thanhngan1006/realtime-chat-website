@@ -17,7 +17,10 @@ import {
   ErrorCodes,
   withErrorHandler,
 } from '../utils/error-handler';
-import { ServiceResponse } from '../utils/response-formatter';
+import {
+  ServiceResponse,
+  convertTimestampsToMillis,
+} from '../utils/response-formatter';
 import { CONVERSATION_MESSAGES } from '../../constants/Message';
 
 // User service specific message keys
@@ -99,22 +102,16 @@ class UserService extends BaseRepository {
       throw new ServiceError('User not found', ErrorCodes.USER_NOT_FOUND, 404);
     }
 
-    // Add any additional user data processing here
-    return ServiceResponse.success(user);
+    // Convert timestamps to millis
+    const convertedUser = convertTimestampsToMillis(user);
+
+    return ServiceResponse.success(convertedUser);
   });
 
   /**
    * Update user profile
    */
   updateUserProfile = withErrorHandler(async (userId, updates) => {
-    // if (!userId || !updates) {
-    //   throw new ServiceError(
-    //     userMessages.USER_ID_UPDATES_REQUIRED,
-    //     ErrorCodes.INVALID_INPUT,
-    //     400,
-    //   );
-    // }
-
     this._validatePresence(
       { userId, updates },
       userMessages.USER_ID_UPDATES_REQUIRED,
@@ -122,6 +119,9 @@ class UserService extends BaseRepository {
 
     // Update Firestore document
     const updatedUser = await this.update(userId, updates);
+
+    // Convert timestamps in returned data
+    const convertedUser = convertTimestampsToMillis(updatedUser);
 
     // Update Firebase Auth profile if display name or photo changed
     if (auth.currentUser && auth.currentUser.uid === userId) {
@@ -134,7 +134,7 @@ class UserService extends BaseRepository {
       }
     }
 
-    return ServiceResponse.success(updatedUser, userMessages.PROFILE_UPDATED);
+    return ServiceResponse.success(convertedUser, userMessages.PROFILE_UPDATED);
   });
 
   /**
@@ -148,9 +148,11 @@ class UserService extends BaseRepository {
         id: doc.id,
         ...doc.data(),
       }));
+      // Convert timestamps
+      const convertedUsers = allUsers.map(convertTimestampsToMillis);
       return ServiceResponse.success(
-        allUsers,
-        `${userMessages.USERS_FOUND}: ${allUsers.length}`,
+        convertedUsers,
+        `${userMessages.USERS_FOUND}: ${convertedUsers.length}`,
       );
     }
 
@@ -187,14 +189,12 @@ class UserService extends BaseRepository {
       new Map(allResults.map((user) => [user.id, user])).values(),
     );
 
-    // Filter out current user
-    // const filteredResults = uniqueResults.filter(
-    //   (user) => user.id !== currentUserId,
-    // );
+    // Convert timestamps
+    const convertedResults = uniqueResults.map(convertTimestampsToMillis);
 
     return ServiceResponse.success(
-      uniqueResults,
-      `${userMessages.USERS_FOUND}: ${uniqueResults.length}`,
+      convertedResults,
+      `${userMessages.USERS_FOUND}: ${convertedResults.length}`,
     );
   });
 

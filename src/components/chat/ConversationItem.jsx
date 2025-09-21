@@ -156,9 +156,11 @@ const ConversationItem = ({ conversationItem }) => {
   }, [conversationItem, receiverId]);
 
   return (
-    <div
-      className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
+    <button
+      type="button"
+      className={`flex w-full items-center gap-3 border-b border-gray-200 p-2 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
       onClick={handleClickItem}
+      aria-label={`Open conversation with ${receiverData.name || 'Unknown User'}`}
     >
       <Avatar
         src={receiverData.avatarUrl || ''}
@@ -184,7 +186,7 @@ const ConversationItem = ({ conversationItem }) => {
       {showUnreadIndicator && (
         <span className="h-3 w-3 rounded-full bg-blue-500"></span>
       )}
-    </div>
+    </button>
   );
 };
 

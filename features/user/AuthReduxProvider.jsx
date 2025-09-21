@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { auth, db } from '../../src/firebase';
 import { setUser, setLoading } from './authReducer';
 import { doc, getDoc } from 'firebase/firestore';
+import { convertTimestampsToMillis } from '../../src/service/utils/response-formatter';
 
 const AuthReduxProvider = ({ children }) => {
   const dispatch = useDispatch();
@@ -17,7 +18,12 @@ const AuthReduxProvider = ({ children }) => {
         try {
           // Optionally fetch additional user data from Firestore
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const userData = userDoc.exists() ? userDoc.data() : null;
+          let userData = userDoc.exists() ? userDoc.data() : null;
+
+          // Convert timestamps to millis
+          if (userData) {
+            userData = convertTimestampsToMillis(userData);
+          }
 
           dispatch(
             setUser({

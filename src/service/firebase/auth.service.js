@@ -81,6 +81,16 @@ class AuthService {
     );
     const user = userCredential.user;
 
+    // Check if user profile exists, create if not
+    const profileExists = await userService.exists(user.uid);
+    if (!profileExists) {
+      await userService.createUserProfile(user.uid, {
+        email: user.email,
+        displayName: user.displayName || '',
+        photoURL: user.photoURL || '',
+      });
+    }
+
     // Update user online status
     await userService.updateUserStatus(user.uid, 'online');
 

@@ -36,41 +36,56 @@ export class ServiceResponse {
 }
 
 /**
- * Formats Firestore timestamps to ISO strings
+ * Recursively converts Firestore Timestamps and Dates to milliseconds (numeric)
+ */
+export function convertTimestampsToMillis(obj) {
+  if (obj === null || obj === undefined) return obj;
+
+  if (obj.toDate && typeof obj.toDate === 'function') {
+    // Firestore Timestamp
+    return obj.toMillis();
+  }
+
+  if (obj instanceof Date) {
+    // Date object
+    return obj.getTime();
+  }
+
+  if (typeof obj === 'object') {
+    if (Array.isArray(obj)) {
+      return obj.map(convertTimestampsToMillis);
+    } else {
+      const converted = {};
+      for (const [key, value] of Object.entries(obj)) {
+        converted[key] = convertTimestampsToMillis(value);
+      }
+      return converted;
+    }
+  }
+
+  return obj;
+}
+
+/**
+ * Formats Firestore timestamps to milliseconds
  */
 export function formatTimestamp(timestamp) {
   if (!timestamp) return null;
 
-  // Handle Firestore Timestamp
-  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
-    return timestamp.toDate().toISOString();
-  }
-
-  // Handle Date object
-  if (timestamp instanceof Date) {
-    return timestamp.toISOString();
-  }
-
-  // Handle string timestamp
-  if (typeof timestamp === 'string') {
-    return new Date(timestamp).toISOString();
-  }
-
-  return null;
+  return convertTimestampsToMillis(timestamp);
 }
 
 /**
- * Formats Firestore document data
+ * Formats Firestore document data by converting all timestamps
  */
 export function formatDocument(doc) {
   if (!doc.exists) return null;
 
   const data = doc.data();
+  const formattedData = convertTimestampsToMillis(data);
   return {
     id: doc.id,
-    ...data,
-    createdAt: formatTimestamp(data.createdAt),
-    updatedAt: formatTimestamp(data.updatedAt),
+    ...formattedData,
   };
 }
 

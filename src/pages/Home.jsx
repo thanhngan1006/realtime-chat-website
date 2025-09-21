@@ -523,10 +523,16 @@ const Home = () => {
         )}
       </div>
 
-      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
+      <div className="fixed bottom-0 grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl md:w-[75%] dark:bg-zinc-800">
         <div className="flex items-center gap-2 text-blue-400">
           <div>
-            <IoMdAddCircle onClick={handleSendFile} className="h-8 w-8" />
+            <button
+              aria-label="Attach file"
+              onClick={handleSendFile}
+              className="h-8 w-8 cursor-pointer border-none bg-transparent"
+            >
+              <IoMdAddCircle />
+            </button>
             <Input
               type="file"
               ref={fileInputRef}
@@ -536,7 +542,13 @@ const Home = () => {
           </div>
 
           <div>
-            <FaRegImage onClick={handleSendImage} className="h-8 w-8" />
+            <button
+              aria-label="Send image"
+              onClick={handleSendImage}
+              className="h-8 w-8 cursor-pointer border-none bg-transparent"
+            >
+              <FaRegImage />
+            </button>
             <Input
               type="file"
               accept="image/*"
@@ -545,11 +557,28 @@ const Home = () => {
               className="hidden"
             />
           </div>
-          <IoIosCamera className="h-8 w-8" />
+          <button
+            aria-label="Take photo"
+            className="h-8 w-8 cursor-pointer border-none bg-transparent"
+          >
+            <IoIosCamera />
+          </button>
 
-          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
+          <button
+            aria-label="Record voice message"
+            className="h-8 w-8 cursor-pointer border-none bg-transparent"
+            onClick={handleOpenMicro}
+          >
+            <FaMicrophone />
+          </button>
           <div>
-            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
+            <button
+              aria-label="Send video"
+              onClick={handleOpenWidget}
+              className="h-8 w-8 cursor-pointer border-none bg-transparent"
+            >
+              <MdOndemandVideo />
+            </button>
           </div>
         </div>
 
@@ -591,11 +620,13 @@ const Home = () => {
 
         <div className="text-blue-400">
           {canSendMessage ? (
-            <button type="submit" form="chatForm">
+            <button type="submit" form="chatForm" aria-label="Send message">
               <IoSend size={24} />
             </button>
           ) : !isOpenMicro ? (
-            <AiFillLike className="h-8 w-8" />
+            <button aria-label="Like" className="h-8 w-8">
+              <AiFillLike />
+            </button>
           ) : null}
         </div>
       </div>

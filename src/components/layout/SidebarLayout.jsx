@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Avatar } from '../common';
+import { HiBars3 } from 'react-icons/hi2';
 import SubMenu from './SubMenu';
 import Sidebar from './Sidebar';
 import { auth } from '../../firebase';
@@ -11,7 +12,7 @@ import { setIsOpen } from '../../../features/modal/modalReducer';
 import { LuMoon, LuSun } from 'react-icons/lu';
 import { setTheme } from '../../../features/common/commonReducer';
 
-const SidebarLayout = () => {
+const SidebarLayout = ({ toggleSidebar, isSidebarOpen }) => {
   const { isOpen } = useSelector((state) => state.modal);
   const { user } = useSelector((state) => state.auth);
   const { avatarUrl } = useSelector((state) => state.user);
@@ -36,6 +37,15 @@ const SidebarLayout = () => {
   return (
     <div className="">
       <header className="z-10 flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
+        {/* Hamburger for mobile */}
+        <button
+          onClick={toggleSidebar}
+          className="hover:text-primary p-2 text-gray-600 md:hidden dark:text-gray-300"
+          aria-label="Toggle sidebar"
+        >
+          <HiBars3 className="h-6 w-6" />
+        </button>
+
         <button
           onClick={() => dispatch(setIsOpen(true))}
           className="relative cursor-pointer"

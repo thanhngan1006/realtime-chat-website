@@ -6,7 +6,7 @@ const Avatar = ({ src, className = '', alt = 'Avatar', isOnline = false }) => {
   return (
     <div className={`relative ${className}`}>
       <img
-        src={src}
+        src={src || null}
         alt={alt}
         className={` ${baseStyles} h-full w-full object-cover`}
       />
