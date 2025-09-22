@@ -14,5 +14,5 @@ export const formatTimeAgo = (timestamp) => {
   if (interval > 1) return Math.floor(interval) + 'g';
   interval = seconds / 60;
   if (interval > 1) return Math.floor(interval) + 'p';
-  return '0 phút';
+  return '0p';
 };
