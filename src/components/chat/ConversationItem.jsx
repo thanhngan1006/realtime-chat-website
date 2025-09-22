@@ -14,6 +14,7 @@ const ConversationItem = ({ conversationItem }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { modeType } = useSelector((state) => state.chat);
+
   const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
 
   const receiverId = useMemo(() => {
@@ -23,6 +24,8 @@ const ConversationItem = ({ conversationItem }) => {
       ? conversationItem.participants[0]
       : conversationItem.participants.find((id) => id !== senderUserId) || null;
   }, [conversationItem, senderUserId]);
+
+  const presenceStatuses = useSelector((state) => state.user.presenceStatuses);
 
   const isSelfConversation = useMemo(() => {
     if (
@@ -123,11 +126,11 @@ const ConversationItem = ({ conversationItem }) => {
     }
   };
 
-  console.log('receiverData', receiverData);
-
   useEffect(() => {
     const fetchSenderName = async () => {
       if (receiverId === AI_ASSISTANT_ID) {
+        console.log('AI_ASSISTANT_PROFILE.name', AI_ASSISTANT_PROFILE.name);
+        setSenderNameInLastMessage(AI_ASSISTANT_PROFILE.name);
         return;
       }
 
@@ -155,6 +158,52 @@ const ConversationItem = ({ conversationItem }) => {
     fetchSenderName();
   }, [conversationItem, receiverId]);
 
+  const displayStatus = useMemo(() => {
+    if (!conversationItem.isGroup) {
+      const singleReceiverId = conversationItem.participants.find(
+        (pId) => pId !== senderUserId,
+      );
+      return presenceStatuses[singleReceiverId];
+    }
+
+    if (conversationItem.isGroup) {
+      const otherParticipantsIds = conversationItem.participants.filter(
+        (pId) => pId !== senderUserId,
+      );
+
+      if (otherParticipantsIds.length === 0) return null;
+
+      let anyoneOnline = false;
+      let mostRecentOfflineUserStatus = null;
+
+      for (const id of otherParticipantsIds) {
+        const status = presenceStatuses[id];
+
+        if (status?.state === 'online') {
+          anyoneOnline = true;
+          break;
+        }
+
+        if (status?.state === 'offline' && status.last_changed) {
+          if (
+            !mostRecentOfflineUserStatus ||
+            status.last_changed > mostRecentOfflineUserStatus.last_changed
+          ) {
+            mostRecentOfflineUserStatus = status;
+          }
+        }
+      }
+
+      if (anyoneOnline) {
+        return { state: 'online' };
+      }
+
+      return mostRecentOfflineUserStatus;
+    }
+
+    return null;
+  }, [conversationItem, senderUserId, presenceStatuses]);
+
   return (
     <div
       className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
@@ -162,13 +211,17 @@ const ConversationItem = ({ conversationItem }) => {
     >
       <Avatar
         src={receiverData.avatarUrl || ''}
+        // userId={receiverData?.uid}
+        presenceStatus={displayStatus}
         className="h-12 w-12 rounded-full"
       />
+
       <div className="flex-1 flex-col">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">
             {receiverData.name || 'Unknown User'}{' '}
           </span>
+
           <span className="text-xs text-gray-500">
             {formatTimestampFromText(conversationItem.updatedAt) ||
               'No messages yet'}{' '}

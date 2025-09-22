@@ -12,9 +12,13 @@ import {
   setModeType,
   setSelectedPeopleToCreateGroup,
 } from '../../../features/chat/chatReducer';
-import { setUsers } from '../../../features/user/userReducer';
+import {
+  setPresenceStatus,
+  setUsers,
+} from '../../../features/user/userReducer';
 import { FaUserGroup } from 'react-icons/fa6';
 import { IoAddSharp } from 'react-icons/io5';
+import { presenceService } from '../../service/firebase/presence.service';
 
 const Sidebar = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -103,6 +107,23 @@ const Sidebar = () => {
   const handleChange = (event) => {
     setSearchValue(event.target.value);
   };
+
+  useEffect(() => {
+    const participantsIds = conversations
+      .map((convo) => convo.participants.find((pId) => pId !== senderId))
+      .filter(Boolean);
+
+    if (participantsIds.length === 0) return;
+
+    const unsubscribe = presenceService.listenToMultipleUsers(
+      participantsIds,
+      (userId, status) => {
+        dispatch(setPresenceStatus({ userId, status }));
+      },
+    );
+
+    return () => unsubscribe();
+  }, [conversations, senderId, dispatch]);
 
   return (
     <div className="flex flex-col gap-3 px-4 pt-4">

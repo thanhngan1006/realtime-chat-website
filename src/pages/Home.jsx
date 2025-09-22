@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AiFillLike } from 'react-icons/ai';
-import { IoIosCamera, IoMdAddCircle } from 'react-icons/io';
+import { IoMdAddCircle } from 'react-icons/io';
 import { FaMicrophone, FaRegImage, FaRobot } from 'react-icons/fa';
 import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
 import { Button, Input } from '../components/common';
@@ -487,9 +487,24 @@ const Home = () => {
     }
   };
 
+  const handleSendLikeButton = async () => {
+    const receiverIds = Array.isArray(selectedUser.id)
+      ? selectedUser.id
+      : [selectedUser.id || ''];
+
+    await messageService.createNewMessage({
+      senderId: uid,
+      receiverIds: receiverIds,
+      conversationId: conversationId,
+      messageContent: '👍',
+      typeContent: 0,
+    });
+  };
+
   return (
     <div className="relative flex h-screen flex-col">
-      <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" />
+      {/* <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" /> */}
+      <HeadingMessageBar />
       <div
         id="chat-screen"
         className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
@@ -545,7 +560,6 @@ const Home = () => {
               className="hidden"
             />
           </div>
-          <IoIosCamera className="h-8 w-8" />
 
           <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
           <div>
@@ -581,7 +595,6 @@ const Home = () => {
                     }),
                   );
                   dispatch(setShowEmojiPicker(!showEmojiPicker));
-                  console.log('nhan emoji');
                 }}
                 className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
               />
@@ -595,7 +608,7 @@ const Home = () => {
               <IoSend size={24} />
             </button>
           ) : !isOpenMicro ? (
-            <AiFillLike className="h-8 w-8" />
+            <AiFillLike className="h-8 w-8" onClick={handleSendLikeButton} />
           ) : null}
         </div>
       </div>

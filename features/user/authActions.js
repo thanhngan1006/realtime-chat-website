@@ -36,7 +36,7 @@ export const loginUser = createAsyncThunk(
       };
     } catch (error) {
       return rejectWithValue({
-        messageKey: ERROR.LOGIN_FAILURE,
+        // messageKey: ERROR.LOGIN_FAILURE,
         code: error.code,
         statusCode: error.statusCode,
       });

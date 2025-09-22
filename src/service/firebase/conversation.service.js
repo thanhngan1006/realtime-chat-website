@@ -144,9 +144,6 @@ class ConversationService extends BaseRepository {
 
     const updateDoc = await this.update(conversationId, data);
 
-    console.log(
-      `Cuộc trò chuyện ${conversationId} đã được đánh dấu là đã đọc bởi ${userId}`,
-    );
     return updateDoc;
   });
 
