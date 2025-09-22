@@ -14,22 +14,26 @@ import {
 } from '../../../features/chat/chatReducer';
 import {
   setPresenceStatus,
+  setSelectedUser,
   setUsers,
 } from '../../../features/user/userReducer';
 import { FaUserGroup } from 'react-icons/fa6';
 import { IoAddSharp } from 'react-icons/io5';
 import { presenceService } from '../../service/firebase/presence.service';
+import { useNavigate } from 'react-router-dom';
+import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
 
 const Sidebar = () => {
   const [searchValue, setSearchValue] = useState('');
   const [isOpenUserToAddGroup, setIsOpenUserToAddGroup] = useState(false);
   const senderId = auth.currentUser?.uid;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { conversations, modeType, selectedPeopleToCreateGroup } = useSelector(
     (state) => state.chat,
   );
-  const { users } = useSelector((state) => state.user);
+  const { users, selectedUser } = useSelector((state) => state.user);
 
   const usersExceptSender = users.filter((user) => user.id !== senderId);
 
@@ -124,6 +128,60 @@ const Sidebar = () => {
 
     return () => unsubscribe();
   }, [conversations, senderId, dispatch]);
+
+  // === TỰ ĐỘNG CHỌN CUỘC TRÒ CHUYỆN ĐẦU TIÊN ===
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedUser?.id && senderId) {
+      console.log('Auto-selecting the first conversation...');
+
+      const firstConversation = conversations[0];
+
+      const selectFirstConversation = async () => {
+        try {
+          let userData = {
+            id: null,
+            name: 'Loading...',
+            avatarUrl: '',
+            conversationId: firstConversation.id,
+          };
+
+          if (firstConversation.isGroup) {
+            const otherParticipants = firstConversation.participants.filter(
+              (p) => p !== senderId,
+            );
+            const groupNameData =
+              await conversationService.fetchGroupName(otherParticipants);
+            userData.id = otherParticipants;
+            userData.name = groupNameData.data;
+          } else {
+            const receiverId = firstConversation.participants.find(
+              (p) => p !== senderId,
+            );
+            userData.id = receiverId;
+
+            if (receiverId === AI_ASSISTANT_ID) {
+              userData.name = AI_ASSISTANT_PROFILE.name;
+              userData.avatarUrl = AI_ASSISTANT_PROFILE.avatarUrl;
+            } else if (receiverId) {
+              const userDoc = await userService.getUser(receiverId);
+              if (userDoc.success) {
+                userData.name = userDoc.data.name;
+                userData.avatarUrl = userDoc.data.avatarUrl;
+              }
+            }
+          }
+
+          dispatch(setSelectedUser(userData));
+
+          navigate(`/${firstConversation.id}`);
+        } catch (error) {
+          console.error('Error auto-selecting conversation:', error);
+        }
+      };
+
+      selectFirstConversation();
+    }
+  }, [conversations, selectedUser, senderId, dispatch, navigate]);
 
   return (
     <div className="flex flex-col gap-3 px-4 pt-4">
