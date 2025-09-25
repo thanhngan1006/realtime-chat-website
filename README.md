@@ -9,6 +9,7 @@ A real-time chat application built with React, Vite, Tailwind CSS, and Firebase.
 - User profiles and status (online, offline, etc.)
 - Search for other users
 - Send text messages, emojis, and file attachments
+- Talk to ai
 
 ## Getting Started
 
