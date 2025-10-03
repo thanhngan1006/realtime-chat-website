@@ -21,7 +21,8 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       >
-        <Route path="/:conversation-id" element={<Home />} />
+        <Route index element={<Home />} />
+        <Route path=":conversation-id" element={<Home />} />
         <Route path="profile/:uid" element={<Profile />} />
         <Route path="*" element={<NoPage />} />
       </Route>

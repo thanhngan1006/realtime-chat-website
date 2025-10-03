@@ -82,3 +82,21 @@ button:focus-visible {
     background-color: #f9f9f9;
   } */
 }
+
+.chat-screen-background {
+  background-color: #f9fafb; /* bg-gray-50 */
+  background-image: radial-gradient(
+    #e5e7eb 1px,
+    transparent 1px
+  ); /* border-gray-200 */
+  background-size: 16px 16px;
+}
+
+.dark .chat-screen-background {
+  background-color: #111827; /* bg-gray-900 */
+  background-image: radial-gradient(
+    #374151 1px,
+    transparent 1px
+  ); /* border-gray-700 */
+  background-size: 16px 16px;
+}

@@ -169,9 +169,13 @@ const Message = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dispatch]);
 
+  const bubbleStyle = `relative max-w-[75%] rounded-xl px-3 py-2 shadow-sm`;
+  const yourMessageStyle = `bg-blue-500 text-white rounded-br-none`;
+  const otherMessageStyle = `bg-gray-200 text-gray-800 rounded-bl-none dark:bg-zinc-700 dark:text-gray-200`;
+
   return (
     <div
-      className={`relative mb-2 flex items-center gap-2`}
+      className={`relative mb-2 flex items-start gap-2`} // Use items-start for better alignment with multiline messages
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -239,10 +243,8 @@ const Message = ({
             </div>
           ) : (
             <div
-              className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                isYourMessage
-                  ? `rounded-br-none bg-blue-500`
-                  : `rounded-bl-none bg-gray-500`
+              className={`${bubbleStyle} ${
+                isYourMessage ? yourMessageStyle : otherMessageStyle
               } ${className}`}
               ref={messageContentRef}
             >
@@ -259,10 +261,8 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
+                className={`${bubbleStyle} ${
+                  isYourMessage ? yourMessageStyle : otherMessageStyle
                 } ${className}`}
                 ref={messageContentRef}
               >
@@ -275,7 +275,11 @@ const Message = ({
               </div>
             ) : msg.imageUrl ? (
               <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <img src={msg.imageUrl} alt="Sent" className="rounded-lg" />
+                <img
+                  src={msg.imageUrl}
+                  alt="Sent"
+                  className="rounded-lg shadow-sm"
+                />
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
@@ -290,10 +294,8 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative flex max-w-[75%] items-center gap-2 rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
+                className={`${bubbleStyle} ${
+                  isYourMessage ? yourMessageStyle : otherMessageStyle
                 } ${className}`}
                 ref={messageContentRef}
               >
@@ -310,17 +312,15 @@ const Message = ({
                 ref={messageContentRef}
               >
                 <div
-                  className={`rounded-2xl px-4 py-2 text-white ${
-                    isYourMessage
-                      ? `rounded-br-none bg-blue-500`
-                      : `rounded-bl-none bg-gray-600`
-                  } ${className}`}
+                  className={`${bubbleStyle} ${
+                    isYourMessage ? yourMessageStyle : otherMessageStyle
+                  } ${className} flex items-center gap-2`}
                 >
                   <FaFile className="h-5 w-5" />
                   <a
                     href={msg.file}
                     download={msg.fileName}
-                    className="text-white underline"
+                    className="underline"
                   >
                     {msg.fileName}
                   </a>
@@ -339,10 +339,8 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
+                className={`${bubbleStyle} ${
+                  isYourMessage ? yourMessageStyle : otherMessageStyle
                 } ${className}`}
                 ref={messageContentRef}
               >
@@ -355,7 +353,7 @@ const Message = ({
               </div>
             ) : msg.video ? (
               <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <video controls width="300">
+                <video controls width="300" className="rounded-lg shadow-sm">
                   <source src={msg.video} type="video/mp4" />
                   <track
                     kind="captions"
@@ -380,10 +378,8 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
+                className={`${bubbleStyle} ${
+                  isYourMessage ? yourMessageStyle : otherMessageStyle
                 } ${className}`}
                 ref={messageContentRef}
               >

@@ -1,17 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AiFillLike } from 'react-icons/ai';
-import { IoMdAddCircle } from 'react-icons/io';
-import { FaMicrophone, FaRegImage, FaRobot } from 'react-icons/fa';
-import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
-import { Button, Input } from '../components/common';
+import { FaRobot } from 'react-icons/fa';
+import { Button } from '../components/common';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   clearRecordingState,
   setConversations,
-  setEmojiPickerPosition,
-  setIsFocused,
   setIsOpenMicro,
   setMessageContent,
   setMessages,
@@ -33,11 +28,10 @@ import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
 import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
-import ReactRecorder from '../components/chat/Recorder';
-import { IoSend } from 'react-icons/io5';
 import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../constants/ai';
 import { setSelectedUser } from '../../features/user/userReducer';
 import { aiService } from '../service/firebase/ai.service';
+import ChatInput from '../components/chat/ChatInput';
 
 const Home = () => {
   const { selectedUser } = useSelector((state) => state.user);
@@ -73,7 +67,6 @@ const Home = () => {
 
   const hasTextContent = messageContent.trim() !== '';
   const hasAudioContent = recorderStatus === 'stopped' && mediaBlobUrl;
-  const canSendMessage = hasTextContent || hasAudioContent;
 
   const handleOpenMicro = () => {
     dispatch(setIsOpenMicro(!isOpenMicro));
@@ -507,7 +500,7 @@ const Home = () => {
       <HeadingMessageBar />
       <div
         id="chat-screen"
-        className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
+        className="chat-screen-background mb-10 h-full flex-1 overflow-y-auto p-4 dark:text-white"
       >
         {selectedUser && conversationId && messages.length > 0 && (
           <MessageBox messages={messages} avatarUrls={avatarUrls} />
@@ -538,80 +531,16 @@ const Home = () => {
         )}
       </div>
 
-      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
-        <div className="flex items-center gap-2 text-blue-400">
-          <div>
-            <IoMdAddCircle onClick={handleSendFile} className="h-8 w-8" />
-            <Input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleUploadFile}
-              className="hidden"
-            />
-          </div>
-
-          <div>
-            <FaRegImage onClick={handleSendImage} className="h-8 w-8" />
-            <Input
-              type="file"
-              accept="image/*"
-              ref={imageInputRef}
-              onChange={handleUploadImage}
-              className="hidden"
-            />
-          </div>
-
-          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
-          <div>
-            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} id="chatForm" className="">
-          {isOpenMicro ? (
-            <ReactRecorder />
-          ) : (
-            <div className="relative flex items-center">
-              <Input
-                type="text"
-                placeholder="Aa"
-                className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
-                value={messageContent}
-                onChange={(e) => {
-                  dispatch(setMessageContent(e.target.value));
-                }}
-                onFocus={() => dispatch(setIsFocused(true))}
-                onBlur={() => dispatch(setIsFocused(false))}
-                ref={inputRef}
-              />
-
-              <MdEmojiEmotions
-                onClick={(e) => {
-                  const rect = e.target.getBoundingClientRect();
-                  dispatch(
-                    setEmojiPickerPosition({
-                      top: rect.top - 320,
-                      left: rect.left,
-                    }),
-                  );
-                  dispatch(setShowEmojiPicker(!showEmojiPicker));
-                }}
-                className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
-              />
-            </div>
-          )}
-        </form>
-
-        <div className="text-blue-400">
-          {canSendMessage ? (
-            <button type="submit" form="chatForm">
-              <IoSend size={24} />
-            </button>
-          ) : !isOpenMicro ? (
-            <AiFillLike className="h-8 w-8" onClick={handleSendLikeButton} />
-          ) : null}
-        </div>
-      </div>
+      <ChatInput
+        handleSubmit={handleSubmit}
+        handleSendLikeButton={handleSendLikeButton}
+        handleSendFile={handleSendFile}
+        handleUploadFile={handleUploadFile}
+        handleSendImage={handleSendImage}
+        handleUploadImage={handleUploadImage}
+        handleOpenMicro={handleOpenMicro}
+        handleOpenWidget={handleOpenWidget}
+      />
 
       <Button
         className="absolute right-4 bottom-20 cursor-pointer rounded-full bg-gray-300 p-3 hover:bg-gray-400"
