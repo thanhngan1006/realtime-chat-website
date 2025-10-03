@@ -206,50 +206,36 @@ const ConversationItem = ({ conversationItem }) => {
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-xl mx-2 my-1 cursor-pointer transition-all duration-200 hover:bg-gray-100 dark:hover:bg-neutral-700/50 hover:shadow-md group ${
-        showUnreadIndicator
-          ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
-          : 'hover:scale-[1.02]'
-      }`}
+      className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
       onClick={handleClickItem}
     >
-      <div className="relative">
-        <Avatar
-          src={receiverData.avatarUrl || ''}
-          presenceStatus={displayStatus}
-          className="h-14 w-14 rounded-full ring-2 ring-gray-200 dark:ring-neutral-600 group-hover:ring-primary-500/30 transition-all"
-        />
-        {displayStatus?.state === 'online' && (
-          <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full bg-secondary-500 border-2 border-white dark:border-neutral-800 animate-pulse"></span>
-        )}
-      </div>
+      <Avatar
+        src={receiverData.avatarUrl || ''}
+        // userId={receiverData?.uid}
+        presenceStatus={displayStatus}
+        className="h-12 w-12 rounded-full"
+      />
 
-      <div className="flex-1 flex-col min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <span className={`text-sm font-semibold truncate ${showUnreadIndicator ? 'text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-white'}`}>
-            {receiverData.name || 'Unknown User'}
+      <div className="flex-1 flex-col">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">
+            {receiverData.name || 'Unknown User'}{' '}
           </span>
 
-          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
-            {formatTimestampFromText(conversationItem.updatedAt) || 'Now'}
+          <span className="text-xs text-gray-500">
+            {formatTimestampFromText(conversationItem.updatedAt) ||
+              'No messages yet'}{' '}
           </span>
         </div>
+        {}
 
-        <p className={`text-sm truncate ${showUnreadIndicator ? 'font-medium text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400'}`}>
-          {conversationItem.lastMessage?.senderId === senderUserId && (
-            <span className="text-primary-600 dark:text-primary-400 mr-1">Bạn:</span>
-          )}
-          {conversationItem.lastMessage?.senderId !== senderUserId && senderNameInLastMessage && (
-            <span className="text-secondary-600 dark:text-secondary-400 mr-1">{senderNameInLastMessage}:</span>
-          )}
-          {truncateText(conversationItem.lastMessage?.text, 30)}
-        </p>
+        <span>
+          {`${conversationItem.lastMessage?.senderId === senderUserId ? `Bạn` : senderNameInLastMessage ? `${senderNameInLastMessage}` : ''}${truncateText(conversationItem.lastMessage?.text)} `}
+        </span>
       </div>
 
       {showUnreadIndicator && (
-        <div className="flex-shrink-0">
-          <span className="flex h-2.5 w-2.5 rounded-full bg-primary-500 animate-pulse shadow-lg shadow-primary-500/50"></span>
-        </div>
+        <span className="h-3 w-3 rounded-full bg-blue-500"></span>
       )}
     </div>
   );

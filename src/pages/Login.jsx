@@ -97,23 +97,22 @@ const Login = () => {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 animate-fade-in">
-      <div className="shadow-blue flex h-4/5 w-4/5 max-w-6xl rounded-3xl bg-white shadow-2xl overflow-hidden backdrop-blur-sm animate-scale-in">
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 bg-gradient-to-br from-primary-50 to-primary-100">
-          <h1 className="text-5xl font-bold text-primary-900 tracking-tight">Login</h1>
-          <h2 className="text-center text-primary-800 text-lg">
+    <div className="flex h-screen w-full items-center justify-center bg-blue-950">
+      <div className="shadow-blue flex h-4/5 w-4/5 rounded-md bg-white shadow-2xl">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
+          <h1 className="text-5xl font-bold text-blue-950">Login</h1>
+          <h2 className="text-center text-blue-950">
             Make your account more secure
           </h2>
-          <img className="w-4/5 object-contain drop-shadow-2xl" src={login} alt="ảnh login" />
+          <img className="w-4/5 object-contain" src={login} alt="ảnh login" />
         </div>
 
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
-          <div className="flex flex-col items-center gap-2 mb-2">
-            <span className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">Realtime Chat</span>
-            <p className="text-gray-500 text-sm">Connect with friends instantly</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xl font-bold">Realtime chat</span>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex w-3/5 flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex w-3/5 flex-col gap-4">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <Input
@@ -123,7 +122,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="w-full rounded-xl border-2 border-gray-200 p-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all bg-gray-50 focus:bg-white"
+                  className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
               <div className="relative flex flex-col items-center gap-1">
@@ -134,13 +133,13 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full rounded-xl border-2 border-gray-200 p-3 pr-12 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all bg-gray-50 focus:bg-white"
+                  className="w-full rounded-md border border-gray-300 p-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
                 <div
-                  className="absolute right-4 bottom-0 -translate-y-1/2 transform cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
+                  className="absolute right-3 bottom-0 -translate-y-1/2 transform cursor-pointer text-gray-500"
                   onClick={() => setIsShowPassword((prev) => !prev)}
                 >
-                  {isShowPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  {isShowPassword ? <FaEyeSlash /> : <FaEye />}
                 </div>
               </div>
             </div>
@@ -148,26 +147,19 @@ const Login = () => {
             <Button
               onClick={handleForgotPassword}
               type="button"
-              className="mb-2 flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
+              className="mb-4 flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
             >
-              <span className="cursor-pointer text-primary-600 hover:text-primary-700 font-medium transition-colors">
+              <span className="cursor-pointer text-blue-800 hover:text-blue-950">
                 Forgot password?
               </span>
             </Button>
 
             <Button
               type="submit"
-              className="w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 p-3 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-full rounded-md bg-blue-700 p-2 text-white transition duration-200 hover:bg-blue-800"
               disabled={loading}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <FaSpinner className="animate-spin" />
-                  Logging in...
-                </span>
-              ) : (
-                'Login'
-              )}
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
 
             <div className="flex items-center justify-center gap-0.5">
@@ -177,7 +169,7 @@ const Login = () => {
                 onClick={() => navigate('/signup')}
                 className="flex flex-col items-start justify-between !border-none !px-0 !py-0 hover:border-0 focus:outline-none focus-visible:outline-none"
               >
-                <span className="cursor-pointer text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <span className="cursor-pointer text-blue-800 hover:text-blue-950">
                   Sign up
                 </span>
               </Button>
@@ -187,10 +179,8 @@ const Login = () => {
       </div>
 
       {loading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-2xl p-8 shadow-2xl animate-scale-in">
-            <FaSpinner className="animate-spin text-5xl text-primary-600" />
-          </div>
+        <div className="fixed flex items-center justify-center">
+          <FaSpinner className="animate-spin text-4xl text-blue-700" />
         </div>
       )}
     </div>

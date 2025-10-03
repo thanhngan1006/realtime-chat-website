@@ -126,48 +126,41 @@ const Sidebar = () => {
   }, [conversations, senderId, dispatch]);
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-6 pb-4 h-screen">
-      <div className="relative flex items-center text-gray-400 focus-within:text-primary-600 transition-colors group">
-        <MdSearch className="pointer-events-none absolute left-4 h-5 w-5 transition-all group-focus-within:scale-110" />
+    <div className="flex flex-col gap-3 px-4 pt-4">
+      <div className="relative flex items-center text-gray-400 focus-within:text-gray-600">
+        <MdSearch className="mb-1xs pointer-events-none absolute mt-2 ml-3 h-5 w-5" />
 
         <Input
           type="text"
           value={searchValue}
           onChange={handleChange}
-          placeholder="Search conversations..."
-          className="w-full rounded-2xl pl-12 pr-4 py-3 bg-gray-100 dark:bg-neutral-700 border-2 border-transparent focus:border-primary-500 focus:bg-white dark:focus:bg-neutral-600 transition-all duration-200 shadow-sm hover:shadow-md dark:text-white placeholder:text-gray-400"
+          placeholder="Search messenger"
+          className="rounded-2xl pr-3 pl-10 dark:text-white"
         />
       </div>
 
       <UserStory userStorys={ListUsersStory} />
 
-      <div className="flex gap-2 bg-gray-100 dark:bg-neutral-700 rounded-xl p-1">
+      <div className="flex">
         <button
           onClick={() => {
             dispatch(setModeType('notGroup'));
           }}
-          className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg py-2.5 transition-all duration-200 ${
-            modeType !== 'isGroup'
-              ? 'bg-white dark:bg-neutral-600 shadow-md text-primary-600 dark:text-primary-400 transform scale-105'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-neutral-600/50'
-          }`}
+          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
         >
-          <FaUserGroup className="h-5 w-5" />
+          <FaUserGroup className="" />
         </button>
         <button
           onClick={() => dispatch(setModeType('isGroup'))}
-          className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg py-2.5 transition-all duration-200 ${
-            modeType === 'isGroup'
-              ? 'bg-white dark:bg-neutral-600 shadow-md text-primary-600 dark:text-primary-400 transform scale-105'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-neutral-600/50'
-          }`}
+          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
         >
-          <MdGroups className="h-5 w-5" />
+          <MdGroups />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {modeType !== 'isGroup' ? (
+      {/* khac nhom la hai nguoi */}
+      {
+        modeType !== 'isGroup' ? (
           !searchValue ? (
             <ConversationList
               conversationList={conversations.filter((c) => !c.isGroup)}
@@ -176,21 +169,20 @@ const Sidebar = () => {
             <UserList users={users} />
           )
         ) : !searchValue ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
             <Button
               onClick={handleAddGroup}
-              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-3 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center bg-amber-200"
             >
-              <IoAddSharp className="h-5 w-5" />
-              <span className="font-medium">Create Group</span>
+              <IoAddSharp />
             </Button>
 
             {isOpenUserToAddGroup && (
-              <div className="flex flex-col gap-3 p-4 bg-gray-50 dark:bg-neutral-700/50 rounded-xl border border-gray-200 dark:border-neutral-600 animate-slide-in-down">
+              <div className="flex flex-col">
                 <UserList users={usersExceptSender} />
                 <Button
                   onClick={handleCreateGroupChat}
-                  className="cursor-pointer bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 px-4 py-2.5 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                  className="mt-2 cursor-pointer bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
                 >
                   Create group chat
                 </Button>
@@ -201,8 +193,9 @@ const Sidebar = () => {
               conversationList={conversations.filter((c) => c.isGroup)}
             />
           </div>
-        ) : null}
-      </div>
+        ) : null
+        // chua xu ly neu k tim kiem gi ben chat nhom thi hien thi gi
+      }
     </div>
   );
 };
