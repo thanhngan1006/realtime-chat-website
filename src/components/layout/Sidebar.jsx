@@ -121,16 +121,15 @@ const Sidebar = () => {
   }, [conversations, senderId, dispatch]);
 
   return (
-    <div className="flex flex-col gap-3 px-4 pt-4">
-      <div className="relative flex items-center text-gray-400 focus-within:text-gray-600">
-        <MdSearch className="mb-1xs pointer-events-none absolute mt-2 ml-3 h-5 w-5" />
-
+    <div className="flex h-full flex-col gap-3 bg-card px-4 pt-4 text-card-foreground">
+      <div className="relative flex items-center text-muted-foreground focus-within:text-foreground">
+        <MdSearch className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform" />
         <Input
           type="text"
           value={searchValue}
           onChange={handleChange}
           placeholder="Search messenger"
-          className="rounded-2xl pr-3 pl-10 dark:text-white"
+          className="w-full rounded-full bg-muted py-2 pr-3 pl-10"
         />
       </div>
 
@@ -138,7 +137,7 @@ const Sidebar = () => {
         <h2 className="text-xl font-bold">Chats</h2>
         <Button
           onClick={handleAddGroup}
-          className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-zinc-700"
+          className="rounded-full p-2 hover:bg-accent"
         >
           <IoAddSharp size={20} />
         </Button>
@@ -149,14 +148,14 @@ const Sidebar = () => {
           <UserList users={usersExceptSender} />
           <Button
             onClick={handleCreateGroupChat}
-            className="mt-2 w-full cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="mt-2 w-full cursor-pointer rounded-lg bg-primary py-2 px-4 text-primary-foreground hover:bg-primary/90"
           >
             Create Group Chat
           </Button>
         </div>
       )}
 
-      <div className="overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         {!searchValue ? (
           <ConversationList conversationList={conversations} />
         ) : (
