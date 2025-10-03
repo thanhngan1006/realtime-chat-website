@@ -502,15 +502,29 @@ const Home = () => {
   };
 
   return (
-    <div className="relative flex h-screen flex-col">
-      {/* <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" /> */}
+    <div className="relative flex h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-900 dark:to-neutral-800">
       <HeadingMessageBar />
       <div
         id="chat-screen"
-        className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
+        className="mb-20 h-full flex-1 overflow-y-auto p-6 custom-scrollbar"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.03) 0%, transparent 50%)'
+        }}
       >
-        {selectedUser && conversationId && messages.length > 0 && (
+        {selectedUser && conversationId && messages.length > 0 ? (
           <MessageBox messages={messages} avatarUrls={avatarUrls} />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center space-y-4 animate-fade-in">
+              <div className="text-6xl">💬</div>
+              <h3 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
+                No conversation selected
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Choose a conversation from the sidebar to start chatting
+              </p>
+            </div>
+          </div>
         )}
 
         <EmojiPickerPortal
@@ -523,13 +537,13 @@ const Home = () => {
         />
 
         {typingStatus && (
-          <div className="flex items-center gap-2 p-2 dark:bg-zinc-700">
+          <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-neutral-800/80 rounded-2xl shadow-md backdrop-blur-sm w-fit animate-slide-in-up">
             {typingUsers.map((userId) => (
-              <div key={userId} className="flex items-center">
+              <div key={userId} className="flex items-center gap-2">
                 <img
                   src={avatarUrls[userId] || '/default-avatar.png'}
                   alt="Avatar"
-                  className="mr-2 h-8 w-8 rounded-full"
+                  className="h-8 w-8 rounded-full ring-2 ring-primary-500/30"
                 />
                 <TypingDots />
               </div>
@@ -538,10 +552,10 @@ const Home = () => {
         )}
       </div>
 
-      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
-        <div className="flex items-center gap-2 text-blue-400">
+      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-3 border-t border-gray-200 dark:border-neutral-700 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md p-4 shadow-2xl rounded-t-2xl">
+        <div className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
           <div>
-            <IoMdAddCircle onClick={handleSendFile} className="h-8 w-8" />
+            <IoMdAddCircle onClick={handleSendFile} className="h-7 w-7 cursor-pointer hover:text-primary-600 dark:hover:text-primary-300 transition-all hover:scale-110" />
             <Input
               type="file"
               ref={fileInputRef}
@@ -551,7 +565,7 @@ const Home = () => {
           </div>
 
           <div>
-            <FaRegImage onClick={handleSendImage} className="h-8 w-8" />
+            <FaRegImage onClick={handleSendImage} className="h-7 w-7 cursor-pointer hover:text-primary-600 dark:hover:text-primary-300 transition-all hover:scale-110" />
             <Input
               type="file"
               accept="image/*"
@@ -561,9 +575,9 @@ const Home = () => {
             />
           </div>
 
-          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
+          <FaMicrophone className="h-7 w-7 cursor-pointer hover:text-primary-600 dark:hover:text-primary-300 transition-all hover:scale-110" onClick={handleOpenMicro} />
           <div>
-            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
+            <MdOndemandVideo onClick={handleOpenWidget} className="h-7 w-7 cursor-pointer hover:text-primary-600 dark:hover:text-primary-300 transition-all hover:scale-110" />
           </div>
         </div>
 
@@ -574,8 +588,8 @@ const Home = () => {
             <div className="relative flex items-center">
               <Input
                 type="text"
-                placeholder="Aa"
-                className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
+                placeholder="Type a message..."
+                className="w-full rounded-full border-2 border-transparent bg-gray-100 dark:bg-neutral-700 px-12 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:bg-white dark:focus:bg-neutral-600 transition-all shadow-sm hover:shadow-md"
                 value={messageContent}
                 onChange={(e) => {
                   dispatch(setMessageContent(e.target.value));
@@ -596,28 +610,28 @@ const Home = () => {
                   );
                   dispatch(setShowEmojiPicker(!showEmojiPicker));
                 }}
-                className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
+                className="absolute left-4 h-5 w-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
               />
             </div>
           )}
         </form>
 
-        <div className="text-blue-400">
+        <div className="text-primary-500 dark:text-primary-400">
           {canSendMessage ? (
-            <button type="submit" form="chatForm">
-              <IoSend size={24} />
+            <button type="submit" form="chatForm" className="p-2 rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-all hover:scale-110 shadow-md hover:shadow-lg">
+              <IoSend size={20} />
             </button>
           ) : !isOpenMicro ? (
-            <AiFillLike className="h-8 w-8" onClick={handleSendLikeButton} />
+            <AiFillLike className="h-7 w-7 cursor-pointer hover:text-primary-600 dark:hover:text-primary-300 transition-all hover:scale-110" onClick={handleSendLikeButton} />
           ) : null}
         </div>
       </div>
 
       <Button
-        className="absolute right-4 bottom-20 cursor-pointer rounded-full bg-gray-300 p-3 hover:bg-gray-400"
+        className="fixed right-8 bottom-28 cursor-pointer rounded-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 p-4 shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 group"
         onClick={handleCreateAiChat}
       >
-        <FaRobot className="h-8 w-8" />
+        <FaRobot className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
       </Button>
     </div>
   );

@@ -85,29 +85,40 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (loading) return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="animate-pulse text-primary-600 dark:text-primary-400 text-lg font-medium">
+        Loading...
+      </div>
+    </div>
+  );
+  if (error) return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="text-red-500 dark:text-red-400 text-lg">{error}</div>
+    </div>
+  );
 
   return (
     <div className="relative">
-      <div className="relative flex h-screen w-full items-center justify-center bg-gray-200 dark:bg-zinc-800">
-        <div className="absolute top-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
-        <div className="absolute bottom-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
+      <div className="relative flex h-screen w-full items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-neutral-900 dark:to-neutral-800">
+        <div className="absolute top-0 h-[20%] w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700"></div>
+        <div className="absolute bottom-0 h-[20%] w-full bg-gradient-to-r from-secondary-500 via-secondary-600 to-secondary-700"></div>
 
-        <div className="z-10 flex h-[90%] w-[85%] rounded-2xl bg-white shadow-2xl dark:bg-zinc-700">
-          <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
-            <div className="relative h-32 w-32">
+        <div className="z-10 flex h-[85%] w-[85%] max-w-5xl rounded-3xl bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md shadow-2xl animate-scale-in overflow-hidden">
+          <div className="flex flex-1/3 flex-col items-center gap-4 border-r border-gray-200 dark:border-neutral-700 p-8 bg-gradient-to-b from-gray-50 to-white dark:from-neutral-800 dark:to-neutral-800">
+            <div className="relative h-36 w-36">
               <Avatar
                 src={profileData?.avatarUrl}
-                className="h-32 w-32 rounded-full bg-red-400"
+                className="h-36 w-36 rounded-full ring-4 ring-primary-500/30 shadow-xl"
               />
               {auth.currentUser.uid === uid && (
                 <>
                   <Button
                     onClick={handleAvatarClick}
-                    className="absolute top-24 right-0 rounded-full bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600"
+                    variant="primary"
+                    className="absolute bottom-0 right-0 !rounded-full !p-3 shadow-lg"
                   >
-                    <FaEdit />
+                    <FaEdit className="h-4 w-4" />
                   </Button>
                   <Input
                     type="file"
@@ -119,13 +130,13 @@ const Profile = () => {
                 </>
               )}
             </div>
-            <span className="font-bold text-blue-500">
+            <span className="font-semibold text-primary-600 dark:text-primary-400 text-center break-all px-4">
               {profileData?.email}
             </span>
           </div>
 
-          <div className="flex-2/3 p-4">
-            <div className="mx-auto mt-8 max-w-md space-y-4">
+          <div className="flex-2/3 p-8">
+            <div className="mx-auto mt-8 max-w-md space-y-6">
               {isEditing ? (
                 <>
                   <div>
@@ -136,22 +147,23 @@ const Profile = () => {
                       onChange={(e) =>
                         handleInputChange('name', e.target.value)
                       }
-                      className="w-full border-b border-gray-400 text-xl focus:border-blue-500 focus:outline-none dark:text-white"
                     />
                   </div>
-                  <div className="mt-4 flex space-x-4">
+                  <div className="mt-6 flex gap-3">
                     <Button
                       onClick={handleUpdate}
-                      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                      variant="primary"
+                      className="flex-1"
                     >
-                      Save
+                      Save Changes
                     </Button>
                     <Button
                       onClick={() => {
                         setIsEditing(false);
                         setEditedData(profileData);
                       }}
-                      className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
+                      variant="outline"
+                      className="flex-1"
                     >
                       Cancel
                     </Button>
@@ -163,7 +175,8 @@ const Profile = () => {
                   <ProfileRow label="Email" value={profileData?.email} />
                   {auth.currentUser.uid === uid && (
                     <Button
-                      className="mt-4 flex items-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                      variant="primary"
+                      className="mt-6 gap-2"
                       onClick={() => setIsEditing(true)}
                     >
                       <FaEdit />
@@ -177,8 +190,12 @@ const Profile = () => {
         </div>
       </div>
 
-      <Button className="absolute top-4 left-4" onClick={() => navigate('/')}>
-        <IoMdArrowBack className="h-6 w-6 font-bold text-white" />
+      <Button
+        variant="ghost"
+        className="absolute top-6 left-6 !rounded-full !p-3 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md shadow-lg hover:shadow-xl"
+        onClick={() => navigate('/')}
+      >
+        <IoMdArrowBack className="h-6 w-6 text-gray-900 dark:text-white" />
       </Button>
     </div>
   );
