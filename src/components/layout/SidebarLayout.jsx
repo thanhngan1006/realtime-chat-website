@@ -34,7 +34,7 @@ const SidebarLayout = () => {
 
   return (
     <div className="">
-      <header className="z-10 flex items-center justify-between bg-white p-2.5 text-center shadow dark:bg-zinc-800 dark:text-white">
+      <header className="border-border bg-background z-10 flex items-center justify-between border-b p-4 text-center">
         <button
           onClick={() => dispatch(setIsOpen(true))}
           className="relative cursor-pointer"
@@ -48,23 +48,19 @@ const SidebarLayout = () => {
           </>
         </Modal>
 
-        <h3 className="text-2xl font-bold">Chat</h3>
-        <div className="flex">
+        <h3 className="text-foreground text-2xl font-bold">Chat</h3>
+        <div className="flex gap-2">
           <button
-            onClick={() => {
-              dispatch(setTheme(''));
-            }}
-            className="rounded-lg bg-transparent p-3 text-black hover:bg-zinc-200 dark:text-white dark:hover:bg-zinc-100"
+            onClick={() => dispatch(setTheme(''))}
+            className="text-foreground hover:bg-accent hover:text-accent-foreground rounded-full p-2"
           >
-            <LuSun />
+            <LuSun size={20} />
           </button>
           <button
-            onClick={() => {
-              dispatch(setTheme('dark'));
-            }}
-            className="rounded-lg bg-transparent p-3 text-black hover:bg-zinc-200 dark:text-white dark:hover:bg-zinc-100"
+            onClick={() => dispatch(setTheme('dark'))}
+            className="text-foreground hover:bg-accent hover:text-accent-foreground rounded-full p-2"
           >
-            <LuMoon />
+            <LuMoon size={20} />
           </button>
         </div>
       </header>

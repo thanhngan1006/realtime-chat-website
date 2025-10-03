@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AiFillLike } from 'react-icons/ai';
-import { FaMicrophone, FaRegImage } from 'react-icons/fa';
+import { FaMicrophone, FaRegImage, FaFile } from 'react-icons/fa';
 import { IoMdAddCircle } from 'react-icons/io';
 import { IoSend } from 'react-icons/io5';
 import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
@@ -43,117 +43,129 @@ const ChatInput = ({
     setShowActions(!showActions);
   };
 
+  const actionButtons = [
+    {
+      icon: <FaFile />,
+      label: 'File',
+      onClick: () => fileInputRef.current.click(),
+    },
+    {
+      icon: <FaRegImage />,
+      label: 'Image',
+      onClick: () => imageInputRef.current.click(),
+    },
+    { icon: <FaMicrophone />, label: 'Micro', onClick: handleOpenMicro },
+    { icon: <MdOndemandVideo />, label: 'Video', onClick: handleOpenWidget },
+  ];
+
   return (
-    <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
-      <div className="relative flex items-center gap-2 text-blue-400">
+    <div className="border-t border-gray-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
+      <div className="relative flex items-center gap-4">
+        {/* Action Menu */}
         <div className="relative">
-          <IoMdAddCircle
+          <button
             onClick={toggleActions}
-            className="h-8 w-8 cursor-pointer"
-          />
+            className="rounded-full p-2 text-blue-500 hover:bg-gray-200 dark:hover:bg-zinc-700"
+          >
+            <IoMdAddCircle size={24} />
+          </button>
           {showActions && (
-            <div className="absolute bottom-10 left-0 flex flex-col gap-2 rounded-lg bg-white p-2 shadow-lg dark:bg-zinc-700">
-              <div
-                onClick={() => {
-                  fileInputRef.current.click();
-                  toggleActions();
-                }}
-                className="flex cursor-pointer items-center gap-2 p-1 hover:bg-gray-200 dark:hover:bg-zinc-600"
-              >
-                <IoMdAddCircle className="h-6 w-6" />
-                <span>File</span>
-                <Input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleUploadFile}
-                  className="hidden"
-                />
-              </div>
-              <div
-                onClick={() => {
-                  imageInputRef.current.click();
-                  toggleActions();
-                }}
-                className="flex cursor-pointer items-center gap-2 p-1 hover:bg-gray-200 dark:hover:bg-zinc-600"
-              >
-                <FaRegImage className="h-6 w-6" />
-                <span>Image</span>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  ref={imageInputRef}
-                  onChange={handleUploadImage}
-                  className="hidden"
-                />
-              </div>
-              <div
-                onClick={() => {
-                  handleOpenMicro();
-                  toggleActions();
-                }}
-                className="flex cursor-pointer items-center gap-2 p-1 hover:bg-gray-200 dark:hover:bg-zinc-600"
-              >
-                <FaMicrophone className="h-6 w-6" />
-                <span>Micro</span>
-              </div>
-              <div
-                onClick={() => {
-                  handleOpenWidget();
-                  toggleActions();
-                }}
-                className="flex cursor-pointer items-center gap-2 p-1 hover:bg-gray-200 dark:hover:bg-zinc-600"
-              >
-                <MdOndemandVideo className="h-6 w-6" />
-                <span>Video</span>
-              </div>
+            <div
+              className="ring-opacity-5 absolute bottom-12 left-0 mb-2 flex flex-col gap-2 rounded-lg bg-white p-2 shadow-lg ring-1 ring-black dark:bg-zinc-900"
+              style={{
+                transformOrigin: 'bottom left',
+                transition: 'transform 0.2s ease-out, opacity 0.2s ease-out',
+                transform: showActions ? 'scale(1)' : 'scale(0.95)',
+                opacity: showActions ? 1 : 0,
+              }}
+            >
+              {actionButtons.map((button, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    button.onClick();
+                    toggleActions();
+                  }}
+                  className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                >
+                  {button.icon}
+                  <span className="text-sm">{button.label}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
-      </div>
 
-      <form onSubmit={handleSubmit} id="chatForm" className="w-full">
-        {isOpenMicro ? (
-          <ReactRecorder />
-        ) : (
-          <div className="relative flex items-center">
-            <Input
-              type="text"
-              placeholder="Aa"
-              className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
-              value={messageContent}
-              onChange={(e) => dispatch(setMessageContent(e.target.value))}
-              onFocus={() => dispatch(setIsFocused(true))}
-              onBlur={() => dispatch(setIsFocused(false))}
-              ref={inputRef}
-            />
-            <MdEmojiEmotions
-              onClick={(e) => {
-                const rect = e.target.getBoundingClientRect();
-                dispatch(
-                  setEmojiPickerPosition({
-                    top: rect.top - 320,
-                    left: rect.left,
-                  }),
-                );
-                dispatch(setShowEmojiPicker(!showEmojiPicker));
-              }}
-              className="absolute right-3 bottom-2.5 h-5 w-5 cursor-pointer text-gray-500"
-            />
-          </div>
-        )}
-      </form>
+        {/* Input Form */}
+        <form onSubmit={handleSubmit} id="chatForm" className="flex-1">
+          {isOpenMicro ? (
+            <ReactRecorder />
+          ) : (
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="Aa"
+                className="w-full rounded-full border-none bg-gray-100 py-2 pr-10 pl-4 text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:text-white"
+                value={messageContent}
+                onChange={(e) => dispatch(setMessageContent(e.target.value))}
+                onFocus={() => dispatch(setIsFocused(true))}
+                onBlur={() => dispatch(setIsFocused(false))}
+                ref={inputRef}
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  const rect = e.target.getBoundingClientRect();
+                  dispatch(
+                    setEmojiPickerPosition({
+                      top: rect.top - 450,
+                      left: rect.left - 300,
+                    }),
+                  );
+                  dispatch(setShowEmojiPicker(!showEmojiPicker));
+                }}
+                className="absolute inset-y-0 right-3 flex items-center"
+              >
+                <MdEmojiEmotions className="h-6 w-6 text-gray-500 hover:text-blue-500" />
+              </button>
+            </div>
+          )}
+        </form>
 
-      <div className="text-blue-400">
-        {canSendMessage ? (
-          <button type="submit" form="chatForm">
-            <IoSend size={24} />
-          </button>
-        ) : !isOpenMicro ? (
-          <AiFillLike
-            className="h-8 w-8 cursor-pointer"
-            onClick={handleSendLikeButton}
-          />
-        ) : null}
+        {/* Send/Like Button */}
+        <div className="text-blue-500">
+          {canSendMessage ? (
+            <button
+              type="submit"
+              form="chatForm"
+              className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-zinc-700"
+            >
+              <IoSend size={24} />
+            </button>
+          ) : !isOpenMicro ? (
+            <button
+              onClick={handleSendLikeButton}
+              className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-zinc-700"
+            >
+              <AiFillLike size={24} />
+            </button>
+          ) : null}
+        </div>
+
+        {/* Hidden Inputs for File/Image */}
+        <Input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleUploadFile}
+          className="hidden"
+        />
+        <Input
+          type="file"
+          accept="image/*"
+          ref={imageInputRef}
+          onChange={handleUploadImage}
+          className="hidden"
+        />
       </div>
     </div>
   );

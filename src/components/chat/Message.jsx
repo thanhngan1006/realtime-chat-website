@@ -1,26 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Avatar from '../common/Avatar';
-import { FaFile } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-
+import dayjs from 'dayjs';
 import { Button, Input } from '../common';
 import {
   setEditedMessage,
-  setEmojiPickerPosition,
   setMessages,
-  setSelectedMessageToReactEmoji,
   setSelectedReactionDetail,
-  setShowFullEmojiPicker,
   setUpdatedMessageText,
 } from '../../../features/chat/chatReducer';
-import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp } from 'firebase/firestore';
 import { messageService } from '../../service';
-import EmojiPicker from 'emoji-picker-react';
-import { auth, db } from '../../firebase';
 import OptionsForMessage from './OptionsForMessage';
 import ReactionDisplay from './ReactionDisplay';
-import { IoMdCloseCircle } from 'react-icons/io';
 import { AI_ASSISTANT_ID } from '../../constants/ai';
 
 const Message = ({
@@ -29,16 +22,15 @@ const Message = ({
   src = '',
   isYourMessage,
   msg,
+  showAvatar,
+  isFirstInGroup,
 }) => {
   const [isHover, setIsHover] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(src || '');
-  const [reactionUsers, setReactionUsers] = useState([]);
   const {
     editedMessage,
     selectedMessageId,
     updatedMessageText,
-    selectedMessageToReactEmoji,
-    showFullEmojiPicker,
     selectedReactionDetail,
   } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
@@ -88,45 +80,6 @@ const Message = ({
 
   const handleMouseLeave = () => {
     setIsHover(false);
-    setTimeout(() => {
-      // if (!isHover) {
-      //   dispatch(setSelectedMessageToReactEmoji('')); // Ẩn thanh phản ứng
-      // }
-    }, 500);
-  };
-
-  const handleReactionClick = async (emoji) => {
-    const userId = auth.currentUser.uid;
-    const currentReactions = msg.reactions || {};
-
-    if (currentReactions[userId] === emoji) {
-      await messageService.removeReaction(msg.messageId, userId);
-    } else {
-      await messageService.addReaction(msg.messageId, userId, emoji);
-    }
-    dispatch(setSelectedMessageToReactEmoji(''));
-  };
-
-  const handleShowFullPicker = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    dispatch(
-      setEmojiPickerPosition({
-        top: rect.top - 320,
-        left: rect.left,
-      }),
-    );
-    dispatch(setShowFullEmojiPicker(true));
-  };
-
-  const handleEmojiSelect = (emojiData) => {
-    const userId = auth.currentUser.uid;
-    const currentReactions = msg.reactions || {};
-    if (currentReactions[userId] === emojiData.emoji) {
-      handleReactionClick('');
-    } else {
-      handleReactionClick(emojiData.emoji);
-    }
-    dispatch(setShowFullEmojiPicker(false));
   };
 
   const handleReactionClickDetail = () => {
@@ -136,33 +89,12 @@ const Message = ({
   };
 
   useEffect(() => {
-    const fetchReactionUsers = async () => {
-      if (msg.reactions && Object.keys(msg.reactions).length > 0) {
-        const userPromises = Object.keys(msg.reactions).map(async (userId) => {
-          const userDocRef = doc(db, 'users', userId);
-          const userDoc = await getDoc(userDocRef);
-          const userData = userDoc.exists()
-            ? { id: userDoc.id, ...userDoc.data() }
-            : { name: 'Unknown', avatarUrl: '' };
-          return { ...userData, emoji: msg.reactions[userId] };
-        });
-        const users = await Promise.all(userPromises);
-        setReactionUsers(users);
-      } else {
-        setReactionUsers([]);
-      }
-    };
-    fetchReactionUsers();
-  }, [msg.reactions, selectedReactionDetail]);
-
-  useEffect(() => {
     const handleClickOutside = (e) => {
       if (
         messageContentRef.current &&
         !messageContentRef.current.contains(e.target)
       ) {
         dispatch(setSelectedReactionDetail(null));
-        setReactionUsers([]);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -170,346 +102,114 @@ const Message = ({
   }, [dispatch]);
 
   const bubbleStyle = `relative max-w-[75%] rounded-xl px-3 py-2 shadow-sm`;
-  const yourMessageStyle = `bg-blue-500 text-white rounded-br-none`;
-  const otherMessageStyle = `bg-gray-200 text-gray-800 rounded-bl-none dark:bg-zinc-700 dark:text-gray-200`;
+  const yourMessageStyle = `bg-blue-500 text-white`;
+  const otherMessageStyle = `bg-gray-200 text-gray-800 dark:bg-zinc-700 dark:text-gray-200`;
 
   return (
     <div
-      className={`relative mb-2 flex items-start gap-2`} // Use items-start for better alignment with multiline messages
+      className={`group relative flex items-start gap-2 ${
+        isFirstInGroup ? 'mt-4' : 'mt-0.5'
+      }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {!isYourMessage && (
-        <Avatar
-          src={`${
-            avatarUrl
-              ? avatarUrl
-              : msg.senderId == AI_ASSISTANT_ID
-                ? '/ai_avatar.jpg'
-                : null
-          }`}
-          alt="Avatar"
-          className="h-8 w-8 flex-shrink-0 rounded-full"
-        />
-      )}
+      <div className="w-8">
+        {!isYourMessage && showAvatar && (
+          <Avatar
+            src={`${
+              avatarUrl
+                ? avatarUrl
+                : msg.senderId === AI_ASSISTANT_ID
+                  ? '/ai_avatar.jpg'
+                  : null
+            }`}
+            alt="Avatar"
+            className="h-8 w-8 flex-shrink-0 rounded-full"
+          />
+        )}
+      </div>
 
       <div
-        className={`flex w-full items-center gap-2 ${
-          isYourMessage ? 'justify-end' : 'justify-start'
+        className={`flex w-full flex-col gap-1 ${
+          isYourMessage ? 'items-end' : 'items-start'
         }`}
       >
-        {isHover &&
-          (isYourMessage ? (
-            <div className="">
+        <div
+          className={`flex items-center gap-2 ${
+            isYourMessage ? 'flex-row-reverse' : 'flex-row'
+          }`}
+        >
+          {isHover && (
+            <div className={isYourMessage ? 'mr-2' : 'order-1 ml-2'}>
               <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
             </div>
-          ) : (
-            <div className="order-1">
-              <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
-            </div>
-          ))}
+          )}
 
-        {msg.type === 0 &&
-          (editedMessage === msg.messageId &&
-          selectedMessageId === msg.messageId ? (
-            <div
-              className="relative flex max-w-[75%] items-center gap-2"
-              ref={messageContentRef}
-            >
-              <Input
-                type="text"
-                value={updatedMessageText}
-                onChange={handleUpdateMessage}
-                placeholder="Edit message"
-                className="rounded-2xl pr-3 pl-10 dark:text-white"
-              />
-              <Button
-                className="rounded bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
-                onClick={handleSaveEdit}
-              >
-                Save
-              </Button>
-              <Button
-                className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </Button>
-              <ReactionDisplay
-                reactions={msg.reactions}
-                parentRef={messageContentRef}
-                onReactionClick={handleReactionClickDetail}
-              />
-            </div>
-          ) : (
-            <div
-              className={`${bubbleStyle} ${
-                isYourMessage ? yourMessageStyle : otherMessageStyle
-              } ${className}`}
-              ref={messageContentRef}
-            >
-              <ReactMarkdown>{children}</ReactMarkdown>
-              <ReactionDisplay
-                reactions={msg.reactions}
-                parentRef={messageContentRef}
-                onReactionClick={handleReactionClickDetail}
-              />
-            </div>
-          ))}
-
-        {msg.type === 1 && (
-          <>
-            {msg.messageText && msg.messageText.trim() ? (
-              <div
-                className={`${bubbleStyle} ${
-                  isYourMessage ? yourMessageStyle : otherMessageStyle
-                } ${className}`}
-                ref={messageContentRef}
-              >
-                {msg.messageText}
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : msg.imageUrl ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <img
-                  src={msg.imageUrl}
-                  alt="Sent"
-                  className="rounded-lg shadow-sm"
-                />
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : null}
-          </>
-        )}
-
-        {msg.type === 2 && (
-          <>
-            {msg.messageText && msg.messageText.trim() ? (
-              <div
-                className={`${bubbleStyle} ${
-                  isYourMessage ? yourMessageStyle : otherMessageStyle
-                } ${className}`}
-                ref={messageContentRef}
-              >
-                {msg.messageText}
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : msg.file && msg.fileName ? (
+          {msg.type === 0 &&
+            (editedMessage === msg.messageId &&
+            selectedMessageId === msg.messageId ? (
               <div
                 className="relative flex max-w-[75%] items-center gap-2"
                 ref={messageContentRef}
               >
-                <div
-                  className={`${bubbleStyle} ${
-                    isYourMessage ? yourMessageStyle : otherMessageStyle
-                  } ${className} flex items-center gap-2`}
+                <Input
+                  type="text"
+                  value={updatedMessageText}
+                  onChange={handleUpdateMessage}
+                  placeholder="Edit message"
+                  className="rounded-2xl pr-3 pl-10 dark:text-white"
+                />
+                <Button
+                  className="rounded bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
+                  onClick={handleSaveEdit}
                 >
-                  <FaFile className="h-5 w-5" />
-                  <a
-                    href={msg.file}
-                    download={msg.fileName}
-                    className="underline"
-                  >
-                    {msg.fileName}
-                  </a>
-                </div>
+                  Save
+                </Button>
+                <Button
+                  className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </Button>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
                   onReactionClick={handleReactionClickDetail}
                 />
               </div>
-            ) : null}
-          </>
-        )}
-
-        {msg.type === 3 ? (
-          <>
-            {msg.messageText && msg.messageText.trim() ? (
+            ) : (
               <div
                 className={`${bubbleStyle} ${
                   isYourMessage ? yourMessageStyle : otherMessageStyle
+                } ${
+                  isYourMessage
+                    ? isFirstInGroup
+                      ? 'rounded-br-none'
+                      : 'rounded-r-none'
+                    : isFirstInGroup
+                      ? 'rounded-bl-none'
+                      : 'rounded-l-none'
                 } ${className}`}
                 ref={messageContentRef}
               >
-                {msg.messageText}
+                <ReactMarkdown>{children}</ReactMarkdown>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
                   onReactionClick={handleReactionClickDetail}
                 />
               </div>
-            ) : msg.video ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <video controls width="300" className="rounded-lg shadow-sm">
-                  <source src={msg.video} type="video/mp4" />
-                  <track
-                    kind="captions"
-                    src="captions_en.vtt"
-                    srcLang="en"
-                    label="English captions"
-                    default
-                  />
-                  Your browser does not support the video tag.
-                </video>
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : null}
-          </>
-        ) : null}
+            ))}
+        </div>
 
-        {msg.type === 4 ? (
-          <>
-            {msg.messageText && msg.messageText.trim() ? (
-              <div
-                className={`${bubbleStyle} ${
-                  isYourMessage ? yourMessageStyle : otherMessageStyle
-                } ${className}`}
-                ref={messageContentRef}
-              >
-                {msg.messageText}
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : msg.audio ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <div className="">
-                  {msg.audio ? (
-                    <audio controls className="">
-                      <source src={msg.audio} type="audio/mpeg" />
-                      <track kind="captions" />
-                      Your browser does not support the audio element.
-                    </audio>
-                  ) : (
-                    ''
-                  )}
-                </div>
-                <ReactionDisplay
-                  reactions={msg.reactions}
-                  parentRef={messageContentRef}
-                  onReactionClick={handleReactionClickDetail}
-                />
-              </div>
-            ) : null}
-          </>
-        ) : null}
-
-        {selectedReactionDetail === msg.messageId &&
-          reactionUsers.length > 0 && (
-            <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center px-4 py-1">
-              <div className="flex max-h-96 w-80 flex-col overflow-y-auto rounded-lg bg-white p-4">
-                <div className="flex items-center justify-between">
-                  <div></div>
-                  <span className="font-bold">Cảm xúc về tin nhắn</span>
-                  <Button
-                    onClick={() => dispatch(setSelectedReactionDetail(null))}
-                  >
-                    <IoMdCloseCircle />
-                  </Button>
-                </div>
-                <div className="mt-2 space-y-2">
-                  {reactionUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between gap-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Avatar
-                          src={user.avatarUrl}
-                          alt={user.name}
-                          className="h-10 w-10 rounded-full"
-                        />
-                        <span className="text-sm font-medium">{user.name}</span>
-                      </div>
-                      <span style={{ fontSize: '16px' }}>
-                        {user.emoji}
-                      </span>{' '}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-        {isHover && selectedMessageToReactEmoji === msg.messageId && (
-          <div
-            className={`absolute flex items-center ${
-              isYourMessage ? 'right-2' : 'left-2'
+        {isHover && (
+          <span
+            className={`text-xs text-gray-500 opacity-0 group-hover:opacity-100 ${
+              isYourMessage ? 'pr-2' : 'pl-2'
             }`}
-            style={{
-              top: '-36px',
-              background: '#fff',
-              borderRadius: '10px',
-              padding: '5px',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-              zIndex: 10000,
-            }}
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={handleMouseLeave}
           >
-            {['❤️', '😂', '😮', '😢', '👍'].map((emoji, index) => {
-              const userId = auth.currentUser.uid;
-              const isSelected =
-                msg.reactions && msg.reactions[userId] === emoji;
-              return (
-                <span
-                  key={index}
-                  onClick={() => handleReactionClick(emoji)}
-                  style={{
-                    cursor: 'pointer',
-                    margin: '0 2px',
-                    fontSize: '18px',
-                    color: isSelected ? 'red' : 'black',
-                    backgroundColor: isSelected ? '#ffebee' : 'transparent',
-                  }}
-                >
-                  {emoji}
-                </span>
-              );
-            })}
-            <span
-              onClick={handleShowFullPicker}
-              style={{ cursor: 'pointer', margin: '0 2px', fontSize: '18px' }}
-            >
-              ➕
-            </span>
-            {showFullEmojiPicker && (
-              <div
-                className=""
-                style={{
-                  position: 'absolute',
-                  bottom: '30px',
-                  right: '0',
-                  zIndex: 1000,
-                }}
-              >
-                <EmojiPicker
-                  width={250}
-                  height={300}
-                  onEmojiClick={handleEmojiSelect}
-                />
-              </div>
-            )}
-          </div>
+            {dayjs(msg.sentTime?.toDate()).format('h:mm A')}
+          </span>
         )}
       </div>
     </div>

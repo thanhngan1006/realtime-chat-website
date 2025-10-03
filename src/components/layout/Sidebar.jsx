@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { MdGroups, MdSearch } from 'react-icons/md';
+import { MdSearch } from 'react-icons/md';
 import { Button, Input } from '../common';
-import { UserList, UserStory } from '../user';
-import { ListUsersStory } from '../../mock_data/ListUsersStory';
+import { UserList } from '../user';
 import { auth } from '../../firebase';
 import { conversationService, userService } from '../../service';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConversationList } from '../chat';
 import {
   setConversations,
-  setModeType,
   setSelectedPeopleToCreateGroup,
 } from '../../../features/chat/chatReducer';
 import {
   setPresenceStatus,
   setUsers,
 } from '../../../features/user/userReducer';
-import { FaUserGroup } from 'react-icons/fa6';
 import { IoAddSharp } from 'react-icons/io5';
 import { presenceService } from '../../service/firebase/presence.service';
 
@@ -26,7 +23,7 @@ const Sidebar = () => {
   const senderId = auth.currentUser?.uid;
   const dispatch = useDispatch();
 
-  const { conversations, modeType, selectedPeopleToCreateGroup } = useSelector(
+  const { conversations, selectedPeopleToCreateGroup } = useSelector(
     (state) => state.chat,
   );
   const { users } = useSelector((state) => state.user);
@@ -87,11 +84,9 @@ const Sidebar = () => {
   useEffect(() => {
     if (!senderId) return;
 
-    const isGroup = modeType === 'isGroup';
-
     const unsubscribe = conversationService.listenToConversations(
       senderId,
-      isGroup,
+      undefined, // Fetch all conversations
       (response) => {
         if (response.success) {
           dispatch(setConversations(response.data));
@@ -102,7 +97,7 @@ const Sidebar = () => {
     );
 
     return () => unsubscribe();
-  }, [senderId, modeType, dispatch]);
+  }, [senderId, dispatch]);
 
   const handleChange = (event) => {
     setSearchValue(event.target.value);
@@ -139,63 +134,35 @@ const Sidebar = () => {
         />
       </div>
 
-      <UserStory userStorys={ListUsersStory} />
-
-      <div className="flex">
-        <button
-          onClick={() => {
-            dispatch(setModeType('notGroup'));
-          }}
-          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
+      <div className="flex items-center justify-between px-2 py-2">
+        <h2 className="text-xl font-bold">Chats</h2>
+        <Button
+          onClick={handleAddGroup}
+          className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-zinc-700"
         >
-          <FaUserGroup className="" />
-        </button>
-        <button
-          onClick={() => dispatch(setModeType('isGroup'))}
-          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
-        >
-          <MdGroups />
-        </button>
+          <IoAddSharp size={20} />
+        </Button>
       </div>
 
-      {/* khac nhom la hai nguoi */}
-      {
-        modeType !== 'isGroup' ? (
-          !searchValue ? (
-            <ConversationList
-              conversationList={conversations.filter((c) => !c.isGroup)}
-            />
-          ) : (
-            <UserList users={users} />
-          )
-        ) : !searchValue ? (
-          <div className="flex flex-col">
-            <Button
-              onClick={handleAddGroup}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center bg-amber-200"
-            >
-              <IoAddSharp />
-            </Button>
+      {isOpenUserToAddGroup && (
+        <div className="p-2">
+          <UserList users={usersExceptSender} />
+          <Button
+            onClick={handleCreateGroupChat}
+            className="mt-2 w-full cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            Create Group Chat
+          </Button>
+        </div>
+      )}
 
-            {isOpenUserToAddGroup && (
-              <div className="flex flex-col">
-                <UserList users={usersExceptSender} />
-                <Button
-                  onClick={handleCreateGroupChat}
-                  className="mt-2 cursor-pointer bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
-                >
-                  Create group chat
-                </Button>
-              </div>
-            )}
-
-            <ConversationList
-              conversationList={conversations.filter((c) => c.isGroup)}
-            />
-          </div>
-        ) : null
-        // chua xu ly neu k tim kiem gi ben chat nhom thi hien thi gi
-      }
+      <div className="overflow-y-auto">
+        {!searchValue ? (
+          <ConversationList conversationList={conversations} />
+        ) : (
+          <UserList users={users} />
+        )}
+      </div>
     </div>
   );
 };

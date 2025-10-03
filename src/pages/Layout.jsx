@@ -7,13 +7,11 @@ const Layout = () => {
   const { theme } = useSelector((state) => state.common);
 
   return (
-    <div
-      className={`grid min-h-screen w-full grid-cols-12 ${theme ? 'dark' : ''} bg-white dark:bg-zinc-800`}
-    >
-      <div className="col-span-3 bg-gray-100 text-gray-900 dark:bg-zinc-700 dark:text-white">
+    <div className={`flex h-screen w-full ${theme ? 'dark' : ''}`}>
+      <div className="bg-card text-card-foreground w-96 flex-shrink-0">
         <SidebarLayout />
       </div>
-      <div className="col-span-9" style={{ zIndex: 1000 }}>
+      <div className="bg-background flex-1">
         <Outlet />
       </div>
     </div>
