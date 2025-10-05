@@ -21,8 +21,8 @@ const Login = () => {
     useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'thanhngan10604@gmail.com',
+    password: '123456',
   });
   const [isShowPassword, setIsShowPassword] = useState(false);
 
