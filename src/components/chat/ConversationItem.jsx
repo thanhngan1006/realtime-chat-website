@@ -7,6 +7,7 @@ import { setSelectedUser } from '../../../features/user/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { conversationService, userService } from '../../service';
 import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
+import GroupAvatar from '../common/GroupAvatar';
 
 const ConversationItem = ({ conversationItem }) => {
   const senderUserId = auth.currentUser.uid;
@@ -14,6 +15,7 @@ const ConversationItem = ({ conversationItem }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { modeType } = useSelector((state) => state.chat);
+  const [groupAvatarUrls, setGroupAvatarUrls] = useState([]);
 
   const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
 
@@ -56,7 +58,7 @@ const ConversationItem = ({ conversationItem }) => {
             (id) => id !== senderUserId,
           );
           if (participants.length === 0) {
-            setReceiverData({ name: 'Group Chat', avatarUrl: '' });
+            setReceiverData({ name: 'Chỉ có bạn', avatarUrl: '' });
             return;
           }
 
@@ -67,7 +69,7 @@ const ConversationItem = ({ conversationItem }) => {
 
           setReceiverData({
             name: groupName,
-            avatarUrl: 'https://cdn-icons-png.flaticon.com/512/69/69589.png',
+            // avatarUrl: 'https://cdn-icons-png.flaticon.com/512/69/69589.png',
           });
         } else {
           if (!receiverId) {
@@ -94,6 +96,38 @@ const ConversationItem = ({ conversationItem }) => {
 
     fetchReceiverData();
   }, [conversationItem, senderUserId, dispatch, receiverId, modeType]);
+
+  useEffect(() => {
+    if (!conversationItem.isGroup) {
+      setGroupAvatarUrls([]);
+      return;
+    }
+    const fetchGroupAvatars = async () => {
+      let otherParticipants = conversationItem.participants.filter(
+        (id) => id !== senderUserId,
+      );
+
+      if (otherParticipants.length === 1) {
+        otherParticipants.unshift(senderUserId);
+      }
+
+      const idsToFetch = otherParticipants.slice(0, 2);
+
+      try {
+        const avatarPromises = idsToFetch.map((id) => userService.getUser(id));
+        const userDocs = await Promise.all(avatarPromises);
+
+        const urls = userDocs.map((doc) =>
+          doc.success ? doc.data.avatarUrl : '/default-avatar.png',
+        );
+        setGroupAvatarUrls(urls);
+      } catch (error) {
+        console.error('Error fetching group avatars:', error);
+      }
+    };
+
+    fetchGroupAvatars();
+  }, [conversationItem, senderUserId]);
 
   const handleClickItem = async () => {
     try {
@@ -209,12 +243,19 @@ const ConversationItem = ({ conversationItem }) => {
       className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
       onClick={handleClickItem}
     >
-      <Avatar
-        src={receiverData.avatarUrl || ''}
-        // userId={receiverData?.uid}
-        presenceStatus={displayStatus}
-        className="h-12 w-12 rounded-full"
-      />
+      {conversationItem.isGroup ? (
+        <GroupAvatar
+          src1={groupAvatarUrls[0]}
+          src2={groupAvatarUrls[1]}
+          className="h-12 w-12"
+        />
+      ) : (
+        <Avatar
+          src={receiverData.avatarUrl || ''}
+          presenceStatus={displayStatus}
+          className="h-12 w-12 rounded-full"
+        />
+      )}
 
       <div className="flex-1 flex-col">
         <div className="flex items-center justify-between">

@@ -7,6 +7,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { BaseRepository } from '../repository/base.repository';
@@ -16,7 +17,11 @@ import {
   withErrorHandler,
 } from '../utils/error-handler';
 import { db } from '../../firebase';
-import { formatDocuments, ServiceResponse } from '../utils/response-formatter';
+import {
+  formatDocument,
+  formatDocuments,
+  ServiceResponse,
+} from '../utils/response-formatter';
 
 const CONVERSATION_MESSAGES = {
   CONVESATION_CREATED: 'conversation.conversation_created_success',
@@ -137,14 +142,34 @@ class ConversationService extends BaseRepository {
   };
 
   markAsRead = withErrorHandler(async (conversationId, userId) => {
-    if (!conversationId || !userId) return;
+    if (!conversationId || !userId) {
+      throw new ServiceError(
+        'conversationId and userId are required',
+        ErrorCodes.INVALID_INPUT,
+        400,
+      );
+    }
+
+    const docRef = doc(this.collectionRef, conversationId);
+
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      throw new ServiceError(
+        `${this.collectionName} not found`,
+        ErrorCodes.DOCUMENT_NOT_FOUND,
+        404,
+      );
+    }
+
     const data = {
       unReadBy: arrayRemove(userId),
     };
 
-    const updateDoc = await this.update(conversationId, data);
+    await updateDoc(docRef, data);
 
-    return updateDoc;
+    const updatedDoc = await getDoc(docRef);
+    return formatDocument(updatedDoc);
   });
 
   fetchConversation = withErrorHandler(async (senderId, isGroup = false) => {
