@@ -7,9 +7,9 @@ export const formatTimeAgo = (timestamp) => {
   let interval = seconds / 31536000;
   if (interval > 1) return Math.floor(interval) + ' năm';
   interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + ' tháng';
+  if (interval > 1) return Math.floor(interval) + ' t';
   interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + ' ngày';
+  if (interval > 1) return Math.floor(interval) + ' n';
   interval = seconds / 3600;
   if (interval > 1) return Math.floor(interval) + 'g';
   interval = seconds / 60;
