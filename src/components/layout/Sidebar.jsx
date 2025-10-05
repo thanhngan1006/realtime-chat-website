@@ -132,7 +132,7 @@ const Sidebar = () => {
   // === TỰ ĐỘNG CHỌN CUỘC TRÒ CHUYỆN ĐẦU TIÊN ===
   useEffect(() => {
     if (conversations.length > 0 && !selectedUser?.id && senderId) {
-      console.log('Auto-selecting the first conversation...');
+      // console.log('Auto-selecting the first conversation...');
 
       const firstConversation = conversations[0];
 
@@ -217,43 +217,40 @@ const Sidebar = () => {
       </div>
 
       {/* khac nhom la hai nguoi */}
-      {
-        modeType !== 'isGroup' ? (
-          !searchValue ? (
-            <ConversationList
-              conversationList={conversations.filter((c) => !c.isGroup)}
-            />
-          ) : (
-            <UserList users={users} />
-          )
-        ) : !searchValue ? (
-          <div className="flex flex-col">
-            <Button
-              onClick={handleAddGroup}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center bg-amber-200"
-            >
-              <IoAddSharp />
-            </Button>
+      {modeType !== 'isGroup' ? (
+        !searchValue ? (
+          <ConversationList
+            conversationList={conversations.filter((c) => !c.isGroup)}
+          />
+        ) : (
+          <UserList users={users} />
+        )
+      ) : !searchValue ? (
+        <div className="flex flex-col">
+          <Button
+            onClick={handleAddGroup}
+            className="flex h-10 w-10 cursor-pointer items-center justify-center bg-amber-200"
+          >
+            <IoAddSharp />
+          </Button>
 
-            {isOpenUserToAddGroup && (
-              <div className="flex flex-col">
-                <UserList users={usersExceptSender} />
-                <Button
-                  onClick={handleCreateGroupChat}
-                  className="mt-2 cursor-pointer bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
-                >
-                  Create group chat
-                </Button>
-              </div>
-            )}
+          {isOpenUserToAddGroup && (
+            <div className="flex flex-col">
+              <UserList users={usersExceptSender} />
+              <Button
+                onClick={handleCreateGroupChat}
+                className="mt-2 cursor-pointer bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
+              >
+                Create group chat
+              </Button>
+            </div>
+          )}
 
-            <ConversationList
-              conversationList={conversations.filter((c) => c.isGroup)}
-            />
-          </div>
-        ) : null
-        // chua xu ly neu k tim kiem gi ben chat nhom thi hien thi gi
-      }
+          <ConversationList
+            conversationList={conversations.filter((c) => c.isGroup)}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };
