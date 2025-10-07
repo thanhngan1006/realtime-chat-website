@@ -63,6 +63,7 @@ const Home = () => {
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
   const propsRef = useRef();
+  const cloudinaryCallbackRef = useRef();
 
   useEffect(() => {
     propsRef.current = {
@@ -224,38 +225,51 @@ const Home = () => {
   };
 
   useEffect(() => {
-    cloudinaryRef.current = window.cloudinary;
-    widgetRef.current = cloudinaryRef.current.createUploadWidget(
-      {
-        cloudName: 'dbwmvrxbd',
-        uploadPreset: 'smycavha',
-        resourceType: 'video',
-        clientAllowedFormats: ['mp4', 'mov'],
-      },
-      async (error, result) => {
-        if (!error && result && result.event === 'success') {
-          const videoUrl = result.info.secure_url;
+    cloudinaryCallbackRef.current = {
+      uid,
+      selectedUser,
+      conversationId,
+      messageContent,
+    };
+  }, [uid, selectedUser, conversationId, messageContent]);
 
-          const receiverIds = Array.isArray(selectedUser.id)
-            ? selectedUser.id
-            : [selectedUser.id || ''];
+  useEffect(() => {
+    if (window.cloudinary) {
+      cloudinaryRef.current = window.cloudinary;
+      widgetRef.current = cloudinaryRef.current.createUploadWidget(
+        {
+          cloudName: 'dbwmvrxbd',
+          uploadPreset: 'smycavha',
+          resourceType: 'video',
+          clientAllowedFormats: ['mp4', 'mov'],
+        },
+        async (error, result) => {
+          if (!error && result && result.event === 'success') {
+            const { uid, selectedUser, conversationId, messageContent } =
+              cloudinaryCallbackRef.current;
 
-          await messageService.createNewMessage({
-            senderId: uid,
-            receiverIds: receiverIds,
-            conversationId: conversationId,
-            messageContent: messageContent || '',
-            video: videoUrl,
-            typeContent: 3,
-          });
-        }
-      },
-    );
-  }, [conversationId, messageContent, selectedUser.id, uid]);
+            const videoUrl = result.info.secure_url;
+            const receiverIds = Array.isArray(selectedUser.id)
+              ? selectedUser.id
+              : [selectedUser.id || ''];
+
+            await messageService.createNewMessage({
+              senderId: uid,
+              receiverIds: receiverIds,
+              conversationId: conversationId,
+              messageContent: messageContent || '',
+              video: videoUrl,
+              typeContent: 3,
+            });
+          }
+        },
+      );
+    }
+  }, []);
 
   const handleOpenWidget = () => {
     if (widgetRef.current) {
-      widgetRef.current.open(); // Mở widget khi click
+      widgetRef.current.open();
     }
   };
 
