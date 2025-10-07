@@ -24,7 +24,7 @@ const SearchPeople = () => {
         <Button className="bg-green-400 text-white">Search</Button>
       </div>
 
-      <div className="rounded-2xl bg-blue-300 p-2">
+      <div className="bg-brand-200 rounded-2xl p-2">
         <span>Tips</span>
         <ul>
           <li>You can search with partial email address</li>

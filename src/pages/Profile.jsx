@@ -85,101 +85,142 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-rose-300">
+        {error}
+      </div>
+    );
 
   return (
-    <div className="relative">
-      <div className="relative flex h-screen w-full items-center justify-center bg-gray-200 dark:bg-zinc-800">
-        <div className="absolute top-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
-        <div className="absolute bottom-0 h-[15%] w-full bg-blue-400 dark:bg-zinc-600"></div>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-cyan-950 to-slate-900">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="bg-brand-500/15 absolute top-[-20%] left-[-20%] h-[28rem] w-[28rem] rounded-full blur-[220px]" />
+        <div className="bg-brand-300/18 absolute right-[-15%] bottom-[-20%] h-[30rem] w-[30rem] rounded-full blur-[240px]" />
+      </div>
 
-        <div className="z-10 flex h-[90%] w-[85%] rounded-2xl bg-white shadow-2xl dark:bg-zinc-700">
-          <div className="flex flex-1/3 flex-col items-center gap-2 border-r border-gray-500 p-4">
-            <div className="relative h-32 w-32">
-              <Avatar
-                src={profileData?.avatarUrl}
-                className="h-32 w-32 rounded-full bg-red-400"
-              />
-              {auth.currentUser.uid === uid && (
-                <>
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-16">
+        <button
+          onClick={() => navigate('/')}
+          className="focus-visible:ring-brand-200 flex w-fit items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition hover:bg-white/20 focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <IoMdArrowBack className="h-5 w-5" />
+          Back to chat
+        </button>
+
+        <div className="grid gap-8 lg:grid-cols-12">
+          <aside className="lg:col-span-4">
+            <div className="rounded-3xl border border-white/20 bg-white/80 p-8 text-center shadow-[0_40px_120px_-60px_rgba(6,182,212,0.35)] backdrop-blur-2xl dark:border-zinc-700/60 dark:bg-zinc-900/80">
+              <div className="relative mx-auto h-36 w-36">
+                <Avatar
+                  src={profileData?.avatarUrl}
+                  className="h-36 w-36 rounded-3xl shadow-xl ring-4 ring-white/70 dark:ring-zinc-800"
+                />
+                {auth.currentUser.uid === uid && (
+                  <>
+                    <button
+                      onClick={handleAvatarClick}
+                      type="button"
+                      className="from-brand-500 to-brand-600 focus-visible:ring-brand-200 absolute right-2 bottom-2 rounded-full bg-gradient-to-br p-3 text-white shadow-lg transition hover:shadow-xl focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <FaEdit />
+                    </button>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </>
+                )}
+              </div>
+              <div className="mt-6 space-y-2">
+                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
+                  {profileData?.name}
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {profileData?.email}
+                </p>
+              </div>
+            </div>
+          </aside>
+
+          <section className="lg:col-span-8">
+            <div className="rounded-3xl border border-white/20 bg-white/85 p-8 shadow-[0_40px_140px_-70px_rgba(6,182,212,0.32)] backdrop-blur-2xl dark:border-zinc-700/60 dark:bg-zinc-900/80">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                    Profile details
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Manage what your teammates see when chatting with you.
+                  </p>
+                </div>
+                {auth.currentUser.uid === uid && !isEditing && (
                   <Button
-                    onClick={handleAvatarClick}
-                    className="absolute top-24 right-0 rounded-full bg-blue-500 p-2 text-white transition-colors hover:bg-blue-600"
+                    variant="primary"
+                    size="sm"
+                    className="!rounded-xl"
+                    onClick={() => setIsEditing(true)}
                   >
                     <FaEdit />
+                    <span className="ml-2">Edit profile</span>
                   </Button>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </>
-              )}
-            </div>
-            <span className="font-bold text-blue-500">
-              {profileData?.email}
-            </span>
-          </div>
+                )}
+              </div>
 
-          <div className="flex-2/3 p-4">
-            <div className="mx-auto mt-8 max-w-md space-y-4">
-              {isEditing ? (
-                <>
-                  <div>
+              <div className="mt-6 space-y-4">
+                {isEditing ? (
+                  <>
                     <Input
-                      label="Name"
+                      label="Display name"
                       type="text"
                       value={editedData.name || ''}
                       onChange={(e) =>
                         handleInputChange('name', e.target.value)
                       }
-                      className="w-full border-b border-gray-400 text-xl focus:border-blue-500 focus:outline-none dark:text-white"
+                      variant="filled"
+                      inputClassName="rounded-xl bg-white/90 px-4 py-3 text-slate-700 placeholder:text-slate-400 shadow-inner dark:bg-zinc-800/90 dark:text-white"
                     />
+
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        onClick={handleUpdate}
+                        variant="primary"
+                        className="!rounded-xl"
+                      >
+                        Save changes
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditedData(profileData);
+                        }}
+                        variant="secondary"
+                        className="!rounded-xl"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <ProfileRow label="Name" value={profileData?.name} />
+                    <ProfileRow label="Email" value={profileData?.email} />
                   </div>
-                  <div className="mt-4 flex space-x-4">
-                    <Button
-                      onClick={handleUpdate}
-                      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditedData(profileData);
-                      }}
-                      className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <ProfileRow label="Name" value={profileData?.name} />
-                  <ProfileRow label="Email" value={profileData?.email} />
-                  {auth.currentUser.uid === uid && (
-                    <Button
-                      className="mt-4 flex items-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <FaEdit />
-                      <span>Edit Profile</span>
-                    </Button>
-                  )}
-                </>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
-
-      <Button className="absolute top-4 left-4" onClick={() => navigate('/')}>
-        <IoMdArrowBack className="h-6 w-6 font-bold text-white" />
-      </Button>
     </div>
   );
 };

@@ -135,6 +135,13 @@ const Message = ({
     );
   };
 
+  const bubbleBaseClass =
+    'relative max-w-[80%] rounded-3xl px-5 py-3 text-sm leading-relaxed shadow-lg transition-all duration-200';
+  const yourBubbleClass =
+    'bg-gradient-to-br from-brand-300 via-brand-400 to-brand-500 text-slate-900 shadow-[0_20px_60px_-40px_rgba(6,182,212,0.38)] dark:text-white';
+  const otherBubbleClass =
+    'border border-white/70 bg-white/90 text-slate-700 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70 dark:text-slate-100';
+
   useEffect(() => {
     const fetchReactionUsers = async () => {
       if (msg.reactions && Object.keys(msg.reactions).length > 0) {
@@ -171,36 +178,38 @@ const Message = ({
 
   return (
     <div
-      className={`relative mb-2 flex items-center gap-2`}
+      className={`relative flex items-start gap-4 rounded-3xl px-2 transition-all duration-200`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      role="article"
+      aria-labelledby={`message-${msg.messageId}`}
     >
       {!isYourMessage && (
-        <Avatar
-          src={`${
-            avatarUrl
-              ? avatarUrl
-              : msg.senderId == AI_ASSISTANT_ID
-                ? '/ai_avatar.jpg'
-                : null
-          }`}
-          alt="Avatar"
-          className="h-8 w-8 flex-shrink-0 rounded-full"
-        />
+        <div className="flex-shrink-0">
+          <Avatar
+            src={`${
+              avatarUrl
+                ? avatarUrl
+                : msg.senderId == AI_ASSISTANT_ID
+                  ? '/ai_avatar.jpg'
+                  : null
+            }`}
+            alt="Sender avatar"
+            className="h-10 w-10 rounded-full shadow-md ring-2 ring-white/20 dark:ring-zinc-800"
+          />
+        </div>
       )}
 
       <div
-        className={`flex w-full items-center gap-2 ${
-          isYourMessage ? 'justify-end' : 'justify-start'
-        }`}
+        className={`flex w-full flex-col items-${isYourMessage ? 'end' : 'start'}`}
       >
         {isHover &&
           (isYourMessage ? (
-            <div className="">
+            <div className="mb-1 self-end">
               <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
             </div>
           ) : (
-            <div className="order-1">
+            <div className="mb-1 self-start">
               <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
             </div>
           ))}
@@ -209,28 +218,33 @@ const Message = ({
           (editedMessage === msg.messageId &&
           selectedMessageId === msg.messageId ? (
             <div
-              className="relative flex max-w-[75%] items-center gap-2"
+              className="relative flex w-full max-w-[80%] flex-col gap-2"
               ref={messageContentRef}
             >
-              <Input
-                type="text"
-                value={updatedMessageText}
-                onChange={handleUpdateMessage}
-                placeholder="Edit message"
-                className="rounded-2xl pr-3 pl-10 dark:text-white"
-              />
-              <Button
-                className="rounded bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
-                onClick={handleSaveEdit}
-              >
-                Save
-              </Button>
-              <Button
-                className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </Button>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={updatedMessageText}
+                  onChange={handleUpdateMessage}
+                  placeholder="Edit message..."
+                  className="border-brand-300 focus:border-brand-500 flex-1 rounded-2xl border-2 px-4 py-2 focus:outline-none dark:bg-zinc-700 dark:text-white"
+                  aria-label="Edit message input"
+                />
+                <Button
+                  className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 text-white shadow-md transition-all duration-200 hover:from-green-600 hover:to-green-700 hover:shadow-lg focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                  onClick={handleSaveEdit}
+                  aria-label="Save edited message"
+                >
+                  Save
+                </Button>
+                <Button
+                  className="rounded-xl bg-gradient-to-r from-gray-500 to-gray-600 px-4 py-2 text-white shadow-md transition-all duration-200 hover:from-gray-600 hover:to-gray-700 hover:shadow-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+                  onClick={handleCancelEdit}
+                  aria-label="Cancel editing message"
+                >
+                  Cancel
+                </Button>
+              </div>
               <ReactionDisplay
                 reactions={msg.reactions}
                 parentRef={messageContentRef}
@@ -239,12 +253,12 @@ const Message = ({
             </div>
           ) : (
             <div
-              className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                isYourMessage
-                  ? `rounded-br-none bg-blue-500`
-                  : `rounded-bl-none bg-gray-500`
-              } ${className}`}
+              className={`${bubbleBaseClass} ${
+                isYourMessage ? yourBubbleClass : otherBubbleClass
+              } hover:-translate-y-0.5 ${className}`}
               ref={messageContentRef}
+              id={`message-${msg.messageId}`}
+              aria-label={`Message from ${isYourMessage ? 'you' : 'sender'}`}
             >
               <ReactMarkdown>{children}</ReactMarkdown>
               <ReactionDisplay
@@ -259,11 +273,9 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
-                } ${className}`}
+                className={`${bubbleBaseClass} ${
+                  isYourMessage ? yourBubbleClass : otherBubbleClass
+                } max-w-[75%] ${className}`}
                 ref={messageContentRef}
               >
                 {msg.messageText}
@@ -274,8 +286,15 @@ const Message = ({
                 />
               </div>
             ) : msg.imageUrl ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <img src={msg.imageUrl} alt="Sent" className="rounded-lg" />
+              <div
+                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                ref={messageContentRef}
+              >
+                <img
+                  src={msg.imageUrl}
+                  alt="Sent"
+                  className="block h-full w-full object-cover"
+                />
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
@@ -290,14 +309,12 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative flex max-w-[75%] items-center gap-2 rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
-                } ${className}`}
+                className={`${bubbleBaseClass} ${
+                  isYourMessage ? yourBubbleClass : otherBubbleClass
+                } flex max-w-[80%] items-center gap-3 hover:-translate-y-0.5 ${className}`}
                 ref={messageContentRef}
               >
-                {msg.messageText}
+                <span className="leading-relaxed">{msg.messageText}</span>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
@@ -310,17 +327,15 @@ const Message = ({
                 ref={messageContentRef}
               >
                 <div
-                  className={`rounded-2xl px-4 py-2 text-white ${
-                    isYourMessage
-                      ? `rounded-br-none bg-blue-500`
-                      : `rounded-bl-none bg-gray-600`
-                  } ${className}`}
+                  className={`${bubbleBaseClass} ${
+                    isYourMessage ? yourBubbleClass : otherBubbleClass
+                  } flex items-center gap-3 text-sm ${className}`}
                 >
                   <FaFile className="h-5 w-5" />
                   <a
                     href={msg.file}
                     download={msg.fileName}
-                    className="text-white underline"
+                    className="font-medium underline"
                   >
                     {msg.fileName}
                   </a>
@@ -339,14 +354,12 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
-                } ${className}`}
+                className={`${bubbleBaseClass} ${
+                  isYourMessage ? yourBubbleClass : otherBubbleClass
+                } hover:-translate-y-0.5 ${className}`}
                 ref={messageContentRef}
               >
-                {msg.messageText}
+                <span className="leading-relaxed">{msg.messageText}</span>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
@@ -354,7 +367,10 @@ const Message = ({
                 />
               </div>
             ) : msg.video ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
+              <div
+                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                ref={messageContentRef}
+              >
                 <video controls width="300">
                   <source src={msg.video} type="video/mp4" />
                   <track
@@ -380,14 +396,12 @@ const Message = ({
           <>
             {msg.messageText && msg.messageText.trim() ? (
               <div
-                className={`relative max-w-[75%] rounded-2xl px-4 py-2 text-white ${
-                  isYourMessage
-                    ? `rounded-br-none bg-blue-500`
-                    : `rounded-bl-none bg-gray-600`
-                } ${className}`}
+                className={`${bubbleBaseClass} ${
+                  isYourMessage ? yourBubbleClass : otherBubbleClass
+                } hover:-translate-y-0.5 ${className}`}
                 ref={messageContentRef}
               >
-                {msg.messageText}
+                <span className="leading-relaxed">{msg.messageText}</span>
                 <ReactionDisplay
                   reactions={msg.reactions}
                   parentRef={messageContentRef}
@@ -395,10 +409,13 @@ const Message = ({
                 />
               </div>
             ) : msg.audio ? (
-              <div className="relative max-w-[75%]" ref={messageContentRef}>
-                <div className="">
+              <div
+                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 p-4 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                ref={messageContentRef}
+              >
+                <div>
                   {msg.audio ? (
-                    <audio controls className="">
+                    <audio controls className="w-full">
                       <source src={msg.audio} type="audio/mpeg" />
                       <track kind="captions" />
                       Your browser does not support the audio element.

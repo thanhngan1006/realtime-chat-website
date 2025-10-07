@@ -14,6 +14,7 @@ const ConversationItem = ({ conversationItem }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { modeType } = useSelector((state) => state.chat);
+  const { presenceStatuses, selectedUser } = useSelector((state) => state.user);
 
   const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
 
@@ -24,8 +25,6 @@ const ConversationItem = ({ conversationItem }) => {
       ? conversationItem.participants[0]
       : conversationItem.participants.find((id) => id !== senderUserId) || null;
   }, [conversationItem, senderUserId]);
-
-  const presenceStatuses = useSelector((state) => state.user.presenceStatuses);
 
   const isSelfConversation = useMemo(() => {
     if (
@@ -41,12 +40,34 @@ const ConversationItem = ({ conversationItem }) => {
   const showUnreadIndicator =
     baseUnread && !isSelfConversation && receiverId !== AI_ASSISTANT_ID;
 
-  const truncateText = (text, maxLength = 15) => {
-    if (!text) return 'No messages yet';
-    return text.length > maxLength
-      ? text.substring(0, maxLength) + '...'
-      : text;
-  };
+  const isActiveConversation =
+    selectedUser?.conversationId === conversationItem.id;
+
+  const lastMessageTimestamp = conversationItem.lastMessage?.createdAt
+    ? formatTimestampFromText(conversationItem.lastMessage.createdAt)
+    : conversationItem.updatedAt
+      ? formatTimestampFromText(conversationItem.updatedAt)
+      : '';
+
+  const lastMessagePreview = useMemo(() => {
+    const truncate = (text, maxLength = 15) => {
+      if (!text) return 'No messages yet';
+      return text.length > maxLength
+        ? `${text.substring(0, maxLength)}...`
+        : text;
+    };
+
+    if (!conversationItem?.lastMessage) return 'Start the conversation';
+
+    const { messageText, fileName, imageUrl, audio } =
+      conversationItem.lastMessage;
+
+    if (messageText) return truncate(messageText, 55);
+    if (fileName) return truncate(`Shared ${fileName}`, 45);
+    if (imageUrl) return 'Shared a photo';
+    if (audio) return 'Sent a voice note';
+    return 'New activity';
+  }, [conversationItem]);
 
   useEffect(() => {
     const fetchReceiverData = async () => {
@@ -204,40 +225,87 @@ const ConversationItem = ({ conversationItem }) => {
     return null;
   }, [conversationItem, senderUserId, presenceStatuses]);
 
+  const senderLabel =
+    conversationItem.lastMessage?.senderId === senderUserId
+      ? 'You'
+      : senderNameInLastMessage;
+
+  const cardClasses = `group relative flex w-full items-center gap-4 rounded-2xl border px-4 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
+    isActiveConversation
+      ? 'border-transparent bg-gradient-to-r from-brand-500/90 via-brand-400/90 to-brand-600/90 text-white shadow-glow'
+      : 'border-white/35 bg-white/65 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-700/40 dark:bg-zinc-900/65 dark:text-slate-200'
+  }`;
+
   return (
-    <div
-      className={`flex items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-500 ${showUnreadIndicator ? 'bg-blue-50 font-bold dark:bg-gray-700' : ''} `}
+    <button
+      type="button"
       onClick={handleClickItem}
+      className={cardClasses}
+      aria-label={`Open conversation with ${receiverData.name || 'Unknown user'}`}
+      aria-pressed={isActiveConversation}
     >
-      <Avatar
-        src={receiverData.avatarUrl || ''}
-        // userId={receiverData?.uid}
-        presenceStatus={displayStatus}
-        className="h-12 w-12 rounded-full"
-      />
-
-      <div className="flex-1 flex-col">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">
-            {receiverData.name || 'Unknown User'}{' '}
-          </span>
-
-          <span className="text-xs text-gray-500">
-            {formatTimestampFromText(conversationItem.updatedAt) ||
-              'No messages yet'}{' '}
-          </span>
-        </div>
-        {}
-
-        <span>
-          {`${conversationItem.lastMessage?.senderId === senderUserId ? `Bạn` : senderNameInLastMessage ? `${senderNameInLastMessage}` : ''}${truncateText(conversationItem.lastMessage?.text)} `}
-        </span>
+      <div className="relative flex-shrink-0">
+        <Avatar
+          src={receiverData.avatarUrl || ''}
+          presenceStatus={displayStatus}
+          className={`h-12 w-12 rounded-full shadow-lg ring-2 ${
+            isActiveConversation
+              ? 'ring-white/70'
+              : 'ring-white/50 dark:ring-zinc-800'
+          }`}
+          aria-hidden="true"
+        />
+        {displayStatus?.state === 'online' && (
+          <span className="absolute -right-1 -bottom-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400 shadow-md dark:border-zinc-900" />
+        )}
       </div>
 
-      {showUnreadIndicator && (
-        <span className="h-3 w-3 rounded-full bg-blue-500"></span>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className={`truncate text-base font-semibold ${
+              isActiveConversation
+                ? 'text-white'
+                : 'text-slate-800 dark:text-slate-100'
+            }`}
+          >
+            {receiverData.name || 'Unknown user'}
+          </span>
+          {lastMessageTimestamp && (
+            <span
+              className={`text-xs ${
+                isActiveConversation
+                  ? 'text-white/80'
+                  : 'text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              {lastMessageTimestamp}
+            </span>
+          )}
+        </div>
+        <div
+          className={`mt-1 flex min-w-0 items-center gap-1 text-sm ${
+            isActiveConversation
+              ? 'text-white/80'
+              : 'text-slate-500 dark:text-slate-400'
+          }`}
+        >
+          {senderLabel && (
+            <span className="inline-flex shrink-0 items-center gap-1 font-medium">
+              {senderLabel}
+              <span aria-hidden="true">•</span>
+            </span>
+          )}
+          <span className="truncate" aria-label="Last message preview">
+            {lastMessagePreview}
+          </span>
+        </div>
+      </div>
+
+      {showUnreadIndicator && !isActiveConversation && (
+        <span className="bg-accent absolute top-4 right-4 h-2.5 w-2.5 rounded-full shadow-md" />
       )}
-    </div>
+    </button>
   );
 };
 

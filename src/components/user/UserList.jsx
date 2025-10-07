@@ -4,7 +4,7 @@ import { formatTimestamp } from '../../service';
 
 const UserList = ({ users }) => {
   return (
-    <div className="w-full">
+    <div className="flex flex-col gap-3">
       {users.map((user, index) => (
         <UserItem
           id={user.id}

@@ -82,7 +82,7 @@ const ReactRecorder = () => {
           {status === 'recording' ? (
             <FaStopCircle size={24} className="text-red-500" />
           ) : (
-            <IoPlay size={24} className="text-blue-500" />
+            <IoPlay size={24} className="text-brand-500" />
           )}
         </button>
         <div className="flex-1">

@@ -1,22 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { AiFillLike } from 'react-icons/ai';
-import { IoMdAddCircle } from 'react-icons/io';
-import { FaMicrophone, FaRegImage, FaRobot } from 'react-icons/fa';
-import { MdEmojiEmotions, MdOndemandVideo } from 'react-icons/md';
-import { Button, Input } from '../components/common';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { FaRobot } from 'react-icons/fa';
+import { Button } from '../components/common';
+import MessageInput from '../components/chat/MessageInput';
 import { HeadingMessageBar } from '../components/layout';
 import { MessageBox } from '../components/chat';
 import { useDispatch, useSelector } from 'react-redux';
+import { convertFirestoreDocument } from '../service/utils/format-date';
 import {
   clearRecordingState,
   setConversations,
-  setEmojiPickerPosition,
-  setIsFocused,
   setIsOpenMicro,
   setMessageContent,
   setMessages,
   setReceiverData,
-  setShowEmojiPicker,
   setTypingStatus,
 } from '../../features/chat/chatReducer';
 import {
@@ -32,9 +28,6 @@ import { auth, db } from '../firebase';
 import { conversationService, fileService, userService } from '../service';
 import { messageService } from '../service/firebase/message.service';
 import TypingDots from '../components/chat/TypingDots';
-import EmojiPickerPortal from '../components/common/EmojiPickerPortal';
-import ReactRecorder from '../components/chat/Recorder';
-import { IoSend } from 'react-icons/io5';
 import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../constants/ai';
 import { setSelectedUser } from '../../features/user/userReducer';
 import { aiService } from '../service/firebase/ai.service';
@@ -46,23 +39,18 @@ const Home = () => {
   const {
     messages,
     messageContent,
-    emojiPickerPosition,
-    isFocused,
     typingStatus,
-    showEmojiPicker,
     isOpenMicro,
     recorderStatus,
     mediaBlobUrl,
   } = useSelector((state) => state.chat);
   const uid = auth.currentUser.uid;
-  const inputRef = useRef(null);
-  const imageInputRef = useRef(null);
-  const fileInputRef = useRef(null);
   const [avatarUrls, setAvatarUrls] = useState({});
   const [typingUsers, setTypingUsers] = useState([]);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
   const propsRef = useRef();
+  const messageContentRef = useRef('');
 
   useEffect(() => {
     propsRef.current = {
@@ -71,9 +59,12 @@ const Home = () => {
     };
   }, [selectedUser]);
 
+  useEffect(() => {
+    messageContentRef.current = messageContent;
+  }, [messageContent]);
+
   const hasTextContent = messageContent.trim() !== '';
   const hasAudioContent = recorderStatus === 'stopped' && mediaBlobUrl;
-  const canSendMessage = hasTextContent || hasAudioContent;
 
   const handleOpenMicro = () => {
     dispatch(setIsOpenMicro(!isOpenMicro));
@@ -120,9 +111,8 @@ const Home = () => {
           }
         }
 
-        inputRef.current.value = '';
         dispatch(setMessageContent(''));
-        inputRef.current.focus();
+        stopTyping();
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -166,10 +156,6 @@ const Home = () => {
     }
   };
 
-  const handleSendFile = () => {
-    fileInputRef.current.click();
-  };
-
   const handleUploadFile = async (e) => {
     try {
       const receiverIds = Array.isArray(selectedUser.id)
@@ -187,16 +173,9 @@ const Home = () => {
         file: base64,
         typeContent: 2,
       });
-
-      fileInputRef.current.value = '';
-      inputRef.current.focus();
     } catch (error) {
       console.error('Error sending message:', error);
     }
-  };
-
-  const handleSendImage = () => {
-    imageInputRef.current.click();
   };
 
   const handleUploadImage = async (e) => {
@@ -215,15 +194,14 @@ const Home = () => {
         imageUrl: base64,
         typeContent: 1,
       });
-
-      imageInputRef.current.value = '';
-      inputRef.current.focus();
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
   useEffect(() => {
+    if (!window?.cloudinary) return;
+
     cloudinaryRef.current = window.cloudinary;
     widgetRef.current = cloudinaryRef.current.createUploadWidget(
       {
@@ -244,14 +222,18 @@ const Home = () => {
             senderId: uid,
             receiverIds: receiverIds,
             conversationId: conversationId,
-            messageContent: messageContent || '',
+            messageContent: messageContentRef.current || '',
             video: videoUrl,
             typeContent: 3,
           });
         }
       },
     );
-  }, [conversationId, messageContent, selectedUser.id, uid]);
+
+    return () => {
+      widgetRef.current = null;
+    };
+  }, [conversationId, selectedUser.id, uid]);
 
   const handleOpenWidget = () => {
     if (widgetRef.current) {
@@ -287,7 +269,9 @@ const Home = () => {
             const userDoc = await userService.getUser(selectedUser.id);
 
             if (userDoc.success) {
-              dispatch(setReceiverData(userDoc.data));
+              // Convert Firestore Timestamps to JavaScript dates for Redux compatibility
+              const convertedUserData = convertFirestoreDocument(userDoc.data);
+              dispatch(setReceiverData(convertedUserData));
             } else {
               dispatch(
                 setReceiverData({ name: 'Unknown User', avatarUrl: '' }),
@@ -318,10 +302,14 @@ const Home = () => {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const messagesData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const messagesData = snapshot.docs.map((doc) => {
+          const messageData = {
+            id: doc.id,
+            ...doc.data(),
+          };
+          // Convert Firestore Timestamps to JavaScript dates for Redux compatibility
+          return convertFirestoreDocument(messageData);
+        });
 
         dispatch(setMessages(messagesData));
         console.log('Is array', Array.isArray(messagesData));
@@ -366,52 +354,50 @@ const Home = () => {
   }, [messages]);
 
   // =======Chức năng hiển thị ai đang nhập tin nhắn =========
-  useEffect(() => {
-    if (!conversationId) return;
+  const typingTimeoutRef = useRef(null);
 
-    const updateTypingStatus = async (isTyping) => {
+  const updateTypingStatus = useCallback(
+    async (isTyping) => {
+      if (!conversationId) return;
       const conversationRef = doc(db, 'conversations', conversationId);
       await updateDoc(conversationRef, {
         [`typingStatuses.${uid}`]: isTyping,
       });
-    };
+    },
+    [conversationId, uid],
+  );
 
-    const debounce = (func, delay) => {
-      let timeoutId;
-      return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(null, args), delay);
-      };
-    };
-
-    const handleTyping = debounce(async () => {
-      if (messageContent.trim() !== '' && isFocused) {
-        await updateTypingStatus(true);
-      }
-    }, 300);
-
-    const handleStopTyping = async () => {
-      if (messageContent.trim() === '' || !isFocused) {
-        await updateTypingStatus(false);
-      }
-    };
-
-    const inputElement = inputRef.current;
-
-    if (inputElement) {
-      inputElement.addEventListener('input', handleTyping);
-      inputElement.addEventListener('blur', handleStopTyping);
-
-      return () => {
-        inputElement.removeEventListener('input', handleTyping);
-        inputElement.removeEventListener('blur', handleStopTyping);
-      };
+  const startTyping = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
-  }, [conversationId, messageContent, isFocused, uid]);
+    updateTypingStatus(true);
+    typingTimeoutRef.current = setTimeout(
+      () => updateTypingStatus(false),
+      3000,
+    );
+  }, [updateTypingStatus]);
+
+  const stopTyping = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    updateTypingStatus(false);
+  }, [updateTypingStatus]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      stopTyping();
+    };
+  }, [stopTyping]);
+
+  // handleInputChange no longer needed in Home as it's handled locally in MessageInput
 
   useEffect(() => {
     if (!conversationId) return;
-
     const conversationRef = doc(db, 'conversations', conversationId);
     const unsubscribe = onSnapshot(
       conversationRef,
@@ -432,7 +418,9 @@ const Home = () => {
               const avatars = await Promise.all(
                 typingUsers.map(async (userId) => {
                   const userDoc = await userService.getUser(userId);
-                  return userDoc.success ? userDoc.data.avatarUrl : '';
+                  return userDoc.success
+                    ? convertFirestoreDocument(userDoc.data).avatarUrl
+                    : '';
                 }),
               );
 
@@ -501,125 +489,104 @@ const Home = () => {
     });
   };
 
+  const hasActiveConversation =
+    selectedUser && conversationId && messages.length > 0;
+
   return (
-    <div className="relative flex h-screen flex-col">
-      {/* <HeadingMessageBar name={selectedUser.name} activeTime="1h ago" /> */}
+    <section
+      className="relative flex h-full min-h-0 flex-1 flex-col gap-6 p-6 text-slate-800 dark:text-slate-100"
+      role="main"
+      aria-label="Chat interface"
+      tabIndex="-1"
+    >
       <HeadingMessageBar />
-      <div
-        id="chat-screen"
-        className="mb-10 h-full flex-1 overflow-y-auto bg-gray-200 p-4 dark:bg-zinc-600 dark:text-white"
-      >
-        {selectedUser && conversationId && messages.length > 0 && (
-          <MessageBox messages={messages} avatarUrls={avatarUrls} />
-        )}
 
-        <EmojiPickerPortal
-          show={showEmojiPicker}
-          onEmojiClick={(e) => {
-            dispatch(setMessageContent(messageContent + e.emoji));
-            dispatch(setShowEmojiPicker(false));
-          }}
-          position={emojiPickerPosition}
-        />
-
-        {typingStatus && (
-          <div className="flex items-center gap-2 p-2 dark:bg-zinc-700">
-            {typingUsers.map((userId) => (
-              <div key={userId} className="flex items-center">
-                <img
-                  src={avatarUrls[userId] || '/default-avatar.png'}
-                  alt="Avatar"
-                  className="mr-2 h-8 w-8 rounded-full"
-                />
-                <TypingDots />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="fixed bottom-0 grid w-[75%] grid-cols-[auto_1fr_auto] items-center gap-2 border-t border-gray-700 bg-white p-2 shadow-2xl dark:bg-zinc-800">
-        <div className="flex items-center gap-2 text-blue-400">
-          <div>
-            <IoMdAddCircle onClick={handleSendFile} className="h-8 w-8" />
-            <Input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleUploadFile}
-              className="hidden"
-            />
-          </div>
-
-          <div>
-            <FaRegImage onClick={handleSendImage} className="h-8 w-8" />
-            <Input
-              type="file"
-              accept="image/*"
-              ref={imageInputRef}
-              onChange={handleUploadImage}
-              className="hidden"
-            />
-          </div>
-
-          <FaMicrophone className="h-8 w-8" onClick={handleOpenMicro} />
-          <div>
-            <MdOndemandVideo onClick={handleOpenWidget} className="h-8 w-8" />
-          </div>
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/45 bg-white/88 p-6 shadow-[0_38px_140px_-70px_rgba(6,182,212,0.32)] backdrop-blur-2xl transition-all duration-500 dark:border-zinc-700/60 dark:bg-zinc-900/80">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="bg-brand-300/18 absolute top-[-20%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full blur-3xl" />
+          <div className="bg-brand-200/14 absolute right-[-10%] bottom-[-25%] h-72 w-72 rounded-full blur-[150px]" />
         </div>
 
-        <form onSubmit={handleSubmit} id="chatForm" className="">
-          {isOpenMicro ? (
-            <ReactRecorder />
+        <div
+          id="chat-screen"
+          className="relative flex-1 space-y-6 overflow-y-auto pr-2"
+          role="log"
+          aria-live="polite"
+          aria-label="Chat messages"
+          aria-relevant="additions"
+        >
+          {hasActiveConversation ? (
+            <MessageBox messages={messages} avatarUrls={avatarUrls} />
           ) : (
-            <div className="relative flex items-center">
-              <Input
-                type="text"
-                placeholder="Aa"
-                className="w-full rounded-full border bg-gray-100 px-10 py-2 text-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-700 dark:text-white"
-                value={messageContent}
-                onChange={(e) => {
-                  dispatch(setMessageContent(e.target.value));
-                }}
-                onFocus={() => dispatch(setIsFocused(true))}
-                onBlur={() => dispatch(setIsFocused(false))}
-                ref={inputRef}
-              />
-
-              <MdEmojiEmotions
-                onClick={(e) => {
-                  const rect = e.target.getBoundingClientRect();
-                  dispatch(
-                    setEmojiPickerPosition({
-                      top: rect.top - 320,
-                      left: rect.left,
-                    }),
-                  );
-                  dispatch(setShowEmojiPicker(!showEmojiPicker));
-                }}
-                className="absolute bottom-2.5 left-3 h-5 w-5 text-gray-500"
-              />
+            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+              <div className="from-brand-300 via-brand-400 to-brand-500 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-[0_24px_80px_-55px_rgba(6,182,212,0.4)]">
+                <FaRobot className="h-8 w-8" />
+              </div>
+              <div className="max-w-md space-y-2">
+                <h3 className="text-2xl font-semibold">
+                  Select a conversation
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Choose a person or group from the left to start messaging, or
+                  spark a new idea with our AI copilot.
+                </p>
+              </div>
             </div>
           )}
-        </form>
 
-        <div className="text-blue-400">
-          {canSendMessage ? (
-            <button type="submit" form="chatForm">
-              <IoSend size={24} />
-            </button>
-          ) : !isOpenMicro ? (
-            <AiFillLike className="h-8 w-8" onClick={handleSendLikeButton} />
-          ) : null}
+          {typingStatus && (
+            <div
+              className="inline-flex items-center gap-3 rounded-full border border-white/60 bg-white/85 px-4 py-2 text-sm text-slate-500 shadow-sm backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-800/70"
+              aria-live="polite"
+              aria-label="Users typing"
+            >
+              {typingUsers.map((userId) => (
+                <div key={userId} className="flex items-center" role="status">
+                  <img
+                    src={avatarUrls[userId] || '/default-avatar.png'}
+                    alt={`Avatar of user typing`}
+                    className="mr-2 h-8 w-8 rounded-full border border-white/60 shadow dark:border-zinc-700"
+                    aria-hidden="true"
+                  />
+                  <TypingDots
+                    aria-label={`${avatarUrls[userId] ? 'User is typing' : 'Someone is typing'}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="relative mt-6">
+          <MessageInput
+            conversationId={conversationId}
+            selectedUser={selectedUser}
+            messages={messages}
+            isOpenMicro={isOpenMicro}
+            recorderStatus={recorderStatus}
+            mediaBlobUrl={mediaBlobUrl}
+            onSubmit={handleSubmit}
+            onUploadFile={handleUploadFile}
+            onUploadImage={handleUploadImage}
+            onOpenMicro={handleOpenMicro}
+            onSendLike={handleSendLikeButton}
+            onOpenWidget={handleOpenWidget}
+            onStartTyping={startTyping}
+            onStopTyping={stopTyping}
+          />
         </div>
       </div>
 
       <Button
-        className="absolute right-4 bottom-20 cursor-pointer rounded-full bg-gray-300 p-3 hover:bg-gray-400"
+        variant="ghost"
+        size="lg"
+        className="from-brand-300 via-brand-400 to-brand-500 focus-visible:ring-brand-200 fixed right-16 bottom-28 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br text-slate-900 shadow-[0_24px_80px_-55px_rgba(6,182,212,0.4)] transition-transform duration-200 hover:-translate-y-1 focus-visible:ring-2 focus-visible:outline-none sm:bottom-24 lg:bottom-28 dark:text-white"
         onClick={handleCreateAiChat}
+        aria-label="Start chat with AI assistant"
       >
-        <FaRobot className="h-8 w-8" />
+        <FaRobot className="h-6 w-6" />
       </Button>
-    </div>
+    </section>
   );
 };
 

@@ -5,6 +5,7 @@ import { UserList, UserStory } from '../user';
 import { ListUsersStory } from '../../mock_data/ListUsersStory';
 import { auth } from '../../firebase';
 import { conversationService, userService } from '../../service';
+import { convertFirestoreDocument } from '../../service/utils/format-date';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConversationList } from '../chat';
 import {
@@ -32,6 +33,7 @@ const Sidebar = () => {
   const { users } = useSelector((state) => state.user);
 
   const usersExceptSender = users.filter((user) => user.id !== senderId);
+  const isGroupMode = modeType === 'isGroup';
 
   const handleAddGroup = () => {
     setIsOpenUserToAddGroup(!isOpenUserToAddGroup);
@@ -70,10 +72,14 @@ const Sidebar = () => {
           searchValue.trim(),
           senderId,
         );
-        dispatch(setUsers(response.data));
+        // Convert Firestore Timestamps to JavaScript dates for Redux compatibility
+        const convertedUsers = response.data.map((user) =>
+          convertFirestoreDocument(user),
+        );
+        dispatch(setUsers(convertedUsers));
       } catch (error) {
         console.error('Error loading users:', error);
-        setUsers([]);
+        dispatch(setUsers([]));
       }
     };
 
@@ -125,77 +131,107 @@ const Sidebar = () => {
     return () => unsubscribe();
   }, [conversations, senderId, dispatch]);
 
-  return (
-    <div className="flex flex-col gap-3 px-4 pt-4">
-      <div className="relative flex items-center text-gray-400 focus-within:text-gray-600">
-        <MdSearch className="mb-1xs pointer-events-none absolute mt-2 ml-3 h-5 w-5" />
+  const filterButtonClass = (active) =>
+    `flex flex-1 items-center justify-center gap-2 rounded-2xl border border-transparent px-3 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
+      active
+        ? 'bg-gradient-to-r from-brand-300 to-brand-400 text-slate-800 shadow-[0_16px_45px_-30px_rgba(6,182,212,0.35)]'
+        : 'bg-white/70 text-slate-600 hover:bg-white/85 dark:bg-zinc-800/70 dark:text-slate-200 dark:hover:bg-zinc-800'
+    }`;
 
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-6 px-4 text-slate-700 dark:text-slate-200">
+      <div className="relative flex items-center">
+        <MdSearch className="pointer-events-none absolute left-4 h-5 w-5 text-slate-400 dark:text-slate-500" />
         <Input
           type="text"
           value={searchValue}
           onChange={handleChange}
-          placeholder="Search messenger"
-          className="rounded-2xl pr-3 pl-10 dark:text-white"
+          placeholder="Search conversations, people, or groups"
+          variant="filled"
+          className="w-full !gap-0 rounded-2xl"
+          size="base"
         />
       </div>
 
-      <UserStory userStorys={ListUsersStory} />
+      <div className="rounded-2xl border border-white/60 bg-white/80 p-4 shadow-sm backdrop-blur-xl dark:border-zinc-700/40 dark:bg-zinc-900/60">
+        <UserStory userStorys={ListUsersStory} />
+      </div>
 
-      <div className="flex">
+      <div className="flex items-center gap-2 rounded-2xl bg-white/75 p-1.5 shadow-inner backdrop-blur-xl dark:bg-zinc-900/70">
         <button
-          onClick={() => {
-            dispatch(setModeType('notGroup'));
-          }}
-          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
+          onClick={() => dispatch(setModeType('notGroup'))}
+          className={filterButtonClass(!isGroupMode)}
+          type="button"
+          aria-pressed={!isGroupMode}
         >
-          <FaUserGroup className="" />
+          <FaUserGroup />
+          <span>Direct</span>
         </button>
         <button
           onClick={() => dispatch(setModeType('isGroup'))}
-          className="flex flex-1 cursor-pointer items-center justify-center border-2 border-gray-200 py-1.5 hover:bg-blue-300"
+          className={filterButtonClass(isGroupMode)}
+          type="button"
+          aria-pressed={isGroupMode}
         >
           <MdGroups />
+          <span>Groups</span>
         </button>
       </div>
 
-      {/* khac nhom la hai nguoi */}
-      {
-        modeType !== 'isGroup' ? (
-          !searchValue ? (
+      <div className="relative min-h-0 flex-1">
+        <div className="absolute inset-0 rounded-3xl border border-dashed border-white/45 opacity-70 dark:border-zinc-700/40" />
+        <div className="relative h-full overflow-y-auto px-1 pt-4 pb-6">
+          {isGroupMode ? (
+            searchValue ? (
+              <UserList users={usersExceptSender} />
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                    Collaborate together
+                  </h2>
+                  <Button
+                    onClick={handleAddGroup}
+                    variant="secondary"
+                    size="sm"
+                    className="!rounded-xl !bg-white/80 !px-3 !py-2 text-sm text-slate-700 shadow-sm hover:!bg-white dark:!bg-zinc-800/80 dark:text-slate-200"
+                  >
+                    <IoAddSharp />
+                    <span className="ml-1">New group</span>
+                  </Button>
+                </div>
+
+                {isOpenUserToAddGroup && (
+                  <div className="space-y-3 rounded-2xl border border-white/60 bg-white/80 p-4 shadow-sm backdrop-blur-xl dark:border-zinc-700/40 dark:bg-zinc-900/70">
+                    <h3 className="text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                      Select people
+                    </h3>
+                    <UserList users={usersExceptSender} />
+                    <Button
+                      onClick={handleCreateGroupChat}
+                      variant="primary"
+                      size="sm"
+                      className="w-full !rounded-xl"
+                    >
+                      Create group chat
+                    </Button>
+                  </div>
+                )}
+
+                <ConversationList
+                  conversationList={conversations.filter((c) => c.isGroup)}
+                />
+              </div>
+            )
+          ) : searchValue ? (
+            <UserList users={users} />
+          ) : (
             <ConversationList
               conversationList={conversations.filter((c) => !c.isGroup)}
             />
-          ) : (
-            <UserList users={users} />
-          )
-        ) : !searchValue ? (
-          <div className="flex flex-col">
-            <Button
-              onClick={handleAddGroup}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center bg-amber-200"
-            >
-              <IoAddSharp />
-            </Button>
-
-            {isOpenUserToAddGroup && (
-              <div className="flex flex-col">
-                <UserList users={usersExceptSender} />
-                <Button
-                  onClick={handleCreateGroupChat}
-                  className="mt-2 cursor-pointer bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
-                >
-                  Create group chat
-                </Button>
-              </div>
-            )}
-
-            <ConversationList
-              conversationList={conversations.filter((c) => c.isGroup)}
-            />
-          </div>
-        ) : null
-        // chua xu ly neu k tim kiem gi ben chat nhom thi hien thi gi
-      }
+          )}
+        </div>
+      </div>
     </div>
   );
 };

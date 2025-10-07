@@ -70,20 +70,28 @@ const UserItem = ({ name, imgUrl, user }) => {
   );
 
   return (
-    <div
-      className="flex cursor-pointer items-center gap-3 border-b border-gray-200 p-2 hover:bg-gray-100"
+    <button
+      type="button"
       onClick={handleClickItem}
+      className={`group focus-visible:ring-brand-300 flex w-full items-center gap-3 rounded-2xl border border-white/55 bg-white/85 p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none dark:border-zinc-700/40 dark:bg-zinc-900/70 ${isSelected ? 'ring-brand-300 ring-2' : ''}`}
     >
-      <Avatar src={imgUrl} className="h-12 w-12 rounded-full" />
-      <div className="flex-1">
+      <Avatar
+        src={imgUrl}
+        className="h-12 w-12 rounded-full shadow-lg ring-2 ring-white/50 dark:ring-zinc-800"
+      />
+      <div className="flex flex-1 flex-col">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">{name}</span>
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            {name}
+          </span>
           {isSelected && (
-            <span className="text-xs text-green-500">Selected</span>
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-400/20 dark:text-emerald-300">
+              Selected
+            </span>
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

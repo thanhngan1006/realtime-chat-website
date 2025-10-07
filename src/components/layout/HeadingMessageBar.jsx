@@ -56,8 +56,9 @@ const HeadingMessageBar = () => {
       if (Array.isArray(selectedUser?.id)) {
         const memberCount = selectedUser.id.length + 1;
         return (
-          <span className="text-sm text-gray-500">
-            {memberCount} thành viên
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/40 px-3 py-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:bg-zinc-800/70 dark:text-slate-400">
+            <span aria-hidden="true">•</span>
+            {memberCount} members
           </span>
         );
       }
@@ -65,28 +66,89 @@ const HeadingMessageBar = () => {
     }
 
     if (displayStatus.state === 'online') {
-      return <span className="text-sm text-green-500">Đang hoạt động</span>;
-    }
-
-    if (displayStatus.state === 'offline' && displayStatus.last_changed) {
       return (
-        <span className="text-sm text-gray-500">
-          Hoạt động {timeAgoText} trước
+        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100/80 px-3 py-1 text-xs font-semibold tracking-wide text-emerald-600 uppercase dark:bg-emerald-400/15 dark:text-emerald-300">
+          <span
+            className="h-2 w-2 rounded-full bg-emerald-400"
+            aria-hidden="true"
+          />
+          Online now
         </span>
       );
     }
 
-    return <span className="text-sm text-gray-500">Không hoạt động</span>;
+    if (displayStatus.state === 'offline' && displayStatus.last_changed) {
+      return (
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/40 px-3 py-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:bg-zinc-800/70 dark:text-slate-400">
+          <span
+            className="h-2 w-2 rounded-full bg-slate-400"
+            aria-hidden="true"
+          />
+          Last active {timeAgoText} ago
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full bg-white/40 px-3 py-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:bg-zinc-800/70 dark:text-slate-400">
+        <span
+          className="h-2 w-2 rounded-full bg-slate-400"
+          aria-hidden="true"
+        />
+        Inactive
+      </span>
+    );
   };
 
   return (
-    <div className="flex items-center gap-4 border-b p-2 dark:border-gray-700">
-      <Avatar src={selectedUser?.avatarUrl || ''} className="h-10 w-10" />
-      <div className="flex flex-col">
-        <span className="font-bold">
-          {selectedUser?.name || 'Chọn một cuộc trò chuyện'}
-        </span>
-        {renderActiveStatus()}
+    <div className="group relative z-10 flex items-center justify-between gap-4 rounded-2xl border border-white/45 bg-white/85 p-5 shadow-[0_28px_90px_-55px_rgba(6,182,212,0.3)] backdrop-blur-2xl transition-all duration-300 dark:border-zinc-700/50 dark:bg-zinc-900/70">
+      <div className="flex flex-1 items-center gap-4">
+        <div className="relative">
+          <Avatar
+            src={selectedUser?.avatarUrl || ''}
+            className="h-14 w-14 rounded-3xl shadow-xl ring-2 ring-white/50 transition-transform duration-200 group-hover:scale-105 dark:ring-zinc-800"
+            aria-label={`Avatar of ${selectedUser?.name || 'Selected user'}`}
+          />
+          {displayStatus?.state === 'online' && (
+            <div className="absolute -right-1.5 -bottom-1.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-400 shadow-md dark:border-zinc-900"></div>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col">
+          <h2
+            className="truncate text-2xl font-semibold tracking-tight text-slate-900 dark:text-white"
+            aria-label="Conversation title"
+          >
+            {selectedUser?.name || 'Chọn một cuộc trò chuyện'}
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {renderActiveStatus()}
+            {Array.isArray(selectedUser?.id) && (
+              <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase dark:text-slate-500">
+                {selectedUser.id.length + 1} members
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 rounded-full bg-white/40 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:bg-zinc-800/70">
+        <button
+          className="focus-visible:ring-brand-300 rounded-full bg-white/80 p-2 text-slate-500 transition-colors duration-200 hover:bg-white focus-visible:ring-2 focus-visible:outline-none dark:bg-zinc-700/80 dark:text-slate-300"
+          aria-label="More options"
+        >
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );
