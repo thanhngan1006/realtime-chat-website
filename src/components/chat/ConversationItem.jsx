@@ -8,15 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import { conversationService, userService } from '../../service';
 import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
 
-const ConversationItem = ({ conversationItem }) => {
+const ConversationItem = ({ conversationItem, details }) => {
   const senderUserId = auth.currentUser.uid;
-  const [receiverData, setReceiverData] = useState({});
+  const [receiverData, setReceiverData] = useState(details || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { modeType } = useSelector((state) => state.chat);
   const { presenceStatuses, selectedUser } = useSelector((state) => state.user);
 
   const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
+
+  useEffect(() => {
+    if (details) {
+      setReceiverData(details);
+    }
+  }, [details]);
 
   const receiverId = useMemo(() => {
     if (!conversationItem?.participants) return null;
@@ -43,52 +48,78 @@ const ConversationItem = ({ conversationItem }) => {
   const isActiveConversation =
     selectedUser?.conversationId === conversationItem.id;
 
-  const lastMessageTimestamp = conversationItem.lastMessage?.createdAt
-    ? formatTimestampFromText(conversationItem.lastMessage.createdAt)
-    : conversationItem.updatedAt
-      ? formatTimestampFromText(conversationItem.updatedAt)
-      : '';
+  const lastMessageTimestamp = useMemo(() => {
+    const candidate =
+      conversationItem.lastMessage?.createdAt ||
+      conversationItem.lastMessage?.sentTime ||
+      conversationItem.updatedAt;
+
+    if (!candidate) return '';
+
+    const parsed =
+      typeof candidate.toDate === 'function'
+        ? candidate.toDate()
+        : new Date(candidate);
+
+    if (!parsed || Number.isNaN(parsed.getTime())) return '';
+
+    return formatTimestampFromText(parsed);
+  }, [conversationItem.lastMessage, conversationItem.updatedAt]);
 
   const lastMessagePreview = useMemo(() => {
     const truncate = (text, maxLength = 15) => {
-      if (!text) return 'No messages yet';
+      if (!text) return '';
       return text.length > maxLength
         ? `${text.substring(0, maxLength)}...`
         : text;
     };
 
-    if (!conversationItem?.lastMessage) return 'Start the conversation';
+    const lastMessageData = conversationItem?.lastMessage || {};
 
-    const { messageText, fileName, imageUrl, audio } =
-      conversationItem.lastMessage;
+    const summary = truncate(lastMessageData.summary, 55);
+    if (summary) return summary;
 
-    if (messageText) return truncate(messageText, 55);
-    if (fileName) return truncate(`Shared ${fileName}`, 45);
-    if (imageUrl) return 'Shared a photo';
-    if (audio) return 'Sent a voice note';
-    return 'New activity';
+    const text = lastMessageData.text || lastMessageData.messageText;
+    if (text) {
+      const cleanedText = text.startsWith(': ') ? text.slice(2) : text;
+      const truncated = truncate(cleanedText, 55);
+      if (truncated) return truncated;
+    }
+
+    if (lastMessageData.fileName) {
+      return truncate(`Shared ${lastMessageData.fileName}`, 45);
+    }
+
+    if (lastMessageData.imageUrl) return 'Shared a photo';
+    if (lastMessageData.video) return 'Shared a video';
+    if (lastMessageData.audio) return 'Sent a voice note';
+
+    return 'Start the conversation';
   }, [conversationItem]);
 
   useEffect(() => {
+    if (details) return;
+
     const fetchReceiverData = async () => {
       try {
-        if (modeType === 'isGroup') {
+        if (conversationItem.isGroup) {
           const participants = conversationItem.participants.filter(
             (id) => id !== senderUserId,
           );
+
           if (participants.length === 0) {
-            setReceiverData({ name: 'Group Chat', avatarUrl: '' });
+            setReceiverData({ name: 'Group conversation', avatarUrl: '' });
             return;
           }
 
           const groupNameData =
             await conversationService.fetchGroupName(participants);
 
-          const groupName = groupNameData.data;
+          const groupName = groupNameData.success ? groupNameData.data : '';
 
           setReceiverData({
-            name: groupName,
-            avatarUrl: 'https://cdn-icons-png.flaticon.com/512/69/69589.png',
+            name: groupName || 'Group conversation',
+            avatarUrl: '',
           });
         } else {
           if (!receiverId) {
@@ -96,16 +127,17 @@ const ConversationItem = ({ conversationItem }) => {
             return;
           }
 
-          if (receiverId == AI_ASSISTANT_ID) {
+          if (receiverId === AI_ASSISTANT_ID) {
             setReceiverData({ ...AI_ASSISTANT_PROFILE });
-          } else {
-            const userDocSnap = await userService.getUser(receiverId);
+            return;
+          }
 
-            if (userDocSnap.success) {
-              setReceiverData(userDocSnap.data);
-            } else {
-              console.error('No user found for receiverId:', receiverId);
-            }
+          const userDocSnap = await userService.getUser(receiverId);
+
+          if (userDocSnap.success) {
+            setReceiverData(userDocSnap.data);
+          } else {
+            console.error('No user found for receiverId:', receiverId);
           }
         }
       } catch (error) {
@@ -114,7 +146,7 @@ const ConversationItem = ({ conversationItem }) => {
     };
 
     fetchReceiverData();
-  }, [conversationItem, senderUserId, dispatch, receiverId, modeType]);
+  }, [conversationItem, senderUserId, receiverId, details]);
 
   const handleClickItem = async () => {
     try {
@@ -130,10 +162,11 @@ const ConversationItem = ({ conversationItem }) => {
 
       dispatch(
         setSelectedUser({
-          id: modeType == 'isGroup' ? otherParticipants : receiverId,
-          name: receiverData.name || 'Unknown User',
-          avatarUrl: receiverData.avatarUrl || '',
+          id: conversationItem.isGroup ? otherParticipants : receiverId,
+          name: receiverData.name || details?.name || 'Unknown user',
+          avatarUrl: receiverData.avatarUrl || details?.avatarUrl || '',
           conversationId: conversationId,
+          participants: conversationData.participants,
         }),
       );
 
@@ -150,7 +183,6 @@ const ConversationItem = ({ conversationItem }) => {
   useEffect(() => {
     const fetchSenderName = async () => {
       if (receiverId === AI_ASSISTANT_ID) {
-        console.log('AI_ASSISTANT_PROFILE.name', AI_ASSISTANT_PROFILE.name);
         setSenderNameInLastMessage(AI_ASSISTANT_PROFILE.name);
         return;
       }
@@ -228,12 +260,13 @@ const ConversationItem = ({ conversationItem }) => {
   const senderLabel =
     conversationItem.lastMessage?.senderId === senderUserId
       ? 'You'
-      : senderNameInLastMessage;
+      : senderNameInLastMessage ||
+        (conversationItem.isGroup ? 'Someone' : receiverData.name || '');
 
-  const cardClasses = `group relative flex w-full items-center gap-4 rounded-2xl border px-4 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
+  const cardClasses = `group relative flex w-full items-center gap-4 rounded-2xl border px-4 py-3 text-left transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
     isActiveConversation
-      ? 'border-transparent bg-gradient-to-r from-brand-500/90 via-brand-400/90 to-brand-600/90 text-white shadow-glow'
-      : 'border-white/35 bg-white/65 text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-700/40 dark:bg-zinc-900/65 dark:text-slate-200'
+      ? 'border-brand-200 bg-brand-50 text-brand-800 shadow-sm dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-white'
+      : 'border-slate-200 bg-white text-slate-700 shadow-sm hover:border-brand-200 hover:bg-brand-50/60 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-slate-200'
   }`;
 
   return (
@@ -247,6 +280,7 @@ const ConversationItem = ({ conversationItem }) => {
       <div className="relative flex-shrink-0">
         <Avatar
           src={receiverData.avatarUrl || ''}
+          fallback={receiverData.name}
           presenceStatus={displayStatus}
           className={`h-12 w-12 rounded-full shadow-lg ring-2 ${
             isActiveConversation
@@ -255,9 +289,6 @@ const ConversationItem = ({ conversationItem }) => {
           }`}
           aria-hidden="true"
         />
-        {displayStatus?.state === 'online' && (
-          <span className="absolute -right-1 -bottom-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400 shadow-md dark:border-zinc-900" />
-        )}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -265,7 +296,7 @@ const ConversationItem = ({ conversationItem }) => {
           <span
             className={`truncate text-base font-semibold ${
               isActiveConversation
-                ? 'text-white'
+                ? 'text-brand-900 dark:text-white'
                 : 'text-slate-800 dark:text-slate-100'
             }`}
           >
@@ -275,7 +306,7 @@ const ConversationItem = ({ conversationItem }) => {
             <span
               className={`text-xs ${
                 isActiveConversation
-                  ? 'text-white/80'
+                  ? 'text-brand-700 dark:text-slate-300'
                   : 'text-slate-500 dark:text-slate-400'
               }`}
             >
@@ -286,7 +317,7 @@ const ConversationItem = ({ conversationItem }) => {
         <div
           className={`mt-1 flex min-w-0 items-center gap-1 text-sm ${
             isActiveConversation
-              ? 'text-white/80'
+              ? 'text-brand-700 dark:text-slate-300'
               : 'text-slate-500 dark:text-slate-400'
           }`}
         >

@@ -501,12 +501,7 @@ const Home = () => {
     >
       <HeadingMessageBar />
 
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/45 bg-white/88 p-6 shadow-[0_38px_140px_-70px_rgba(6,182,212,0.32)] backdrop-blur-2xl transition-all duration-500 dark:border-zinc-700/60 dark:bg-zinc-900/80">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="bg-brand-300/18 absolute top-[-20%] left-1/2 h-56 w-56 -translate-x-1/2 rounded-full blur-3xl" />
-          <div className="bg-brand-200/14 absolute right-[-10%] bottom-[-25%] h-72 w-72 rounded-full blur-[150px]" />
-        </div>
-
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-md transition-all duration-200 dark:border-zinc-700 dark:bg-zinc-900">
         <div
           id="chat-screen"
           className="relative flex-1 space-y-6 overflow-y-auto pr-2"
@@ -519,7 +514,7 @@ const Home = () => {
             <MessageBox messages={messages} avatarUrls={avatarUrls} />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-              <div className="from-brand-300 via-brand-400 to-brand-500 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-[0_24px_80px_-55px_rgba(6,182,212,0.4)]">
+              <div className="bg-brand-500 flex h-20 w-20 items-center justify-center rounded-full text-white shadow-md">
                 <FaRobot className="h-8 w-8" />
               </div>
               <div className="max-w-md space-y-2">
@@ -536,7 +531,7 @@ const Home = () => {
 
           {typingStatus && (
             <div
-              className="inline-flex items-center gap-3 rounded-full border border-white/60 bg-white/85 px-4 py-2 text-sm text-slate-500 shadow-sm backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-800/70"
+              className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-600 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/70"
               aria-live="polite"
               aria-label="Users typing"
             >
@@ -545,7 +540,7 @@ const Home = () => {
                   <img
                     src={avatarUrls[userId] || '/default-avatar.png'}
                     alt={`Avatar of user typing`}
-                    className="mr-2 h-8 w-8 rounded-full border border-white/60 shadow dark:border-zinc-700"
+                    className="mr-2 h-8 w-8 rounded-full border border-slate-200 shadow-sm dark:border-zinc-700"
                     aria-hidden="true"
                   />
                   <TypingDots

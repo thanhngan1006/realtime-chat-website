@@ -1,7 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTimeAgo } from '../../hooks/useTimeAgo';
 
-const Avatar = ({ src, className = '', alt = 'Avatar', presenceStatus }) => {
+const extractInitials = (text) => {
+  if (!text) return 'U';
+
+  const normalized = text.trim();
+  if (!normalized) return 'U';
+
+  const parts = normalized.split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+};
+
+const Avatar = ({
+  src,
+  className = '',
+  alt = 'Avatar',
+  presenceStatus,
+  fallback,
+}) => {
   const timeAgo = useTimeAgo(presenceStatus?.last_changed);
 
   const renderStatusIndicator = () => {
@@ -21,13 +41,25 @@ const Avatar = ({ src, className = '', alt = 'Avatar', presenceStatus }) => {
     return null;
   };
 
+  const fallbackText = useMemo(
+    () => fallback || alt || 'User',
+    [fallback, alt],
+  );
+  const initials = useMemo(() => extractInitials(fallbackText), [fallbackText]);
+
   return (
     <div className={`relative flex-shrink-0 ${className}`}>
-      <img
-        src={src}
-        alt={alt}
-        className="h-full w-full rounded-full object-cover"
-      />
+      {src ? (
+        <img
+          src={src}
+          alt={alt}
+          className="h-full w-full rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-200 text-base font-semibold text-slate-700 uppercase dark:bg-zinc-700 dark:text-white">
+          {initials}
+        </div>
+      )}
       {renderStatusIndicator()}
     </div>
   );

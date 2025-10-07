@@ -88,11 +88,6 @@ const Message = ({
 
   const handleMouseLeave = () => {
     setIsHover(false);
-    setTimeout(() => {
-      // if (!isHover) {
-      //   dispatch(setSelectedMessageToReactEmoji('')); // Ẩn thanh phản ứng
-      // }
-    }, 500);
   };
 
   const handleReactionClick = async (emoji) => {
@@ -136,11 +131,11 @@ const Message = ({
   };
 
   const bubbleBaseClass =
-    'relative max-w-[80%] rounded-3xl px-5 py-3 text-sm leading-relaxed shadow-lg transition-all duration-200';
+    'relative max-w-[80%] rounded-2xl px-4 py-3 text-base leading-relaxed transition-all duration-150';
   const yourBubbleClass =
-    'bg-gradient-to-br from-brand-300 via-brand-400 to-brand-500 text-slate-900 shadow-[0_20px_60px_-40px_rgba(6,182,212,0.38)] dark:text-white';
+    'border border-brand-200 bg-brand-50 text-brand-900 shadow-sm';
   const otherBubbleClass =
-    'border border-white/70 bg-white/90 text-slate-700 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70 dark:text-slate-100';
+    'border border-slate-200 bg-slate-100 text-slate-900 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-slate-100';
 
   useEffect(() => {
     const fetchReactionUsers = async () => {
@@ -203,16 +198,15 @@ const Message = ({
       <div
         className={`flex w-full flex-col items-${isYourMessage ? 'end' : 'start'}`}
       >
-        {isHover &&
-          (isYourMessage ? (
-            <div className="mb-1 self-end">
-              <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
-            </div>
-          ) : (
-            <div className="mb-1 self-start">
-              <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
-            </div>
-          ))}
+        <div
+          className={`mb-1 flex w-full ${
+            isYourMessage ? 'justify-end' : 'justify-start'
+          } ${
+            isHover ? 'opacity-100' : 'pointer-events-none opacity-0'
+          } transition-opacity duration-150`}
+        >
+          <OptionsForMessage msg={msg} isYourMessage={isYourMessage} />
+        </div>
 
         {msg.type === 0 &&
           (editedMessage === msg.messageId &&
@@ -231,14 +225,14 @@ const Message = ({
                   aria-label="Edit message input"
                 />
                 <Button
-                  className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 text-white shadow-md transition-all duration-200 hover:from-green-600 hover:to-green-700 hover:shadow-lg focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                  className="rounded-xl bg-emerald-500 px-4 py-2 text-white shadow-sm transition-colors duration-200 hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                   onClick={handleSaveEdit}
                   aria-label="Save edited message"
                 >
                   Save
                 </Button>
                 <Button
-                  className="rounded-xl bg-gradient-to-r from-gray-500 to-gray-600 px-4 py-2 text-white shadow-md transition-all duration-200 hover:from-gray-600 hover:to-gray-700 hover:shadow-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none"
+                  className="rounded-xl bg-slate-200 px-4 py-2 text-slate-700 transition-colors duration-200 hover:bg-slate-300 focus:ring-2 focus:ring-slate-300 focus:outline-none"
                   onClick={handleCancelEdit}
                   aria-label="Cancel editing message"
                 >
@@ -255,7 +249,7 @@ const Message = ({
             <div
               className={`${bubbleBaseClass} ${
                 isYourMessage ? yourBubbleClass : otherBubbleClass
-              } hover:-translate-y-0.5 ${className}`}
+              } ${className}`}
               ref={messageContentRef}
               id={`message-${msg.messageId}`}
               aria-label={`Message from ${isYourMessage ? 'you' : 'sender'}`}
@@ -287,7 +281,7 @@ const Message = ({
               </div>
             ) : msg.imageUrl ? (
               <div
-                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                className="relative max-w-[75%] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md dark:border-zinc-700 dark:bg-zinc-900/80"
                 ref={messageContentRef}
               >
                 <img
@@ -311,7 +305,7 @@ const Message = ({
               <div
                 className={`${bubbleBaseClass} ${
                   isYourMessage ? yourBubbleClass : otherBubbleClass
-                } flex max-w-[80%] items-center gap-3 hover:-translate-y-0.5 ${className}`}
+                } flex max-w-[80%] items-center gap-3 ${className}`}
                 ref={messageContentRef}
               >
                 <span className="leading-relaxed">{msg.messageText}</span>
@@ -356,7 +350,7 @@ const Message = ({
               <div
                 className={`${bubbleBaseClass} ${
                   isYourMessage ? yourBubbleClass : otherBubbleClass
-                } hover:-translate-y-0.5 ${className}`}
+                } ${className}`}
                 ref={messageContentRef}
               >
                 <span className="leading-relaxed">{msg.messageText}</span>
@@ -368,7 +362,7 @@ const Message = ({
               </div>
             ) : msg.video ? (
               <div
-                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                className="relative max-w-[75%] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md dark:border-zinc-700 dark:bg-zinc-900/80"
                 ref={messageContentRef}
               >
                 <video controls width="300">
@@ -398,7 +392,7 @@ const Message = ({
               <div
                 className={`${bubbleBaseClass} ${
                   isYourMessage ? yourBubbleClass : otherBubbleClass
-                } hover:-translate-y-0.5 ${className}`}
+                } ${className}`}
                 ref={messageContentRef}
               >
                 <span className="leading-relaxed">{msg.messageText}</span>
@@ -410,7 +404,7 @@ const Message = ({
               </div>
             ) : msg.audio ? (
               <div
-                className="relative max-w-[75%] overflow-hidden rounded-3xl border border-white/50 bg-white/60 p-4 shadow-md backdrop-blur-lg dark:border-zinc-700/60 dark:bg-zinc-900/70"
+                className="relative max-w-[75%] overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-md dark:border-zinc-700 dark:bg-zinc-900/80"
                 ref={messageContentRef}
               >
                 <div>

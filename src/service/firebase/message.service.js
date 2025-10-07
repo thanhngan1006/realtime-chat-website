@@ -69,42 +69,59 @@ class MessageService extends BaseRepository {
 
       await setDoc(newDocRef, messageDoc);
 
-      // CẬP NHẬT CONVERSATION (LOGIC MỚI) CHO CHỨC NĂNG NHẬN THÔNG BÁO KHI CÓ TIN NHẮN MỚI VÀ HIỂN THỊ LASTMESSAGE LÊN CUỘC TRÒ CHUYÊNH===
+      // CẬP NHẬT CONVERSATION (LOGIC MỚI) CHO CHỨC NĂNG NHẬN THÔNG BÁO KHI CÓ TIN NHẮN MỚI VÀ HIỂN THỊ LASTMESSAGE LÊN CUỘC TRÒ CHUYÊN
       try {
         const conversationRef = doc(db, 'conversations', conversationId);
 
-        let lastMessageText = '';
+        const truncate = (text, limit) => {
+          if (!text) return '';
+          return text.length > limit ? `${text.slice(0, limit)}…` : text;
+        };
 
+        let lastMessageSummary = '';
         switch (typeContent) {
           case 0:
-            lastMessageText = `: ${messageContent}`;
+            lastMessageSummary = truncate(messageContent, 160);
             break;
           case 1:
-            lastMessageText = ` đã gửi một ảnh.`;
+            lastMessageSummary = 'Shared a photo';
             break;
           case 2:
-            lastMessageText = ` đã gửi một tệp.`;
+            lastMessageSummary = fileName
+              ? `Shared ${fileName}`
+              : 'Shared a file';
             break;
           case 3:
-            lastMessageText = ` đã gửi một video.`;
+            lastMessageSummary = 'Shared a video';
             break;
           case 4:
-            lastMessageText = ` đã gửi một tin nhắn thoại.`;
+            lastMessageSummary = 'Sent a voice note';
             break;
           default:
-            lastMessageText = ' đã gửi một tin nhắn.';
+            lastMessageSummary = 'New message';
         }
 
+        const messageTimestamp = serverTimestamp();
+
+        const lastMessageData = {
+          senderId: senderId,
+          type: typeContent,
+          text: typeContent === 0 ? messageContent : '',
+          fileName: typeContent === 2 ? fileName : '',
+          imageUrl: typeContent === 1 ? imageUrl : '',
+          video: typeContent === 3 ? video : '',
+          audio: typeContent === 4 ? audio : '',
+          summary: lastMessageSummary,
+          createdAt: messageTimestamp,
+          sentTime: messageTimestamp,
+        };
+
         await updateDoc(conversationRef, {
-          lastMessage: {
-            text: lastMessageText,
-            senderId: senderId,
-            sentTime: serverTimestamp(),
-          },
+          lastMessage: lastMessageData,
           // Dùng arrayUnion để thêm những người nhận vào danh sách chưa đọc.
           // Nó sẽ không thêm nếu ID đã tồn tại.
           unReadBy: arrayUnion(...receiverIds),
-          updatedAt: serverTimestamp(),
+          updatedAt: messageTimestamp,
         });
       } catch (error) {
         console.error(

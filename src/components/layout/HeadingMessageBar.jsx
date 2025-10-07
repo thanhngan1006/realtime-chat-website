@@ -6,6 +6,10 @@ import { useTimeAgo } from '../../hooks/useTimeAgo';
 
 const HeadingMessageBar = () => {
   const { selectedUser, presenceStatuses } = useSelector((state) => state.user);
+  const { receiverData } = useSelector((state) => state.chat);
+
+  const activeName = selectedUser?.name || receiverData?.name || '';
+  const activeAvatar = selectedUser?.avatarUrl || receiverData?.avatarUrl || '';
 
   const displayStatus = useMemo(() => {
     if (!selectedUser?.id) return null;
@@ -101,24 +105,23 @@ const HeadingMessageBar = () => {
   };
 
   return (
-    <div className="group relative z-10 flex items-center justify-between gap-4 rounded-2xl border border-white/45 bg-white/85 p-5 shadow-[0_28px_90px_-55px_rgba(6,182,212,0.3)] backdrop-blur-2xl transition-all duration-300 dark:border-zinc-700/50 dark:bg-zinc-900/70">
+    <div className="group relative z-10 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm transition-all duration-200 dark:border-zinc-700 dark:bg-zinc-900">
       <div className="flex flex-1 items-center gap-4">
         <div className="relative">
           <Avatar
-            src={selectedUser?.avatarUrl || ''}
+            src={activeAvatar}
+            fallback={activeName}
+            presenceStatus={displayStatus}
             className="h-14 w-14 rounded-3xl shadow-xl ring-2 ring-white/50 transition-transform duration-200 group-hover:scale-105 dark:ring-zinc-800"
-            aria-label={`Avatar of ${selectedUser?.name || 'Selected user'}`}
+            aria-label={`Avatar of ${activeName || 'Selected user'}`}
           />
-          {displayStatus?.state === 'online' && (
-            <div className="absolute -right-1.5 -bottom-1.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-400 shadow-md dark:border-zinc-900"></div>
-          )}
         </div>
         <div className="flex min-w-0 flex-col">
           <h2
             className="truncate text-2xl font-semibold tracking-tight text-slate-900 dark:text-white"
             aria-label="Conversation title"
           >
-            {selectedUser?.name || 'Chọn một cuộc trò chuyện'}
+            {activeName || 'Chọn một cuộc trò chuyện'}
           </h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {renderActiveStatus()}
@@ -130,7 +133,7 @@ const HeadingMessageBar = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 rounded-full bg-white/40 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:bg-zinc-800/70">
+      <div className="flex items-center gap-2 rounded-full bg-slate-100 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:bg-zinc-800/80">
         <button
           className="focus-visible:ring-brand-300 rounded-full bg-white/80 p-2 text-slate-500 transition-colors duration-200 hover:bg-white focus-visible:ring-2 focus-visible:outline-none dark:bg-zinc-700/80 dark:text-slate-300"
           aria-label="More options"

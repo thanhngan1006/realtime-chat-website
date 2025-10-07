@@ -14,7 +14,9 @@ import { setTheme } from '../../../features/common/commonReducer';
 const SidebarLayout = () => {
   const { isOpen } = useSelector((state) => state.modal);
   const { avatarUrl } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.common);
   const dispatch = useDispatch();
+  const isDarkMode = theme === 'dark';
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -31,6 +33,10 @@ const SidebarLayout = () => {
 
     fetchUserData();
   }, [dispatch]);
+
+  const handleToggleTheme = () => {
+    dispatch(setTheme(isDarkMode ? '' : 'dark'));
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -67,22 +73,21 @@ const SidebarLayout = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full bg-white/70 p-1.5 shadow-inner">
-              <button
-                onClick={() => dispatch(setTheme(''))}
-                className="focus-visible:ring-brand-200 flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:outline-none"
-                aria-label="Switch to light mode"
-              >
-                <LuSun className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => dispatch(setTheme('dark'))}
-                className="focus-visible:ring-brand-200 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/70 text-white transition hover:bg-slate-900 focus-visible:ring-2 focus-visible:outline-none"
-                aria-label="Switch to dark mode"
-              >
-                <LuMoon className="h-5 w-5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleToggleTheme}
+              className={`focus-visible:ring-brand-200 relative flex h-10 w-20 items-center rounded-full border border-white/70 bg-white/70 p-1 transition duration-200 focus-visible:ring-2 focus-visible:outline-none dark:border-zinc-700 dark:bg-zinc-900/70 ${isDarkMode ? 'justify-end' : 'justify-start'}`}
+              aria-label="Toggle color theme"
+            >
+              <span className="sr-only">Toggle color theme</span>
+              <span className="pointer-events-none grid h-7 w-7 place-items-center rounded-full bg-white text-slate-600 shadow-sm dark:bg-zinc-800 dark:text-slate-200">
+                {isDarkMode ? (
+                  <LuMoon className="h-4 w-4" />
+                ) : (
+                  <LuSun className="h-4 w-4" />
+                )}
+              </span>
+            </button>
           </div>
 
           <Modal isOpen={isOpen} onClose={() => dispatch(setIsOpen(false))}>

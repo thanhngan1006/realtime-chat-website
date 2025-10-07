@@ -45,7 +45,7 @@ const MessageInput = React.memo(
     const canSendMessage = hasTextContent || hasAudioContent;
 
     const iconButtonClass =
-      'rounded-full bg-white/80 p-2 text-brand-600 transition-colors duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 dark:bg-zinc-800/80 dark:text-slate-200';
+      'rounded-full bg-slate-100 p-2 text-brand-500 transition-colors duration-200 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 dark:bg-zinc-800 dark:text-slate-200';
 
     const handleInputChange = useCallback(
       (e) => {
@@ -116,7 +116,7 @@ const MessageInput = React.memo(
 
     return (
       <div
-        className="flex w-full flex-col gap-3 rounded-3xl border border-white/50 bg-white/90 p-4 shadow-[0_26px_90px_-55px_rgba(6,182,212,0.32)] backdrop-blur-xl lg:flex-row lg:items-end dark:border-zinc-700/60 dark:bg-zinc-900/80"
+        className="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm lg:flex-row lg:items-end dark:border-zinc-700 dark:bg-zinc-900"
         role="toolbar"
         aria-label="Message composition toolbar"
       >
@@ -184,7 +184,7 @@ const MessageInput = React.memo(
                 type="text"
                 placeholder="Write a thoughtful message..."
                 className="w-full"
-                inputClassName="rounded-full bg-white/90 px-12 py-3 text-slate-700 placeholder:text-slate-400 shadow-inner dark:bg-zinc-800/90 dark:text-white"
+                inputClassName="rounded-full border border-slate-200 bg-white px-12 py-3 text-slate-800 placeholder:text-slate-400 shadow-inner dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                 variant="filled"
                 value={localMessageContent}
                 onChange={handleInputChange}
@@ -195,7 +195,7 @@ const MessageInput = React.memo(
               />
               <button
                 onClick={handleEmojiButtonClick}
-                className="focus-visible:ring-brand-300 absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-white/80 p-2 text-slate-500 transition-colors duration-200 hover:bg-white focus-visible:ring-2 focus-visible:outline-none dark:bg-zinc-800/80 dark:text-slate-300"
+                className="focus-visible:ring-brand-300 absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-slate-100 p-2 text-slate-500 transition-colors duration-200 hover:bg-slate-200 focus-visible:ring-2 focus-visible:outline-none dark:bg-zinc-800 dark:text-slate-300"
                 type="button"
                 aria-label="Open emoji picker"
               >
@@ -220,7 +220,7 @@ const MessageInput = React.memo(
             <button
               type="submit"
               form="chatForm"
-              className="from-brand-500 via-brand-400 to-brand-600 focus-visible:ring-brand-200 rounded-full bg-gradient-to-br p-3 text-white shadow-lg transition-all duration-200 hover:shadow-xl focus-visible:ring-2 focus-visible:outline-none"
+              className="bg-brand-500 hover:bg-brand-600 focus-visible:ring-brand-200 rounded-full p-3 text-white shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
               aria-label="Send message"
             >
               <IoSend size={20} />
