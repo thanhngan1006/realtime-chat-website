@@ -22,12 +22,13 @@ import {
 } from '../../../features/chat/chatReducer';
 import {
   setPresenceStatus,
-  setUsers,
   setSelectedUser,
+  setUsers,
 } from '../../../features/user/userReducer';
 import { FaUserGroup } from 'react-icons/fa6';
 import { IoAddSharp } from 'react-icons/io5';
 import { presenceService } from '../../service/firebase/presence.service';
+import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
 
 const Sidebar = () => {
   const [searchValue, setSearchValue] = useState('');

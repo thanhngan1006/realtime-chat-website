@@ -1,8 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Avatar } from '../common';
 import { AI_ASSISTANT_ID } from '../../constants/ai';
 import { useTimeAgo } from '../../hooks/useTimeAgo';
+import { auth } from '../../firebase';
+import { userService } from '../../service';
+import GroupAvatar from '../common/GroupAvatar';
 
 const HeadingMessageBar = () => {
   const { selectedUser, presenceStatuses } = useSelector((state) => state.user);
@@ -10,6 +13,40 @@ const HeadingMessageBar = () => {
 
   const activeName = selectedUser?.name || receiverData?.name || '';
   const activeAvatar = selectedUser?.avatarUrl || receiverData?.avatarUrl || '';
+  const uid = auth.currentUser?.uid;
+  const [groupAvatarUrls, setGroupAvatarUrls] = useState([]);
+  const isGroupChat = Array.isArray(selectedUser?.id);
+
+  useEffect(() => {
+    if (!isGroupChat) {
+      setGroupAvatarUrls([]);
+      return;
+    }
+
+    const fetchGroupAvatars = async () => {
+      let idsToFetch = selectedUser.id;
+
+      if (selectedUser.id.length === 1) {
+        idsToFetch = [uid, ...selectedUser.id];
+      }
+
+      idsToFetch = idsToFetch.slice(0, 2);
+
+      try {
+        const avatarPromises = idsToFetch.map((id) => userService.getUser(id));
+        const userDocs = await Promise.all(avatarPromises);
+
+        const urls = userDocs.map((doc) =>
+          doc.success ? doc.data.avatarUrl : '/default-avatar.png',
+        );
+        setGroupAvatarUrls(urls);
+      } catch (error) {
+        console.error('Error fetching group avatars for heading:', error);
+      }
+    };
+
+    fetchGroupAvatars();
+  }, [selectedUser, isGroupChat, uid]);
 
   const displayStatus = useMemo(() => {
     if (!selectedUser?.id) return null;
@@ -152,6 +189,27 @@ const HeadingMessageBar = () => {
             />
           </svg>
         </button>
+        <div className="flex items-center gap-4 border-b p-2 dark:border-gray-700">
+          {isGroupChat ? (
+            <GroupAvatar
+              src1={groupAvatarUrls[0]}
+              src2={groupAvatarUrls[1]}
+              className="h-10 w-10"
+            />
+          ) : (
+            <Avatar
+              src={selectedUser?.avatarUrl || ''}
+              presenceStatus={displayStatus}
+              className="h-10 w-10"
+            />
+          )}
+          <div className="flex flex-col">
+            <span className="font-bold">
+              {selectedUser?.name || 'Chọn một cuộc trò chuyện'}
+            </span>
+            {renderActiveStatus()}
+          </div>
+        </div>
       </div>
     </div>
   );

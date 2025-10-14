@@ -7,12 +7,15 @@ import { setSelectedUser } from '../../../features/user/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { conversationService, userService } from '../../service';
 import { AI_ASSISTANT_ID, AI_ASSISTANT_PROFILE } from '../../constants/ai';
+import GroupAvatar from '../common/GroupAvatar';
 
 const ConversationItem = ({ conversationItem, details }) => {
   const senderUserId = auth.currentUser.uid;
   const [receiverData, setReceiverData] = useState(details || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { modeType } = useSelector((state) => state.chat);
+  const [groupAvatarUrls, setGroupAvatarUrls] = useState([]);
   const { presenceStatuses, selectedUser } = useSelector((state) => state.user);
 
   const [senderNameInLastMessage, setSenderNameInLastMessage] = useState('');
@@ -108,6 +111,7 @@ const ConversationItem = ({ conversationItem, details }) => {
           );
 
           if (participants.length === 0) {
+            setReceiverData({ name: 'Chỉ có bạn', avatarUrl: '' });
             setReceiverData({ name: 'Group conversation', avatarUrl: '' });
             return;
           }
@@ -118,6 +122,8 @@ const ConversationItem = ({ conversationItem, details }) => {
           const groupName = groupNameData.success ? groupNameData.data : '';
 
           setReceiverData({
+            // name: groupName,
+            // avatarUrl: 'https://cdn-icons-png.flaticon.com/512/69/69589.png',
             name: groupName || 'Group conversation',
             avatarUrl: '',
           });
@@ -146,7 +152,40 @@ const ConversationItem = ({ conversationItem, details }) => {
     };
 
     fetchReceiverData();
-  }, [conversationItem, senderUserId, receiverId, details]);
+  }, [conversationItem, senderUserId, dispatch, receiverId, modeType]);
+
+  useEffect(() => {
+    if (!conversationItem.isGroup) {
+      setGroupAvatarUrls([]);
+      return;
+    }
+    const fetchGroupAvatars = async () => {
+      let otherParticipants = conversationItem.participants.filter(
+        (id) => id !== senderUserId,
+      );
+
+      if (otherParticipants.length === 1) {
+        otherParticipants.unshift(senderUserId);
+      }
+
+      const idsToFetch = otherParticipants.slice(0, 2);
+
+      try {
+        const avatarPromises = idsToFetch.map((id) => userService.getUser(id));
+        const userDocs = await Promise.all(avatarPromises);
+
+        const urls = userDocs.map((doc) =>
+          doc.success ? doc.data.avatarUrl : '/default-avatar.png',
+        );
+        setGroupAvatarUrls(urls);
+      } catch (error) {
+        console.error('Error fetching group avatars:', error);
+      }
+    };
+
+    fetchGroupAvatars();
+  }, [conversationItem, senderUserId]);
+  // } [conversationItem, senderUserId, receiverId, details]);
 
   const handleClickItem = async () => {
     try {
@@ -270,37 +309,25 @@ const ConversationItem = ({ conversationItem, details }) => {
   }`;
 
   return (
-    <button
-      type="button"
-      onClick={handleClickItem}
-      className={cardClasses}
-      aria-label={`Open conversation with ${receiverData.name || 'Unknown user'}`}
-      aria-pressed={isActiveConversation}
-    >
-      <div className="relative flex-shrink-0">
+    <button type="button" onClick={handleClickItem}>
+      {conversationItem.isGroup ? (
+        <GroupAvatar
+          src1={groupAvatarUrls[0]}
+          src2={groupAvatarUrls[1]}
+          className="h-12 w-12"
+        />
+      ) : (
         <Avatar
           src={receiverData.avatarUrl || ''}
-          fallback={receiverData.name}
           presenceStatus={displayStatus}
-          className={`h-12 w-12 rounded-full shadow-lg ring-2 ${
-            isActiveConversation
-              ? 'ring-white/70'
-              : 'ring-white/50 dark:ring-zinc-800'
-          }`}
-          aria-hidden="true"
+          className="h-12 w-12 rounded-full"
         />
-      </div>
+      )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between gap-2">
-          <span
-            className={`truncate text-base font-semibold ${
-              isActiveConversation
-                ? 'text-brand-900 dark:text-white'
-                : 'text-slate-800 dark:text-slate-100'
-            }`}
-          >
-            {receiverData.name || 'Unknown user'}
+      <div className="flex-1 flex-col">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">
+            {receiverData.name || 'Unknown User'}{' '}
           </span>
           {lastMessageTimestamp && (
             <span
