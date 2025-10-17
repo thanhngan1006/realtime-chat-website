@@ -45,7 +45,7 @@ const MessageInput = React.memo(
     const canSendMessage = hasTextContent || hasAudioContent;
 
     const iconButtonClass =
-      'rounded-full bg-slate-100 p-2 text-brand-500 transition-colors duration-200 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 dark:bg-zinc-800 dark:text-slate-200';
+      'rounded-full bg-slate-100 p-2 border-1 border-gray-300 cursor-pointer  text-brand-500 transition-colors duration-200 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 dark:bg-zinc-800 dark:text-slate-200';
 
     const handleInputChange = useCallback(
       (e) => {
@@ -116,12 +116,12 @@ const MessageInput = React.memo(
 
     return (
       <div
-        className="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm lg:flex-row lg:items-end dark:border-zinc-700 dark:bg-zinc-900"
+        className="flex w-full flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm lg:flex-row lg:items-center dark:border-zinc-700 dark:bg-zinc-900"
         role="toolbar"
         aria-label="Message composition toolbar"
       >
         <div
-          className="text-brand-500 flex items-center gap-2"
+          className="text-brand-500 flex items-center justify-center gap-2"
           role="group"
           aria-label="Media attachments"
         >
@@ -171,7 +171,7 @@ const MessageInput = React.memo(
         <form
           onSubmit={handleLocalSubmit}
           id="chatForm"
-          className="flex min-h-[56px] flex-1"
+          className="flex flex-1"
           aria-label="Send message form"
         >
           {isOpenMicro ? (
@@ -184,7 +184,7 @@ const MessageInput = React.memo(
                 type="text"
                 placeholder="Write a thoughtful message..."
                 className="w-full"
-                inputClassName="rounded-full border border-slate-200 bg-white px-12 py-3 text-slate-800 placeholder:text-slate-400 shadow-inner dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                inputClassName="rounded-full border border-slate-200 bg-white px-16 py-3 text-slate-800 placeholder:text-slate-400 shadow-inner dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                 variant="filled"
                 value={localMessageContent}
                 onChange={handleInputChange}
@@ -220,7 +220,7 @@ const MessageInput = React.memo(
             <button
               type="submit"
               form="chatForm"
-              className="bg-brand-500 hover:bg-brand-600 focus-visible:ring-brand-200 rounded-full p-3 text-white shadow-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-brand-200 cursor-pointer rounded-full bg-blue-500 p-2 text-white shadow-sm transition-colors duration-200 hover:bg-blue-600 focus-visible:ring-2 focus-visible:outline-none"
               aria-label="Send message"
             >
               <IoSend size={20} />
@@ -228,7 +228,7 @@ const MessageInput = React.memo(
           ) : !isOpenMicro ? (
             <button
               onClick={onSendLike}
-              className={iconButtonClass}
+              className="focus-visible:ring-brand-200 cursor-pointer rounded-full bg-blue-500 p-2 text-white shadow-sm transition-colors duration-200 hover:bg-blue-600 focus-visible:ring-2 focus-visible:outline-none"
               aria-label="Send like reaction"
               type="button"
             >

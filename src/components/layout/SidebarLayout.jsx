@@ -65,7 +65,7 @@ const SidebarLayout = () => {
                   Realtime Chat
                 </span>
                 <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
-                  Conversations redesigned
+                  Conversations
                 </h1>
                 <p className="mt-1 text-sm text-slate-500">
                   Dive back into your messages and stay in perfect sync.

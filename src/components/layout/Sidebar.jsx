@@ -471,7 +471,7 @@ const Sidebar = () => {
                     onClick={handleAddGroup}
                     variant="secondary"
                     size="sm"
-                    className="!rounded-xl !border !border-slate-200 !bg-white !px-3 !py-2 text-sm text-slate-700 shadow-sm hover:!bg-slate-100 dark:!border-zinc-700 dark:!bg-zinc-800/80 dark:text-slate-200"
+                    className="flex cursor-pointer items-center !rounded-xl !border !border-slate-200 !bg-white !px-3 !py-2 text-sm text-slate-700 shadow-sm hover:!bg-slate-100 dark:!border-zinc-700 dark:!bg-zinc-800/80 dark:text-slate-200"
                   >
                     <IoAddSharp />
                     <span className="ml-1">New group</span>

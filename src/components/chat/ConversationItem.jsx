@@ -152,7 +152,7 @@ const ConversationItem = ({ conversationItem, details }) => {
     };
 
     fetchReceiverData();
-  }, [conversationItem, senderUserId, dispatch, receiverId, modeType]);
+  }, [conversationItem, senderUserId, dispatch, receiverId, modeType, details]);
 
   useEffect(() => {
     if (!conversationItem.isGroup) {
@@ -309,7 +309,7 @@ const ConversationItem = ({ conversationItem, details }) => {
   }`;
 
   return (
-    <button type="button" onClick={handleClickItem}>
+    <button className={cardClasses} type="button" onClick={handleClickItem}>
       {conversationItem.isGroup ? (
         <GroupAvatar
           src1={groupAvatarUrls[0]}

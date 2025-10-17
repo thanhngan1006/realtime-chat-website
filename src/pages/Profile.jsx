@@ -164,15 +164,17 @@ const Profile = () => {
                   </p>
                 </div>
                 {auth.currentUser.uid === uid && !isEditing && (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="!rounded-xl"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <FaEdit />
-                    <span className="ml-2">Edit profile</span>
-                  </Button>
+                  <div className="flex items-center justify-center">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="flex items-center justify-center !rounded-xl"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <FaEdit />
+                      <span className="ml-2">Edit profile</span>
+                    </Button>
+                  </div>
                 )}
               </div>
 
